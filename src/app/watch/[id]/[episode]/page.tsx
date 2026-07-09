@@ -825,7 +825,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                   {showServerDropdown && (
                     <div className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[120px] ${serverOpenDirection === "down" ? "top-[66px]" : "bottom-[46px]"
                       }`}>
-                      {currentServers.map((srv) => (
+                      {currentServers.map((srv: string) => (
                         <button
                           key={srv}
                           onClick={() => {

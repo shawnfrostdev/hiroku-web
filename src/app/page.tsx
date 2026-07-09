@@ -619,7 +619,7 @@ export default function Page() {
               const mockTimeLeft = ["6m left", "14m left", "2m left", "10m left", "18m left"][idx % 5];
               return (
                 <Link
-                  href={`/anime/${item.id}`}
+                  href={`/anime/${item.animeId}`}
                   key={idx}
                   className="group relative h-[100px] md:h-[130px] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden cursor-pointer hover:border-[#FFFFFF]/60 transition-all flex flex-col justify-end p-[12px] shrink-0 snap-start w-[60vw] sm:w-[40vw] md:w-auto"
                 >
@@ -794,7 +794,7 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {entries.slice(0, 10).map((item) => (
+          {entries.slice(0, 10).map((item: any) => (
             <Link
               href={`/anime/${item.id}`}
               key={item.id}
@@ -846,7 +846,7 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {popularSeason.slice(0, 10).map((item) => (
+          {popularSeason.slice(0, 10).map((item: any) => (
             <Link
               href={`/anime/${item.id}`}
               key={item.id}
@@ -899,7 +899,7 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {popularAllTime.slice(0, 10).map((item) => (
+          {popularAllTime.slice(0, 10).map((item: any) => (
             <Link
               href={`/anime/${item.id}`}
               key={item.id}
@@ -1070,7 +1070,7 @@ export default function Page() {
       </div>
 
       {/* Schedule Section */}
-      <ScheduleSection entries={entries} />
+      <ScheduleSection />
     </main>
   );
 }

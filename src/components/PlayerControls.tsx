@@ -189,7 +189,7 @@ export default function PlayerControls({
           {/* Subtitle Selector */}
           <div className="relative">
             <button
-              type="button; shadow"
+              type="button"
               onClick={() => {
                 setShowAudio((prev) => !prev);
                 setShowSpeed(false);
