@@ -24,6 +24,7 @@ This is the complete, high-performance tech stack designed to build a top-tier, 
 
 * **Zustand**: The client-side state manager. It remembers what episode the user is currently watching, manages the video player controls, and handles "optimistic UI updates" (updating the screen instantly before the server confirms a change).
 * **TanStack Query (React Query)**: *(Optional but highly recommended)* Handles fetching, caching, and background-updating the massive amounts of anime metadata you will pull from external APIs.
+* **Fribb's Anime Lists**: The anime mapping service (https://github.com/Fribb/anime-lists). It maps anime identifiers between various databases (such as MyAnimeList, AniList, Kitsu, AniDB, etc.) allowing unified catalog search and cross-platform metadata resolution.
 
 ---
 

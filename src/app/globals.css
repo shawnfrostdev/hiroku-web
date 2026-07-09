@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Megina";
+  src: url("/fonts/Megina.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 8px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  /* Strict Monochrome Colors */
+  --color-background: #000000;
+  --color-foreground: #a3a3a3;
+
+  --color-pure: #000000;
+  --color-surface: #141414;
+  --color-control: #242424;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a3a3a3;
+  --color-text-muted: #525252;
+  --color-border-line: #282828;
+
+  /* Standard Tailwind Overrides for components */
+  --color-card: #141414;
+  --color-card-foreground: #ffffff;
+
+  --color-popover: #141414;
+  --color-popover-foreground: #a3a3a3;
+
+  --color-primary: #ffffff;
+  --color-primary-foreground: #000000;
+
+  --color-secondary: #242424;
+  --color-secondary-foreground: #ffffff;
+
+  --color-muted: #242424;
+  --color-muted-foreground: #525252;
+
+  --color-border: #282828;
+  --color-input: #242424;
+  --color-ring: #ffffff;
+
+  /* Functional Status Colors */
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+
+  /* Spacing (Strict 4px grid) */
+  --spacing-4px: 4px;
+  --spacing-8px: 8px;
+  --spacing-12px: 12px;
+  --spacing-16px: 16px;
+  --spacing-24px: 24px;
+  --spacing-32px: 32px;
+  --spacing-48px: 48px;
+
+  /* Corners */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Typography */
+  --font-sans: "Source Sans 3", "Times";
+  --font-mono: monospace;
+  --font-logo: "Megina", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--color-border-line);
+    outline-color: var(--color-ring);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Dark themed scrollbar matching site UI */
+  .scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: #383838 transparent;
+  }
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+  }
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: #383838 !important;
+    border-radius: 999px !important;
+  }
+  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: #525252 !important;
+  }
+}
+
+@keyframes ping-once {
+  0%   { opacity: 1; transform: scale(0.8); }
+  40%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+.animate-ping-once {
+  animation: ping-once 0.65s ease-out forwards;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
