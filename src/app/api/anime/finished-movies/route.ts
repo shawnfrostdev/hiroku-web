@@ -25,6 +25,7 @@ interface AniListMedia {
   nextAiringEpisode?: {
     episode: number;
   } | null;
+  status?: string;
 }
 
 const fetchAniListFinishedAndMovies = async (): Promise<{ finished: AniListMedia[]; movies: AniListMedia[] }> => {
