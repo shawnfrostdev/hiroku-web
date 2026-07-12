@@ -90,9 +90,38 @@ export async function GET(request: Request) {
       };
     });
 
+    // ----------------------------------------------------
+    // AniSkip Integration
+    // ----------------------------------------------------
+    let skipTimes = [];
+    try {
+      const { getMappingById } = await import('@/lib/animeLists');
+      const mapping = await getMappingById('anilist', animeId);
+      const malId = mapping?.mal_id;
+      
+      if (malId) {
+        const skipUrl = `https://api.aniskip.com/v2/skip-times/${malId}/${episodeNumber}?types[]=op&types[]=ed&episodeLength=0`;
+        const skipRes = await fetch(skipUrl, { cache: 'force-cache' });
+        if (skipRes.ok) {
+          const skipData = await skipRes.json();
+          if (skipData.found && Array.isArray(skipData.results)) {
+            skipTimes = skipData.results.map((r: any) => ({
+              type: r.skipType, // 'op' | 'ed'
+              startTime: r.interval.startTime,
+              endTime: r.interval.endTime
+            }));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[Next.js Stream API] AniSkip fetch failed for animeId ${animeId}:`, err);
+    }
+    // ----------------------------------------------------
+
     return NextResponse.json({
       sources,
-      subtitles: data.subtitles || []
+      subtitles: data.subtitles || [],
+      skipTimes
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });

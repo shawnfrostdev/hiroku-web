@@ -25,6 +25,7 @@ interface PlayerControlsProps {
   episodesCount: number;
   currentSubtitle: string;
   availableSubtitles: string[];
+  skipTimes?: Array<{ type: string; startTime: number; endTime: number }>;
   onPlayToggle: () => void;
   onPrevEpisode: () => void;
   onNextEpisode: () => void;
@@ -47,6 +48,7 @@ export default function PlayerControls({
   episodesCount,
   currentSubtitle,
   availableSubtitles,
+  skipTimes = [],
   onPlayToggle,
   onPrevEpisode,
   onNextEpisode,
@@ -87,11 +89,28 @@ export default function PlayerControls({
     ? availableResolutions 
     : ["1080p", "720p", "480p", "Auto"];
 
+  const activeSkip = skipTimes?.find(
+    (skip) => currentTime >= skip.startTime && currentTime <= skip.endTime
+  );
+
   return (
     <div className={`absolute bottom-0 left-0 right-0 p-[12px] md:p-[20px] bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col gap-[8px] md:gap-[12px] z-10 transition-opacity duration-300 ${
       isHoveringControls || !isPlaying ? "opacity-100" : "opacity-0 md:group-hover:opacity-100"
     }`}>
       
+      {/* Skip OP/ED Button Overlay */}
+      {activeSkip && (
+        <div className="absolute bottom-[calc(100%+16px)] right-[24px] z-50">
+          <button
+            onClick={() => onSeek(activeSkip.endTime)}
+            className="flex items-center gap-[8px] bg-white text-black px-[16px] py-[8px] rounded-[6px] font-bold shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:bg-gray-200 transition-transform active:scale-95 cursor-pointer"
+          >
+            <SkipForward className="w-[18px] h-[18px]" />
+            {activeSkip.type === 'op' ? 'Skip Opening' : 'Skip Ending'}
+          </button>
+        </div>
+      )}
+
       {/* Headless progress slider bar */}
       <TimelineBar onSeek={onSeek} />
 

@@ -700,6 +700,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                   episodesCount={episodesList.length}
                   currentSubtitle={currentSubtitle}
                   availableSubtitles={availableSubtitles}
+                  skipTimes={streamData?.skipTimes}
                   onPlayToggle={togglePlay}
                   onPrevEpisode={navigateToPrevEpisode}
                   onNextEpisode={navigateToNextEpisode}
