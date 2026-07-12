@@ -176,7 +176,12 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
     const isM3U8 = VIDEO_SOURCE.includes(".m3u8") || VIDEO_SOURCE.includes("/m3u8");
     const videoEl = videoRef.current;
     
+    const timeToResume = currentTime; // Capture time exactly when stream switches
+    
     const handleMetadata = () => {
+      if (timeToResume > 0) {
+        videoEl.currentTime = timeToResume;
+      }
       videoEl.play().catch(() => {});
     };
 
@@ -186,6 +191,9 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
       hls.loadSource(VIDEO_SOURCE);
       hls.attachMedia(videoEl);
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        if (timeToResume > 0) {
+          videoEl.currentTime = timeToResume;
+        }
         videoEl.play().catch(() => {});
         // Expose available quality levels to the store
         const levelLabels = data.levels.map((l: any) => `${l.height}p`);
@@ -226,6 +234,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
 
   // Synchronize with Player Store (mock globally active episode)
   useEffect(() => {
+    setCurrentTime(0); // Reset time when episode changes
     player.playEpisode(animeId, currentEpNum);
     player.setPlaying(isPlaying);
     return () => {
