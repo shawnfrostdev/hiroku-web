@@ -32,10 +32,14 @@ export async function GET(request: Request) {
       providersToTry = [{ provider: server, category }];
     } else {
       providersToTry = episode.providers || [];
-      // Prioritize the matching category
+      // Prioritize the matching category, then prioritize 'lynx' as the default server
       providersToTry.sort((a: any, b: any) => {
         if (a.category === category && b.category !== category) return -1;
         if (a.category !== category && b.category === category) return 1;
+        
+        if (a.provider === 'lynx' && b.provider !== 'lynx') return -1;
+        if (a.provider !== 'lynx' && b.provider === 'lynx') return 1;
+        
         return 0;
       });
     }
@@ -52,8 +56,14 @@ export async function GET(request: Request) {
       try {
         const res = await fetch(watchUrl, { cache: 'no-store' });
         if (res.ok) {
-          data = await res.json();
-          break; // Success!
+          const temp = await res.json();
+          if (temp && temp.streams && temp.streams.length > 0) {
+            data = temp;
+            break; // Success! Valid streams found.
+          } else {
+            lastError = new Error(`Provider ${activeServer} succeeded but returned no streams`);
+            console.warn(`[Next.js Stream API] ${lastError.message}`);
+          }
         } else {
           const errText = await res.text().catch(() => '');
           lastError = new Error(`Scraper microservice returned ${res.status}: ${errText || res.statusText}`);
