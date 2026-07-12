@@ -13,7 +13,7 @@ export const formatProviderName = (prov: string) => {
 
 export async function fetchAnimeEpisodes(anilistId: string) {
   const res = await fetch(`${SCRAPER_URL}/api/episodes/${anilistId}`, {
-    cache: 'no-store'
+    next: { revalidate: 3600 } // Cache for 1 hour
   });
   
   if (!res.ok) {
