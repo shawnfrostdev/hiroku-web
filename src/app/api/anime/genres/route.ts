@@ -30,11 +30,15 @@ export async function GET() {
 
     return NextResponse.json(genres, {
       headers: {
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control":
+          "public, s-maxage=86400, stale-while-revalidate=604800",
       },
     });
   } catch (error) {
     console.error("Genres API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch genres" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch genres" },
+      { status: 500 },
+    );
   }
 }

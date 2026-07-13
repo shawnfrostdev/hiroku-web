@@ -57,7 +57,9 @@ interface AniListMediaDetail {
   };
 }
 
-const fetchAniListDetail = async (id: number): Promise<AniListMediaDetail | null> => {
+const fetchAniListDetail = async (
+  id: number,
+): Promise<AniListMediaDetail | null> => {
   const query = `
     query ($id: Int) {
       Media(id: $id, type: ANIME) {
@@ -148,12 +150,18 @@ export async function GET(request: Request) {
     const idParam = searchParams.get("id");
 
     if (!idParam) {
-      return NextResponse.json({ error: "Missing id parameter" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing id parameter" },
+        { status: 400 },
+      );
     }
 
     const animeId = parseInt(idParam, 10);
-    if (isNaN(animeId)) {
-      return NextResponse.json({ error: "Invalid id parameter" }, { status: 400 });
+    if (Number.isNaN(animeId)) {
+      return NextResponse.json(
+        { error: "Invalid id parameter" },
+        { status: 400 },
+      );
     }
 
     const item = await fetchAniListDetail(animeId);
@@ -190,17 +198,87 @@ export async function GET(request: Request) {
     }
 
     const studioEdges = item.studios?.edges || [];
-    const mainStudios = studioEdges.filter((e: any) => e.isMain).map((e: any) => e.node.name);
-    const producersList = studioEdges.filter((e: any) => !e.isMain).map((e: any) => e.node.name);
-    
-    const studio = mainStudios.join(", ") || "Unknown Studio";
-    const producers = producersList.slice(0, 10).join(", ") || "Unknown Producer";
+    const mainStudios = studioEdges
+      .filter(
+        (
+          e:
+            | Record<string, unknown>
+            | string
+            | number
+            | boolean
+            | null
+            | undefined
+            | unknown[]
+            | unknown,
+        ) => e.isMain,
+      )
+      .map(
+        (
+          e:
+            | Record<string, unknown>
+            | string
+            | number
+            | boolean
+            | null
+            | undefined
+            | unknown[]
+            | unknown,
+        ) => e.node.name,
+      );
+    const producersList = studioEdges
+      .filter(
+        (
+          e:
+            | Record<string, unknown>
+            | string
+            | number
+            | boolean
+            | null
+            | undefined
+            | unknown[]
+            | unknown,
+        ) => !e.isMain,
+      )
+      .map(
+        (
+          e:
+            | Record<string, unknown>
+            | string
+            | number
+            | boolean
+            | null
+            | undefined
+            | unknown[]
+            | unknown,
+        ) => e.node.name,
+      );
 
-    const formatAniListDate = (dateObj: any) => {
+    const studio = mainStudios.join(", ") || "Unknown Studio";
+    const producers =
+      producersList.slice(0, 10).join(", ") || "Unknown Producer";
+
+    const formatAniListDate = (dateObj: {
+      year?: number;
+      month?: number;
+      day?: number;
+    }) => {
       if (!dateObj || !dateObj.year) return null;
       const { year, month, day } = dateObj;
       if (!month) return `${year}`;
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       const monthStr = months[month - 1] || String(month).padStart(2, "0");
       if (!day) return `${monthStr} ${year}`;
       return `${monthStr} ${day}, ${year}`;
@@ -229,24 +307,55 @@ export async function GET(request: Request) {
       posterImage,
       episodes: (tmdbDetails?.episodes || []).slice(0, availableEpisodes),
       recommendations: (item.recommendations?.nodes || [])
-        .filter((n: any) => n.mediaRecommendation)
+        .filter(
+          (n: {
+            mediaRecommendation:
+              | Record<string, unknown>
+              | string
+              | number
+              | boolean
+              | null
+              | undefined
+              | unknown[]
+              | unknown;
+          }) => n.mediaRecommendation,
+        )
         .slice(0, 8)
-        .map((n: any) => ({
-          id: n.mediaRecommendation.id,
-          title: n.mediaRecommendation.title.english || n.mediaRecommendation.title.romaji,
-          poster: n.mediaRecommendation.coverImage?.extraLarge || n.mediaRecommendation.coverImage?.large || null,
-          score: n.mediaRecommendation.averageScore ? (n.mediaRecommendation.averageScore / 10).toFixed(1) : null,
-          format: n.mediaRecommendation.format || null,
-          episodes: n.mediaRecommendation.episodes || null,
-        })),
+        .map(
+          (n: {
+            mediaRecommendation:
+              | Record<string, unknown>
+              | string
+              | number
+              | boolean
+              | null
+              | undefined
+              | unknown[]
+              | unknown;
+          }) => ({
+            id: n.mediaRecommendation.id,
+            title:
+              n.mediaRecommendation.title.english ||
+              n.mediaRecommendation.title.romaji,
+            poster:
+              n.mediaRecommendation.coverImage?.extraLarge ||
+              n.mediaRecommendation.coverImage?.large ||
+              null,
+            score: n.mediaRecommendation.averageScore
+              ? (n.mediaRecommendation.averageScore / 10).toFixed(1)
+              : null,
+            format: n.mediaRecommendation.format || null,
+            episodes: n.mediaRecommendation.episodes || null,
+          }),
+        ),
     };
 
     return NextResponse.json(detailData);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in detail route:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch anime details" },
-      { status: 500 }
+      { error: (error as Error).message || "Failed to fetch anime details" },
+      { status: 500 },
     );
   }
 }

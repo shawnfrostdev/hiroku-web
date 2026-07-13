@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import os from "node:os";
+import path from "node:path";
 
 export interface TMDBDetails {
   backdrop_path: string | null;
   poster_path: string | null;
   title: string | null;
   overview: string | null;
-  episodes?: any[];
+  episodes?: Record<string, unknown>[];
 }
 
 const CACHE_DIR = path.join(os.tmpdir(), "hiroku-cache");
@@ -31,7 +31,11 @@ async function saveCache() {
   if (!inMemoryCache) return;
   try {
     await fs.mkdir(CACHE_DIR, { recursive: true });
-    await fs.writeFile(CACHE_FILE, JSON.stringify(inMemoryCache, null, 2), "utf-8");
+    await fs.writeFile(
+      CACHE_FILE,
+      JSON.stringify(inMemoryCache, null, 2),
+      "utf-8",
+    );
   } catch (err) {
     console.error("Failed to save TMDB cache to disk:", err);
   }
@@ -39,19 +43,28 @@ async function saveCache() {
 
 function parseSeasonFromTitle(title: string): number | null {
   const normalized = title.toLowerCase();
-  if (/\b(2nd season|season 2|part 2|season ii|\bs2\b)/.test(normalized)) return 2;
-  if (/\b(3rd season|season 3|part 3|season iii|\bs3\b)/.test(normalized)) return 3;
-  if (/\b(4th season|season 4|part 4|season iv|\bs4\b)/.test(normalized)) return 4;
-  if (/\b(5th season|season 5|part 5|season v|\bs5\b)/.test(normalized)) return 5;
+  if (/\b(2nd season|season 2|part 2|season ii|\bs2\b)/.test(normalized))
+    return 2;
+  if (/\b(3rd season|season 3|part 3|season iii|\bs3\b)/.test(normalized))
+    return 3;
+  if (/\b(4th season|season 4|part 4|season iv|\bs4\b)/.test(normalized))
+    return 4;
+  if (/\b(5th season|season 5|part 5|season v|\bs5\b)/.test(normalized))
+    return 5;
   return null;
 }
 
 /**
  * Fetches TMDB details directly from TMDB API with robust matching.
  */
-async function fetchTMDBDetailsDirectly(mapping: any, title: string): Promise<TMDBDetails | null> {
-  const apiKey = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  const apiBaseUrl = process.env.TMDB_API_BASE_URL || "https://api.themoviedb.org";
+async function fetchTMDBDetailsDirectly(
+  mapping: Record<string, unknown>,
+  title: string,
+): Promise<TMDBDetails | null> {
+  const apiKey =
+    process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const apiBaseUrl =
+    process.env.TMDB_API_BASE_URL || "https://api.themoviedb.org";
 
   if (!apiKey) return null;
 
@@ -114,7 +127,10 @@ async function fetchTMDBDetailsDirectly(mapping: any, title: string): Promise<TM
       if (!result) {
         // Strip season tags and search for the base anime name
         const cleanTitle = title
-          .replace(/\b(2nd season|3rd season|4th season|5th season|season \d+|part \d+|arc|ii|iii|iv|v)\b/gi, "")
+          .replace(
+            /\b(2nd season|3rd season|4th season|5th season|season \d+|part \d+|arc|ii|iii|iv|v)\b/gi,
+            "",
+          )
           .replace(/\s+/g, " ")
           .trim();
         if (cleanTitle && cleanTitle !== title) {
@@ -143,24 +159,26 @@ async function fetchTMDBDetailsDirectly(mapping: any, title: string): Promise<TM
           poster_path: details.poster_path || null,
           title: details.title || null,
           overview: details.overview || null,
-          episodes: [{
-            episode_number: 1,
-            name: details.title,
-            overview: details.overview,
-            still_path: details.backdrop_path || details.poster_path,
-            runtime: details.runtime,
-          }]
+          episodes: [
+            {
+              episode_number: 1,
+              name: details.title,
+              overview: details.overview,
+              still_path: details.backdrop_path || details.poster_path,
+              runtime: details.runtime,
+            },
+          ],
         };
       }
     } else {
       const tvUrl = `${apiBaseUrl}/3/tv/${tmdbId}?api_key=${apiKey}`;
       const tvRes = await fetch(tvUrl);
-      let tvDetails: any = null;
+      let tvDetails: unknown = null;
       if (tvRes.ok) {
         tvDetails = await tvRes.json();
       }
 
-      let seasonDetails: any = null;
+      let seasonDetails: Record<string, unknown> | null = null;
       const targetSeason = seasonNumber !== null ? seasonNumber : 1;
       const seasonUrl = `${apiBaseUrl}/3/tv/${tmdbId}/season/${targetSeason}?api_key=${apiKey}`;
       const seasonRes = await fetch(seasonUrl);
@@ -169,11 +187,13 @@ async function fetchTMDBDetailsDirectly(mapping: any, title: string): Promise<TM
       }
 
       return {
-        backdrop_path: tvDetails?.backdrop_path || seasonDetails?.poster_path || null,
-        poster_path: seasonDetails?.poster_path || tvDetails?.poster_path || null,
+        backdrop_path:
+          tvDetails?.backdrop_path || seasonDetails?.poster_path || null,
+        poster_path:
+          seasonDetails?.poster_path || tvDetails?.poster_path || null,
         title: tvDetails?.name || null,
         overview: seasonDetails?.overview || tvDetails?.overview || null,
-        episodes: seasonDetails?.episodes || []
+        episodes: seasonDetails?.episodes || [],
       };
     }
   } catch (err) {
@@ -188,8 +208,8 @@ async function fetchTMDBDetailsDirectly(mapping: any, title: string): Promise<TM
  */
 export async function getCachedTMDBDetails(
   anilistId: number,
-  mapping: any,
-  title: string
+  mapping: Record<string, unknown>,
+  title: string,
 ): Promise<TMDBDetails | null> {
   await loadCache();
 
@@ -198,7 +218,7 @@ export async function getCachedTMDBDetails(
   }
 
   const details = await fetchTMDBDetailsDirectly(mapping, title);
-  
+
   if (inMemoryCache) {
     inMemoryCache[anilistId] = details;
     await saveCache();

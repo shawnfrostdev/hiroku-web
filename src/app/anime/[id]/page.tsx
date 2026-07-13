@@ -1,53 +1,46 @@
-"use client";
+import Image from "next/image";
 
-import { use, useEffect, useState } from "react";
+("use client");
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Play, 
-  Pause, 
-  Plus, 
-  Check, 
-  Star, 
-  Heart,
-  Volume2, 
-  VolumeX, 
-  Maximize, 
-  Minimize, 
-  MessageSquare, 
-  Loader2, 
-  Tv, 
-  Calendar, 
-  Film, 
-  Bookmark, 
-  Trash2, 
-  X,
-  Send,
-  LayoutList,
-  LayoutGrid,
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowUpDown,
+  Check,
   Grid3X3,
-  ArrowUpDown
+  Heart,
+  LayoutGrid,
+  LayoutList,
+  Pause,
+  Play,
+  Plus,
+  Star,
+  Trash2,
+  Tv,
+  Volume2,
+  VolumeX,
+  X,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator,
-  DropdownMenuLabel
-} from "@/components/ui/dropdown-menu";
-import { 
-  Dialog, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
 } from "@/components/ui/dialog";
-import { useWatchlistStore } from "@/store/useWatchlistStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { usePlayerStore } from "@/store/usePlayerStore";
+import { useWatchlistStore } from "@/store/useWatchlistStore";
 
 interface Comment {
   id: number;
@@ -56,7 +49,11 @@ interface Comment {
   createdAt: string;
 }
 
-export default function AnimeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function AnimeDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const resolvedParams = use(params);
   const animeId = resolvedParams.id;
   const router = useRouter();
@@ -65,7 +62,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   const [commentsList, setCommentsList] = useState<Comment[]>([]);
-  const [episodeView, setEpisodeView] = useState<"list" | "grid" | "small">("list");
+  const [episodeView, setEpisodeView] = useState<"list" | "grid" | "small">(
+    "list",
+  );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isLiked, setIsLiked] = useState(false);
   const [userRating, setUserRating] = useState(0);
@@ -75,7 +74,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [episodeView]);
+  }, []);
 
   useEffect(() => {
     if (isRatingModalOpen) {
@@ -92,7 +91,11 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
   const watchlistItem = watchlist.items[animeId];
 
   // Fetch detail info
-  const { data: anime, isLoading, error } = useQuery({
+  const {
+    data: anime,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["anime-detail", animeId],
     queryFn: async () => {
       const res = await fetch(`/api/anime/detail?id=${animeId}`);
@@ -108,7 +111,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       queryClient.prefetchQuery({
         queryKey: ["anime-servers", animeId, firstEp],
         queryFn: async () => {
-          const res = await fetch(`/api/anime/servers?id=${animeId}&episode=${firstEp}`);
+          const res = await fetch(
+            `/api/anime/servers?id=${animeId}&episode=${firstEp}`,
+          );
           if (!res.ok) throw new Error("Failed to load servers");
           const data = await res.json();
 
@@ -116,10 +121,12 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
           queryClient.prefetchQuery({
             queryKey: ["anime-stream", animeId, firstEp, "Auto", "Sub"],
             queryFn: async () => {
-              const res = await fetch(`/api/anime/stream?id=${animeId}&episode=${firstEp}&server=Auto&category=sub`);
+              const res = await fetch(
+                `/api/anime/stream?id=${animeId}&episode=${firstEp}&server=Auto&category=sub`,
+              );
               if (!res.ok) throw new Error("Failed to load video stream");
               return res.json();
-            }
+            },
           });
 
           return data;
@@ -169,30 +176,36 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             <div className="flex flex-col gap-[16px] p-[20px] bg-surface border border-border-line rounded-[12px] animate-pulse">
               {/* Format, Episodes, Status, Season */}
               <div className="grid grid-cols-2 gap-y-[12px] gap-x-[16px] border-b border-border-line pb-[12px]">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex flex-col gap-[4px]">
-                    <div className="h-[10px] w-1/2 bg-[#242424] rounded-[2px]" />
-                    <div className="h-[16px] w-3/4 bg-[#242424] rounded-[4px]" />
-                  </div>
-                ))}
+                {Array.from({ length: 4 }, (_, i) => `skel-fmt-${i}`).map(
+                  (id) => (
+                    <div key={id} className="flex flex-col gap-[4px]">
+                      <div className="h-[10px] w-1/2 bg-[#242424] rounded-[2px]" />
+                      <div className="h-[16px] w-3/4 bg-[#242424] rounded-[4px]" />
+                    </div>
+                  ),
+                )}
               </div>
               {/* Start & End Dates */}
               <div className="grid grid-cols-2 gap-y-[12px] gap-x-[16px] border-b border-border-line pb-[12px]">
-                {[...Array(2)].map((_, i) => (
-                  <div key={i} className="flex flex-col gap-[4px]">
-                    <div className="h-[10px] w-1/2 bg-[#242424] rounded-[2px]" />
-                    <div className="h-[16px] w-3/4 bg-[#242424] rounded-[4px]" />
-                  </div>
-                ))}
+                {Array.from({ length: 2 }, (_, i) => `skel-date-${i}`).map(
+                  (id) => (
+                    <div key={id} className="flex flex-col gap-[4px]">
+                      <div className="h-[10px] w-1/2 bg-[#242424] rounded-[2px]" />
+                      <div className="h-[16px] w-3/4 bg-[#242424] rounded-[4px]" />
+                    </div>
+                  ),
+                )}
               </div>
               {/* Studios & Producers */}
               <div className="flex flex-col gap-[12px] border-b border-border-line pb-[12px]">
-                {[...Array(2)].map((_, i) => (
-                  <div key={i} className="flex flex-col gap-[4px]">
-                    <div className="h-[10px] w-1/4 bg-[#242424] rounded-[2px]" />
-                    <div className="h-[16px] w-5/6 bg-[#242424] rounded-[4px]" />
-                  </div>
-                ))}
+                {Array.from({ length: 2 }, (_, i) => `skel-studio-${i}`).map(
+                  (id) => (
+                    <div key={id} className="flex flex-col gap-[4px]">
+                      <div className="h-[10px] w-1/4 bg-[#242424] rounded-[2px]" />
+                      <div className="h-[16px] w-5/6 bg-[#242424] rounded-[4px]" />
+                    </div>
+                  ),
+                )}
               </div>
               {/* Ratings */}
               <div className="flex flex-col gap-[4px]">
@@ -218,9 +231,14 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="h-[48px] md:h-[60px] w-3/4 bg-[#282828] rounded-[8px]" />
                 <div className="h-[14px] w-1/3 bg-[#282828] rounded-[4px]" />
                 <div className="flex gap-[8px]">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-[20px] w-[60px] bg-[#282828] rounded-[4px]" />
-                  ))}
+                  {Array.from({ length: 3 }, (_, i) => `skel-tag-${i}`).map(
+                    (id) => (
+                      <div
+                        key={id}
+                        className="h-[20px] w-[60px] bg-[#282828] rounded-[4px]"
+                      />
+                    ),
+                  )}
                 </div>
               </div>
 
@@ -242,8 +260,11 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="h-[28px] w-[100px] bg-[#282828] rounded-[8px]" />
               </div>
               <div className="flex flex-col gap-[12px]">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex gap-[16px] p-[12px] rounded-[8px] bg-surface border border-border-line animate-pulse">
+                {[...Array(5)].map((_, _i) => (
+                  <div
+                    key={id}
+                    className="flex gap-[16px] p-[12px] rounded-[8px] bg-surface border border-border-line animate-pulse"
+                  >
                     <div className="w-[160px] sm:w-[200px] aspect-[16/9] bg-[#282828] rounded-[6px] shrink-0" />
                     <div className="flex-1 flex flex-col gap-[8px]">
                       <div className="h-[14px] w-[100px] bg-[#323232] rounded-[4px]" />
@@ -265,7 +286,8 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       <main className="flex-1 flex flex-col items-center justify-center p-[24px] text-center gap-[16px] min-h-[50vh]">
         <h2 className="text-xl font-bold text-white">Failed to load details</h2>
         <p className="text-sm text-[#A3A3A3] max-w-md">
-          There was an error communicating with the anime service. Please check your connection or try again.
+          There was an error communicating with the anime service. Please check
+          your connection or try again.
         </p>
         <Button variant="primary" onClick={() => window.location.reload()}>
           Try Again
@@ -274,7 +296,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
     );
   }
 
-  const handleWatchlistChange = (status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch") => {
+  const handleWatchlistChange = (
+    status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch",
+  ) => {
     watchlist.addItem({
       animeId,
       animeTitle: anime.title,
@@ -336,10 +360,14 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       const date = new Date(dateStr);
       const now = new Date();
       const diffInMs = now.getTime() - date.getTime();
-      
+
       // If the date is in the future
       if (diffInMs < 0) {
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
       }
 
       const diffInSeconds = Math.floor(diffInMs / 1000);
@@ -361,27 +389,35 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       if (diffInDays < 30) {
         return diffInWeeks === 1 ? "1 week ago" : `${diffInWeeks} weeks ago`;
       }
-      if (diffInDays < 180) { // Up to 6 months
-        return diffInMonths === 1 ? "1 month ago" : `${diffInMonths} months ago`;
+      if (diffInDays < 180) {
+        // Up to 6 months
+        return diffInMonths === 1
+          ? "1 month ago"
+          : `${diffInMonths} months ago`;
       }
-      
+
       // Too old: return specific date
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     } catch {
       return dateStr;
     }
   };
 
-  const episodesList = anime?.episodes && anime.episodes.length > 0
-    ? anime.episodes
-    : Array.from({ length: anime?.episodesCount || 0 }).map((_, i) => ({
-        episode_number: i + 1,
-        name: `Episode ${i + 1}`,
-        overview: "No description available for this episode.",
-        still_path: null,
-        runtime: 24,
-        air_date: null
-      }));
+  const episodesList =
+    anime?.episodes && anime.episodes.length > 0
+      ? anime.episodes
+      : Array.from({ length: anime?.episodesCount || 0 }).map((_, i) => ({
+          episode_number: i + 1,
+          name: `Episode ${i + 1}`,
+          overview: "No description available for this episode.",
+          still_path: null,
+          runtime: 24,
+          air_date: null,
+        }));
 
   const sortedEpisodes = [...episodesList].sort((a, b) => {
     return sortOrder === "asc"
@@ -405,7 +441,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       {/* 1. Dynamic Video Player or Banner Section */}
       <AnimatePresence mode="wait">
         {isPlayingThisAnime ? (
-          <motion.div 
+          <motion.div
             key="player"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -426,9 +462,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 <span className="text-xs md:text-sm font-bold text-white truncate max-w-[70%]">
                   {anime.title} — Episode {player.episodeNumber}
                 </span>
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => player.setPlaying(false)}
                   className="rounded-full h-[28px] w-[28px] md:h-[32px] md:w-[32px] p-0 flex items-center justify-center bg-[#242424] hover:bg-[#323232]"
                 >
@@ -444,12 +480,14 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                     {Math.floor(player.progressSeconds / 60)}:
                     {String(player.progressSeconds % 60).padStart(2, "0")}
                   </span>
-                  <input 
-                    type="range" 
-                    min="0" 
+                  <input
+                    type="range"
+                    min="0"
                     max={player.durationSeconds || 100}
                     value={player.progressSeconds}
-                    onChange={(e) => player.setProgress(parseInt(e.target.value, 10))}
+                    onChange={(e) =>
+                      player.setProgress(parseInt(e.target.value, 10))
+                    }
                     className="w-full h-[3px] md:h-[4px] bg-[#282828] rounded-lg appearance-none cursor-pointer accent-white"
                   />
                   <span className="text-[10px] md:text-xs text-[#A3A3A3] font-mono shrink-0">
@@ -461,29 +499,39 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {/* Left/Right Action Triggers */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-[12px] md:gap-[16px]">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => player.setPlaying(!player.isPlaying)}
                       className="text-white hover:opacity-80 transition-opacity"
                     >
-                      {player.isPlaying ? <Pause className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" /> : <Play className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" />}
+                      {player.isPlaying ? (
+                        <Pause className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" />
+                      ) : (
+                        <Play className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" />
+                      )}
                     </button>
 
                     <div className="flex items-center gap-[8px]">
-                      <button 
+                      <button
                         type="button"
                         onClick={() => player.toggleMute()}
                         className="text-white hover:opacity-80 transition-opacity"
                       >
-                        {player.isMuted ? <VolumeX className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" /> : <Volume2 className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />}
+                        {player.isMuted ? (
+                          <VolumeX className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />
+                        ) : (
+                          <Volume2 className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />
+                        )}
                       </button>
-                      <input 
+                      <input
                         type="range"
                         min="0"
                         max="1"
                         step="0.1"
                         value={player.isMuted ? 0 : player.volume}
-                        onChange={(e) => player.setVolume(parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          player.setVolume(parseFloat(e.target.value))
+                        }
                         className="w-[60px] h-[3px] bg-[#282828] rounded-lg appearance-none cursor-pointer accent-white hidden md:block"
                       />
                     </div>
@@ -497,7 +545,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             key="banner"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -505,7 +553,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             className="absolute top-0 left-0 right-0 h-[480px] md:h-[640px] bg-[#000000] z-0 pointer-events-none"
           >
             {anime.bannerImage ? (
-              <div 
+              <div
                 className="w-full h-full bg-cover bg-center"
                 style={{ backgroundImage: `url(${anime.bannerImage})` }}
               >
@@ -521,14 +569,24 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       </AnimatePresence>
 
       {/* 2. Content Info Details Section */}
-      <div className={`relative w-full px-[12px] md:px-[24px] pb-[48px] flex flex-col lg:flex-row gap-[12px] md:gap-[24px] ${
-        isPlayingThisAnime ? "pt-[12px] md:pt-[24px]" : "pt-[80px] md:pt-[136px]"
-      }`}>
+      <div
+        className={`relative w-full px-[12px] md:px-[24px] pb-[48px] flex flex-col lg:flex-row gap-[12px] md:gap-[24px] ${
+          isPlayingThisAnime
+            ? "pt-[12px] md:pt-[24px]"
+            : "pt-[80px] md:pt-[136px]"
+        }`}
+      >
         {/* Left Column: Poster and Quick Metadata */}
         <div className="w-full lg:w-[340px] shrink-0 flex flex-col gap-[24px]">
           <div className="relative aspect-[2/3] w-full rounded-[12px] overflow-hidden border border-border-line bg-surface shadow-2xl">
             {anime.posterImage && (
-              <img src={anime.posterImage} alt={anime.title} className="w-full h-full object-cover" />
+              <Image
+                unoptimized
+                fill
+                src={anime.posterImage}
+                alt={anime.title}
+                className="w-full h-full object-cover"
+              />
             )}
           </div>
 
@@ -537,21 +595,37 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             {/* Format, Episodes, Status, Season in 2 columns */}
             <div className="grid grid-cols-2 gap-y-[12px] gap-x-[16px] border-b border-border-line pb-[12px]">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Format</span>
-                <span className="text-sm font-semibold text-text-primary uppercase">{anime.format || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Format
+                </span>
+                <span className="text-sm font-semibold text-text-primary uppercase">
+                  {anime.format || "N/A"}
+                </span>
               </div>
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Episodes</span>
-                <span className="text-sm font-semibold text-text-primary">{anime.episodesCount || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Episodes
+                </span>
+                <span className="text-sm font-semibold text-text-primary">
+                  {anime.episodesCount || "N/A"}
+                </span>
               </div>
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Status</span>
-                <span className="text-sm font-semibold text-text-primary capitalize">{formatStatus(anime.status)}</span>
-              </div>
-              <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Season</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Status
+                </span>
                 <span className="text-sm font-semibold text-text-primary capitalize">
-                  {anime.season ? `${anime.season} ${anime.year}` : anime.year || "N/A"}
+                  {formatStatus(anime.status)}
+                </span>
+              </div>
+              <div className="flex flex-col gap-[2px]">
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Season
+                </span>
+                <span className="text-sm font-semibold text-text-primary capitalize">
+                  {anime.season
+                    ? `${anime.season} ${anime.year}`
+                    : anime.year || "N/A"}
                 </span>
               </div>
             </div>
@@ -559,33 +633,52 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             {/* Dates in 2 columns */}
             <div className="grid grid-cols-2 gap-y-[12px] gap-x-[16px] border-b border-border-line pb-[12px]">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Start Date</span>
-                <span className="text-sm font-semibold text-text-primary">{anime.startDate || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Start Date
+                </span>
+                <span className="text-sm font-semibold text-text-primary">
+                  {anime.startDate || "N/A"}
+                </span>
               </div>
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">End Date</span>
-                <span className="text-sm font-semibold text-text-primary">{anime.endDate || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  End Date
+                </span>
+                <span className="text-sm font-semibold text-text-primary">
+                  {anime.endDate || "N/A"}
+                </span>
               </div>
             </div>
 
             {/* Studio & Producers in full-width rows */}
             <div className="flex flex-col gap-[12px] border-b border-border-line pb-[12px]">
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Studios</span>
-                <span className="text-sm font-semibold text-text-primary">{anime.studio || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Studios
+                </span>
+                <span className="text-sm font-semibold text-text-primary">
+                  {anime.studio || "N/A"}
+                </span>
               </div>
               <div className="flex flex-col gap-[2px]">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Producers</span>
-                <span className="text-sm font-semibold text-text-primary leading-normal">{anime.producers || "N/A"}</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Producers
+                </span>
+                <span className="text-sm font-semibold text-text-primary leading-normal">
+                  {anime.producers || "N/A"}
+                </span>
               </div>
             </div>
 
             {/* Ratings */}
             <div className="flex flex-col gap-[12px]">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Rating</span>
+                <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                  Rating
+                </span>
                 <span className="text-sm font-semibold text-text-primary flex items-center gap-[4px]">
-                  {anime.score} <Star className="w-[14px] h-[14px] fill-amber-400 text-amber-400 shrink-0" />
+                  {anime.score}{" "}
+                  <Star className="w-[14px] h-[14px] fill-amber-400 text-amber-400 shrink-0" />
                 </span>
               </div>
             </div>
@@ -598,14 +691,16 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
               <DropdownMenu onOpenChange={setIsDropdownOpen}>
                 <div className="flex items-center gap-[4px] w-full">
                   <DropdownMenuTrigger asChild>
-                    <Button 
+                    <Button
                       variant={watchlistItem ? "secondary" : "primary"}
                       className="flex-1 gap-[8px]"
                     >
                       {watchlistItem ? (
                         <>
                           <Check className="w-[16px] h-[16px] text-emerald-400" />
-                          <span className="capitalize">{watchlistItem.status.replace("_", " ")}</span>
+                          <span className="capitalize">
+                            {watchlistItem.status.replace("_", " ")}
+                          </span>
                         </>
                       ) : (
                         <>
@@ -617,8 +712,8 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                   </DropdownMenuTrigger>
 
                   {watchlistItem && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="icon"
                       onClick={handleRemoveFromWatchlist}
                       className="h-[40px] w-[40px] shrink-0 border border-border-line text-rose-400 hover:bg-rose-950/20"
@@ -629,26 +724,39 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                   )}
                 </div>
 
-                <DropdownMenuContent isOpen={isDropdownOpen} className="w-[280px]">
-                  <DropdownMenuItem onClick={() => handleWatchlistChange("watching")}>
+                <DropdownMenuContent
+                  isOpen={isDropdownOpen}
+                  className="w-[280px]"
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleWatchlistChange("watching")}
+                  >
                     Watching
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleWatchlistChange("completed")}>
+                  <DropdownMenuItem
+                    onClick={() => handleWatchlistChange("completed")}
+                  >
                     Completed
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleWatchlistChange("on_hold")}>
+                  <DropdownMenuItem
+                    onClick={() => handleWatchlistChange("on_hold")}
+                  >
                     On Hold
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleWatchlistChange("dropped")}>
+                  <DropdownMenuItem
+                    onClick={() => handleWatchlistChange("dropped")}
+                  >
                     Dropped
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleWatchlistChange("plan_to_watch")}>
+                  <DropdownMenuItem
+                    onClick={() => handleWatchlistChange("plan_to_watch")}
+                  >
                     Plan to Watch
                   </DropdownMenuItem>
                   {watchlistItem && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={handleRemoveFromWatchlist}
                         className="text-rose-400 hover:bg-rose-950/20"
                       >
@@ -666,21 +774,31 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
               className="w-full gap-[8px]"
               onClick={handleToggleLike}
             >
-              <Heart className={`w-[16px] h-[16px] ${isLiked ? "fill-black text-black" : "text-white"}`} />
+              <Heart
+                className={`w-[16px] h-[16px] ${isLiked ? "fill-black text-black" : "text-white"}`}
+              />
               <span>{isLiked ? "Liked" : "Like"}</span>
             </Button>
 
             {/* Rate Button */}
-            <Dialog open={isRatingModalOpen} onOpenChange={setIsRatingModalOpen}>
+            <Dialog
+              open={isRatingModalOpen}
+              onOpenChange={setIsRatingModalOpen}
+            >
               <DialogTrigger asChild>
                 <Button variant="secondary" className="w-full gap-[8px]">
                   <Star className="w-[16px] h-[16px] text-white" />
                   <span>Rate This Series</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent isOpen={isRatingModalOpen} className="max-w-md bg-surface border border-border-line text-text-primary p-[24px] min-w-0">
+              <DialogContent
+                isOpen={isRatingModalOpen}
+                className="max-w-md bg-surface border border-border-line text-text-primary p-[24px] min-w-0"
+              >
                 <DialogHeader className="min-w-0">
-                  <DialogTitle className="text-xl font-bold truncate">Rate this series</DialogTitle>
+                  <DialogTitle className="text-xl font-bold truncate">
+                    Rate this series
+                  </DialogTitle>
                   <DialogDescription className="text-sm text-text-muted truncate">
                     Share your rating for {anime.title}
                   </DialogDescription>
@@ -691,11 +809,20 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                   <div className="flex gap-[16px] w-full min-w-0 overflow-hidden p-[12px] bg-control border border-border-line rounded-[8px]">
                     <div className="relative aspect-[2/3] w-[60px] rounded-[6px] overflow-hidden border border-border-line bg-background shrink-0">
                       {anime.posterImage && (
-                        <img src={anime.posterImage} alt={anime.title} className="w-full h-full object-cover" />
+                        <Image
+                          unoptimized
+                          fill
+                          src={anime.posterImage}
+                          alt={anime.title}
+                          className="w-full h-full object-cover"
+                        />
                       )}
                     </div>
                     <div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden">
-                      <div className="font-bold text-text-primary text-base truncate w-full" title={anime.title}>
+                      <div
+                        className="font-bold text-text-primary text-base truncate w-full"
+                        title={anime.title}
+                      >
                         {anime.title}
                       </div>
                       <div className="text-xs text-text-muted mt-[2px] truncate w-full">
@@ -703,7 +830,8 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                       </div>
                       {tempRating > 0 && (
                         <span className="text-xs text-text-secondary font-bold mt-[4px] flex items-center gap-[4px]">
-                          Your rating: {tempRating}/5 <Star className="w-[12px] h-[12px] fill-amber-400 text-amber-400" />
+                          Your rating: {tempRating}/5{" "}
+                          <Star className="w-[12px] h-[12px] fill-amber-400 text-amber-400" />
                         </span>
                       )}
                     </div>
@@ -714,26 +842,26 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                     <div className="flex items-center gap-[8px]">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
-                          key={star}
                           type="button"
+                          key={star}
                           onClick={() => handleRateSeries(star)}
                           className="cursor-pointer hover:scale-110 transition-transform p-[4px]"
                           title={`Select ${star} Stars`}
                         >
-                          <Star 
+                          <Star
                             className={`w-[32px] h-[32px] ${
-                              star <= tempRating 
-                                ? "fill-amber-400 text-amber-400" 
+                              star <= tempRating
+                                ? "fill-amber-400 text-amber-400"
                                 : "text-[#3b3b3b] hover:text-text-muted"
-                            }`} 
+                            }`}
                           />
                         </button>
                       ))}
                     </div>
 
-                    <Button 
-                      onClick={handleConfirmRating} 
-                      variant="primary" 
+                    <Button
+                      onClick={handleConfirmRating}
+                      variant="primary"
                       className="w-full mt-[8px]"
                       disabled={tempRating === 0}
                     >
@@ -764,18 +892,20 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
               {/* Genres Row */}
               <div className="flex flex-wrap items-center gap-[8px]">
                 {anime.genres?.map((genre: string) => (
-                  <span 
+                  <span
                     key={genre}
                     className="text-[10px] font-bold px-[8px] py-[3px] rounded bg-control border border-border-line text-text-secondary uppercase tracking-wider"
                   >
                     {genre}
                   </span>
                 ))}
-                <span className={`text-[10px] font-bold px-[8px] py-[3px] rounded border uppercase tracking-wider ${
-                  anime.status === "FINISHED" 
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                    : "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                }`}>
+                <span
+                  className={`text-[10px] font-bold px-[8px] py-[3px] rounded border uppercase tracking-wider ${
+                    anime.status === "FINISHED"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                  }`}
+                >
                   {formatStatus(anime.status)}
                 </span>
               </div>
@@ -783,7 +913,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
 
             {/* Synopsis */}
             <div className="flex flex-col gap-[12px]">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted">Synopsis</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted">
+                Synopsis
+              </h2>
               <p className="text-base text-text-secondary leading-relaxed w-full">
                 {anime.synopsis || "No description provided."}
               </p>
@@ -800,13 +932,19 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {/* Sorting Toggle Button */}
                 <button
                   type="button"
-                  onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+                  onClick={() =>
+                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                  }
                   className={`p-[6px] rounded-[6px] transition-colors cursor-pointer ${
                     sortOrder === "desc"
                       ? "bg-control text-text-primary"
                       : "text-text-muted hover:text-text-secondary"
                   }`}
-                  title={sortOrder === "asc" ? "Sort Descending (Newest first)" : "Sort Ascending (Oldest first)"}
+                  title={
+                    sortOrder === "asc"
+                      ? "Sort Descending (Newest first)"
+                      : "Sort Ascending (Oldest first)"
+                  }
                   aria-label="Toggle Episode Sort Order"
                 >
                   <ArrowUpDown className="w-[14px] h-[14px]" />
@@ -863,39 +1001,54 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {/* List View (full width cards) */}
                 {episodeView === "list" && (
                   <div className="flex flex-col gap-[12px]">
-                    {paginatedEpisodes.map((ep: any, index: number) => {
-                      const epNum = ep.episode_number || (index + 1);
-                      const isCurrentlyPlaying = player.animeId === animeId && player.episodeNumber === epNum && player.isPlaying;
-                      const thumbnail = ep.still_path 
-                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}` 
+                    {paginatedEpisodes.map((ep: unknown, index: number) => {
+                      const epNum = ep.episode_number || index + 1;
+                      const isCurrentlyPlaying =
+                        player.animeId === animeId &&
+                        player.episodeNumber === epNum &&
+                        player.isPlaying;
+                      const thumbnail = ep.still_path
+                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
                         : null;
                       return (
                         <button
-                          key={ep.id || index}
                           type="button"
+                          key={ep.id || index}
                           onClick={() => handlePlayEpisode(epNum)}
                           className={`group relative flex items-center gap-[16px] p-[12px] rounded-[8px] border text-left cursor-pointer transition-all hover:bg-control w-full ${
-                            isCurrentlyPlaying 
-                              ? "bg-control border-white" 
+                            isCurrentlyPlaying
+                              ? "bg-control border-white"
                               : "bg-surface border-border-line"
                           }`}
                         >
                           {thumbnail ? (
                             <div className="w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] overflow-hidden border border-border-line bg-background shrink-0 relative">
-                              <img src={thumbnail} alt={ep.name} className="w-full h-full object-cover" />
+                              <Image
+                                unoptimized
+                                fill
+                                src={thumbnail}
+                                alt={ep.name}
+                                className="w-full h-full object-cover"
+                              />
                               <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
                                 {ep.runtime || 24} MIN
                               </span>
                               {isCurrentlyPlaying && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Playing</span>
+                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                    Playing
+                                  </span>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className={`w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] flex items-center justify-center border text-base font-bold shrink-0 relative ${
-                              isCurrentlyPlaying ? "bg-white text-black border-white" : "bg-control border-border-line text-text-primary"
-                            }`}>
+                            <div
+                              className={`w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] flex items-center justify-center border text-base font-bold shrink-0 relative ${
+                                isCurrentlyPlaying
+                                  ? "bg-white text-black border-white"
+                                  : "bg-control border-border-line text-text-primary"
+                              }`}
+                            >
                               EP {epNum}
                               <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
                                 {ep.runtime || 24} MIN
@@ -908,14 +1061,22 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                               <span>•</span>
                               <span>{formatDate(ep.air_date)}</span>
                             </div>
-                            <span className="text-base font-bold text-text-primary truncate">{ep.name || `Episode ${epNum}`}</span>
+                            <span className="text-base font-bold text-text-primary truncate">
+                              {ep.name || `Episode ${epNum}`}
+                            </span>
                             {ep.overview && (
-                              <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">{ep.overview}</p>
+                              <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
+                                {ep.overview}
+                              </p>
                             )}
                           </div>
-                          <div className={`w-[36px] h-[36px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                            isCurrentlyPlaying ? "bg-white text-black border-white" : "bg-control border-border-line group-hover:bg-white group-hover:text-black group-hover:border-white"
-                          }`}>
+                          <div
+                            className={`w-[36px] h-[36px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                              isCurrentlyPlaying
+                                ? "bg-white text-black border-white"
+                                : "bg-control border-border-line group-hover:bg-white group-hover:text-black group-hover:border-white"
+                            }`}
+                          >
                             <Play className="w-[12px] h-[12px] fill-current" />
                           </div>
                         </button>
@@ -927,26 +1088,35 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {/* Grid View (5 cards per row on desktop, smaller cards) */}
                 {episodeView === "grid" && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[12px]">
-                    {paginatedEpisodes.map((ep: any, index: number) => {
-                      const epNum = ep.episode_number || (index + 1);
-                      const isCurrentlyPlaying = player.animeId === animeId && player.episodeNumber === epNum && player.isPlaying;
-                      const thumbnail = ep.still_path 
-                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}` 
+                    {paginatedEpisodes.map((ep: unknown, index: number) => {
+                      const epNum = ep.episode_number || index + 1;
+                      const isCurrentlyPlaying =
+                        player.animeId === animeId &&
+                        player.episodeNumber === epNum &&
+                        player.isPlaying;
+                      const thumbnail = ep.still_path
+                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
                         : null;
                       return (
                         <button
-                          key={ep.id || index}
                           type="button"
+                          key={ep.id || index}
                           onClick={() => handlePlayEpisode(epNum)}
                           className={`group relative flex flex-col rounded-[8px] border overflow-hidden text-left cursor-pointer transition-all hover:bg-control ${
-                            isCurrentlyPlaying 
-                              ? "bg-control border-white" 
+                            isCurrentlyPlaying
+                              ? "bg-control border-white"
                               : "bg-surface border-border-line"
                           }`}
                         >
                           {thumbnail ? (
                             <div className="w-full aspect-[16/9] bg-background relative border-b border-border-line">
-                              <img src={thumbnail} alt={ep.name} className="w-full h-full object-cover" />
+                              <Image
+                                unoptimized
+                                fill
+                                src={thumbnail}
+                                alt={ep.name}
+                                className="w-full h-full object-cover"
+                              />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                               <span className="absolute bottom-[8px] left-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
                                 EP {epNum}
@@ -956,7 +1126,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                               </span>
                               {isCurrentlyPlaying && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Playing</span>
+                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                    Playing
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -971,15 +1143,20 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                               </span>
                               {isCurrentlyPlaying && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Playing</span>
+                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                    Playing
+                                  </span>
                                 </div>
                               )}
                             </div>
                           )}
                           <div className="p-[16px] flex flex-col flex-1">
-                            <span className="text-base font-bold text-text-primary truncate">{ep.name || `Episode ${epNum}`}</span>
+                            <span className="text-base font-bold text-text-primary truncate">
+                              {ep.name || `Episode ${epNum}`}
+                            </span>
                             <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
-                              {ep.overview || "No description available for this episode."}
+                              {ep.overview ||
+                                "No description available for this episode."}
                             </p>
                             <div className="flex items-center justify-between w-full mt-auto pt-[12px]">
                               <span className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
@@ -999,17 +1176,20 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {/* Small Grid View (Squares with episode numbers) */}
                 {episodeView === "small" && (
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-[8px]">
-                    {paginatedEpisodes.map((ep: any, index: number) => {
-                      const epNum = ep.episode_number || (index + 1);
-                      const isCurrentlyPlaying = player.animeId === animeId && player.episodeNumber === epNum && player.isPlaying;
+                    {paginatedEpisodes.map((ep: unknown, index: number) => {
+                      const epNum = ep.episode_number || index + 1;
+                      const isCurrentlyPlaying =
+                        player.animeId === animeId &&
+                        player.episodeNumber === epNum &&
+                        player.isPlaying;
                       return (
                         <button
-                          key={ep.id || index}
                           type="button"
+                          key={ep.id || index}
                           onClick={() => handlePlayEpisode(epNum)}
                           className={`w-full aspect-square rounded-[8px] border flex items-center justify-center text-sm font-bold transition-all hover:bg-control cursor-pointer ${
-                            isCurrentlyPlaying 
-                              ? "bg-control border-white text-white" 
+                            isCurrentlyPlaying
+                              ? "bg-control border-white text-white"
                               : "bg-surface border-border-line text-text-secondary"
                           }`}
                         >
@@ -1024,13 +1204,23 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                 {totalEpisodes > 0 && (
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-[16px] border-t border-border-line pt-[16px] mt-[16px] text-sm">
                     <span className="text-text-muted">
-                      Showing <span className="text-text-primary font-bold">{startIndex + 1}-{Math.min(endIndex, totalEpisodes)}</span> of <span className="text-text-primary font-bold">{totalEpisodes}</span> Episodes
+                      Showing{" "}
+                      <span className="text-text-primary font-bold">
+                        {startIndex + 1}-{Math.min(endIndex, totalEpisodes)}
+                      </span>{" "}
+                      of{" "}
+                      <span className="text-text-primary font-bold">
+                        {totalEpisodes}
+                      </span>{" "}
+                      Episodes
                     </span>
                     <div className="flex items-center gap-[8px]">
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
                         disabled={currentPage === 1}
                       >
                         Prev
@@ -1040,8 +1230,8 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                           const pageNum = idx + 1;
                           return (
                             <button
-                              key={pageNum}
                               type="button"
+                              key={pageNum}
                               onClick={() => setCurrentPage(pageNum)}
                               className={`h-[32px] px-[10px] min-w-[32px] rounded-[6px] border text-xs font-bold transition-all cursor-pointer ${
                                 currentPage === pageNum
@@ -1057,7 +1247,11 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages),
+                          )
+                        }
                         disabled={currentPage === totalPages}
                       >
                         Next
@@ -1077,7 +1271,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
           <div className="bg-surface border border-border-line rounded-[12px] p-[24px] flex flex-col gap-[24px] mt-0">
             {/* Header */}
             <div className="flex items-center gap-[8px] border-b border-border-line pb-[16px]">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-text-primary">Comments</h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-text-primary">
+                Comments
+              </h2>
               <span className="text-xs font-bold text-text-muted bg-control border border-border-line px-[8px] py-[2px] rounded">
                 {commentsList.length}
               </span>
@@ -1111,10 +1307,17 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             {commentsList.length > 0 ? (
               <div className="flex flex-col gap-[12px]">
                 {commentsList.map((comm) => (
-                  <div key={comm.id} className="p-[16px] bg-[#121212] border border-border-line rounded-[12px] flex flex-col gap-[6px]">
+                  <div
+                    key={comm.id}
+                    className="p-[16px] bg-[#121212] border border-border-line rounded-[12px] flex flex-col gap-[6px]"
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-text-primary">@{comm.username}</span>
-                      <span className="text-[10px] text-text-muted font-semibold">{comm.createdAt}</span>
+                      <span className="text-xs font-bold text-text-primary">
+                        @{comm.username}
+                      </span>
+                      <span className="text-[10px] text-text-muted font-semibold">
+                        {comm.createdAt}
+                      </span>
                     </div>
                     <p className="text-sm text-text-secondary leading-relaxed">
                       {comm.content}
@@ -1125,8 +1328,12 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
             ) : (
               <div className="flex flex-col items-center justify-center py-[32px] gap-[8px] text-center">
                 <span className="text-2xl">💬</span>
-                <p className="text-sm font-bold text-text-primary">No comments yet</p>
-                <p className="text-xs text-text-muted">Be the first to share your thoughts on this show.</p>
+                <p className="text-sm font-bold text-text-primary">
+                  No comments yet
+                </p>
+                <p className="text-xs text-text-muted">
+                  Be the first to share your thoughts on this show.
+                </p>
               </div>
             )}
           </div>

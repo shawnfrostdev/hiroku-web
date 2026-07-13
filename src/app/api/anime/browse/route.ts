@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status");
     const page = parseInt(searchParams.get("page") || "1", 10);
 
-    const variables: Record<string, any> = {
+    const variables: Record<string, unknown> = {
       page,
       perPage: 100,
       type: "ANIME",
@@ -106,36 +106,98 @@ export async function GET(request: Request) {
     const pageInfo = json.data.Page.pageInfo;
     const media = json.data.Page.media || [];
 
-    const results = media.map((item: any) => {
-      let availableEpisodes = item.episodes;
-      if (item.status === "RELEASING" && item.nextAiringEpisode) {
-        availableEpisodes = item.nextAiringEpisode.episode - 1;
-      }
+    const results = media.map(
+      (item: {
+        id: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        media?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        averageScore?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        genres?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        recommendations?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        description?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => {
+        let availableEpisodes = item.episodes;
+        if (item.status === "RELEASING" && item.nextAiringEpisode) {
+          availableEpisodes = item.nextAiringEpisode.episode - 1;
+        }
 
-      const episodesStr =
-        item.format === "MOVIE"
-          ? "MOVIE"
-          : availableEpisodes && availableEpisodes > 0
-          ? `${availableEpisodes}EP`
-          : item.format
-          ? item.format.replace("_", " ")
-          : "Anime";
+        const episodesStr =
+          item.format === "MOVIE"
+            ? "MOVIE"
+            : availableEpisodes && availableEpisodes > 0
+              ? `${availableEpisodes}EP`
+              : item.format
+                ? item.format.replace("_", " ")
+                : "Anime";
 
-      return {
-        id: item.id,
-        title: item.title.english || item.title.romaji,
-        posterImage: item.coverImage?.extraLarge || item.coverImage?.large || null,
-        bannerImage: item.bannerImage || null,
-        score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "N/A",
-        format: item.format || null,
-        episodes: episodesStr,
-        status: item.status,
-        genres: item.genres || [],
-        tagline: item.genres && item.genres.length > 0 ? item.genres[0] : null,
-        year: item.startDate?.year || item.seasonYear || null,
-        season: item.season || null,
-      };
-    });
+        return {
+          id: item.id,
+          title: item.title.english || item.title.romaji,
+          posterImage:
+            item.coverImage?.extraLarge || item.coverImage?.large || null,
+          bannerImage: item.bannerImage || null,
+          score: item.averageScore
+            ? (item.averageScore / 10).toFixed(1)
+            : "N/A",
+          format: item.format || null,
+          episodes: episodesStr,
+          status: item.status,
+          genres: item.genres || [],
+          tagline:
+            item.genres && item.genres.length > 0 ? item.genres[0] : null,
+          year: item.startDate?.year || item.seasonYear || null,
+          season: item.season || null,
+        };
+      },
+    );
 
     return NextResponse.json(
       { results, pageInfo },
@@ -143,10 +205,13 @@ export async function GET(request: Request) {
         headers: {
           "Cache-Control": "public, s-maxage=120, stale-while-revalidate=3600",
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Browse API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch browse results" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch browse results" },
+      { status: 500 },
+    );
   }
 }

@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
-import { fetchAnimeEpisodes, formatProviderName } from '@/lib/scraper';
+import { NextResponse } from "next/server";
+import { fetchAnimeEpisodes, formatProviderName } from "@/lib/scraper";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const animeId = searchParams.get('id');
-  const episodeNumber = searchParams.get('episode');
+  const animeId = searchParams.get("id");
+  const episodeNumber = searchParams.get("episode");
 
   if (!animeId || !episodeNumber) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
@@ -15,7 +15,20 @@ export async function GET(request: Request) {
   try {
     const episodesRes = await fetchAnimeEpisodes(animeId);
     const episode = episodesRes.data.find(
-      (ep: any) => ep.number.toString() === episodeNumber
+      (ep: {
+        number: number;
+        id: string;
+        title: string;
+        providers:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown[];
+      }) => ep.number.toString() === episodeNumber,
     );
 
     if (!episode) {
@@ -23,32 +36,41 @@ export async function GET(request: Request) {
     }
 
     const softsubList = (episode.providers || [])
-      .filter((p: any) => p.category === 'softsub')
-      .map((p: any) => ({
+      .filter(
+        (p: { provider: string; category: string }) => p.category === "softsub",
+      )
+      .map((p: { provider: string; category: string }) => ({
         serverName: formatProviderName(p.provider),
-        serverId: p.provider
+        serverId: p.provider,
       }));
 
     const subList = (episode.providers || [])
-      .filter((p: any) => p.category === 'sub')
-      .map((p: any) => ({
+      .filter(
+        (p: { provider: string; category: string }) => p.category === "sub",
+      )
+      .map((p: { provider: string; category: string }) => ({
         serverName: formatProviderName(p.provider),
-        serverId: p.provider
+        serverId: p.provider,
       }));
 
     const dubList = (episode.providers || [])
-      .filter((p: any) => p.category === 'dub')
-      .map((p: any) => ({
+      .filter(
+        (p: { provider: string; category: string }) => p.category === "dub",
+      )
+      .map((p: { provider: string; category: string }) => ({
         serverName: formatProviderName(p.provider),
-        serverId: p.provider
+        serverId: p.provider,
       }));
 
     return NextResponse.json({
       softsub: softsubList,
       sub: subList,
-      dub: dubList
+      dub: dubList,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 500 },
+    );
   }
 }

@@ -28,7 +28,10 @@ interface AniListMedia {
   status?: string;
 }
 
-const fetchAniListFinishedAndMovies = async (): Promise<{ finished: AniListMedia[]; movies: AniListMedia[] }> => {
+const fetchAniListFinishedAndMovies = async (): Promise<{
+  finished: AniListMedia[];
+  movies: AniListMedia[];
+}> => {
   const query = `
     query {
       finished: Page(page: 1, perPage: 40) {
@@ -93,11 +96,41 @@ const fetchAniListFinishedAndMovies = async (): Promise<{ finished: AniListMedia
 
   const json = await response.json();
   const finishedFiltered = (json.data.finished.media || [])
-    .filter((m: any) => !m.isAdult && m.popularity >= 1500)
+    .filter(
+      (m: {
+        id: number;
+        isAdult: boolean;
+        popularity: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => !m.isAdult && m.popularity >= 1500,
+    )
     .slice(0, 10);
-  
+
   const moviesFiltered = (json.data.movies.media || [])
-    .filter((m: any) => !m.isAdult)
+    .filter(
+      (m: {
+        id: number;
+        isAdult: boolean;
+        popularity: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => !m.isAdult,
+    )
     .slice(0, 10);
 
   return {
@@ -137,11 +170,14 @@ const mapMedia = async (list: AniListMedia[]) => {
         availableEpisodes = item.nextAiringEpisode.episode - 1;
       }
 
-      const episodesStr = item.format === "MOVIE"
-        ? "MOVIE"
-        : (availableEpisodes && availableEpisodes > 0
+      const episodesStr =
+        item.format === "MOVIE"
+          ? "MOVIE"
+          : availableEpisodes && availableEpisodes > 0
             ? `${availableEpisodes}EP`
-            : (item.format ? item.format.replace("_", " ") : "Anime"));
+            : item.format
+              ? item.format.replace("_", " ")
+              : "Anime";
 
       return {
         id: item.id,
@@ -149,11 +185,12 @@ const mapMedia = async (list: AniListMedia[]) => {
         synopsis: tmdbDetails?.overview || cleanSynopsis(item.description),
         score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "8.5",
         episodes: episodesStr,
-        tagline: item.genres && item.genres.length > 0 ? item.genres[0] : "Anime",
+        tagline:
+          item.genres && item.genres.length > 0 ? item.genres[0] : "Anime",
         bannerImage,
         posterImage,
       };
-    })
+    }),
   );
 };
 
@@ -169,10 +206,10 @@ export async function GET() {
       finished: mappedFinished.slice(0, 5),
       movies: mappedMovies.slice(0, 5),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch lists" },
-      { status: 500 }
+      { error: (error as Error).message || "Failed to fetch lists" },
+      { status: 500 },
     );
   }
 }

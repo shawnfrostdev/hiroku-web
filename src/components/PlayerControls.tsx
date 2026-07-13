@@ -1,17 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Gauge, 
-  Languages, 
-  Tv2, 
-  Maximize2, 
-  Minimize2 
+import {
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
 } from "lucide-react";
+import { useState } from "react";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import TimelineBar from "./TimelineBar";
 import VolumeControl from "./VolumeControl";
@@ -63,14 +60,16 @@ export default function PlayerControls({
 }: PlayerControlsProps) {
   const playbackRate = usePlayerStore((state) => state.playbackRate);
   const currentResolution = usePlayerStore((state) => state.currentResolution);
-  const availableResolutions = usePlayerStore((state) => state.availableResolutions);
-  
+  const availableResolutions = usePlayerStore(
+    (state) => state.availableResolutions,
+  );
+
   const [showSpeed, setShowSpeed] = useState(false);
   const [showAudio, setShowAudio] = useState(false);
   const [showQuality, setShowQuality] = useState(false);
 
   const formatTime = (secs: number) => {
-    if (isNaN(secs) || secs === null || secs < 0) return "00:00";
+    if (Number.isNaN(secs) || secs === null || secs < 0) return "00:00";
     const hrs = Math.floor(secs / 3600);
     const mins = Math.floor((secs % 3600) / 60);
     const remainingSecs = Math.floor(secs % 60);
@@ -85,28 +84,33 @@ export default function PlayerControls({
   const duration = usePlayerStore((state) => state.duration);
 
   // Fallback default resolutions if Shaka hasn't loaded track metadata yet
-  const resolutions = availableResolutions.length > 0 
-    ? availableResolutions 
-    : ["1080p", "720p", "480p", "Auto"];
+  const resolutions =
+    availableResolutions.length > 0
+      ? availableResolutions
+      : ["1080p", "720p", "480p", "Auto"];
 
   const activeSkip = skipTimes?.find(
-    (skip) => currentTime >= skip.startTime && currentTime <= skip.endTime
+    (skip) => currentTime >= skip.startTime && currentTime <= skip.endTime,
   );
 
   return (
-    <div className={`absolute bottom-0 left-0 right-0 p-[12px] md:p-[20px] bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col gap-[8px] md:gap-[12px] z-10 transition-opacity duration-300 ${
-      isHoveringControls || !isPlaying ? "opacity-100" : "opacity-0 md:group-hover:opacity-100"
-    }`}>
-      
+    <div
+      className={`absolute bottom-0 left-0 right-0 p-[12px] md:p-[20px] bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col gap-[8px] md:gap-[12px] z-10 transition-opacity duration-300 ${
+        isHoveringControls || !isPlaying
+          ? "opacity-100"
+          : "opacity-0 md:group-hover:opacity-100"
+      }`}
+    >
       {/* Skip OP/ED Button Overlay */}
       {activeSkip && (
         <div className="absolute bottom-[calc(100%+16px)] right-[24px] z-50">
           <button
+            type="button"
             onClick={() => onSeek(activeSkip.endTime)}
             className="flex items-center gap-[8px] bg-white text-black px-[16px] py-[8px] rounded-[6px] font-bold shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:bg-gray-200 transition-transform active:scale-95 cursor-pointer"
           >
             <SkipForward className="w-[18px] h-[18px]" />
-            {activeSkip.type === 'op' ? 'Skip Opening' : 'Skip Ending'}
+            {activeSkip.type === "op" ? "Skip Opening" : "Skip Ending"}
           </button>
         </div>
       )}
@@ -116,10 +120,8 @@ export default function PlayerControls({
 
       {/* Buttons dashboard */}
       <div className="flex items-center justify-between w-full text-white">
-        
         {/* Left Side Controls */}
         <div className="flex items-center gap-[8px] md:gap-[16px]">
-          
           {/* Group 1: Play/Pause */}
           <div className="flex items-center bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
             {/* Play/Pause Toggle */}
@@ -165,19 +167,21 @@ export default function PlayerControls({
           </div>
 
           {/* Group 2: Volume */}
-          <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px] px-[8px]">
-            <VolumeControl onVolumeChange={onVolumeChange} onToggleMute={onToggleMute} />
-          </div>
+          <VolumeControl
+            onVolumeChange={onVolumeChange}
+            onToggleMute={onToggleMute}
+          />
 
           {/* Group 3: Timestamps */}
           <div className="h-[36px] md:h-[40px] px-[10px] md:px-[14px] bg-white/5 border border-white/10 rounded-[8px] flex items-center justify-center text-[10px] md:text-sm font-bold text-white/90 select-none shrink-0">
-            {formatTime(currentTime)} <span className="text-white/40 mx-[2px] md:mx-[4px]">/</span> {formatTime(duration)}
+            {formatTime(currentTime)}{" "}
+            <span className="text-white/40 mx-[2px] md:mx-[4px]">/</span>{" "}
+            {formatTime(duration)}
           </div>
         </div>
 
         {/* Right Side Controls */}
         <div className="flex items-center gap-[8px] md:gap-[16px] relative shrink-0">
-          
           {/* Group 4: Settings (Speed, CC, Quality) */}
           <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
             {/* Speed Selector */}
@@ -199,14 +203,16 @@ export default function PlayerControls({
                 <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
                   {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
                     <button
-                      key={rate}
                       type="button"
+                      key={rate}
                       onClick={() => {
                         onPlaybackRateChange(rate);
                         setShowSpeed(false);
                       }}
-                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black ${
-                        playbackRate === rate ? "bg-white text-black" : "text-text-secondary"
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
+                        playbackRate === rate
+                          ? "bg-white text-black"
+                          : "text-text-secondary"
                       }`}
                     >
                       {rate}x
@@ -229,20 +235,24 @@ export default function PlayerControls({
                 aria-expanded={showAudio}
                 aria-label="Subtitle Language"
               >
-                <span className="capitalize truncate whitespace-nowrap">{currentSubtitle === "Off" ? "CC" : currentSubtitle}</span>
+                <span className="capitalize truncate whitespace-nowrap">
+                  {currentSubtitle === "Off" ? "CC" : currentSubtitle}
+                </span>
               </button>
               {showAudio && (
                 <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
                   {availableSubtitles.map((sub: string) => (
                     <button
-                      key={sub}
                       type="button"
+                      key={sub}
                       onClick={() => {
                         onSubtitleChange(sub);
                         setShowAudio(false);
                       }}
-                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
-                        currentSubtitle === sub ? "bg-white text-black" : "text-text-secondary"
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                        currentSubtitle === sub
+                          ? "bg-white text-black"
+                          : "text-text-secondary"
                       }`}
                     >
                       {sub}
@@ -271,14 +281,17 @@ export default function PlayerControls({
                 <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[90px]">
                   {resolutions.map((res) => (
                     <button
-                      key={res}
                       type="button"
+                      key={res}
                       onClick={() => {
                         onResolutionChange(res);
                         setShowQuality(false);
                       }}
-                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
-                        currentResolution === res || (res === "Auto" && !currentResolution) ? "bg-white text-black" : "text-text-secondary"
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                        currentResolution === res ||
+                        (res === "Auto" && !currentResolution)
+                          ? "bg-white text-black"
+                          : "text-text-secondary"
                       }`}
                     >
                       {res}
@@ -299,7 +312,9 @@ export default function PlayerControls({
               title={isTheaterMode ? "Default View" : "Theater Mode"}
               aria-label="Toggle Theater Mode"
             >
-              <span className={`block w-[20px] h-[14px] border-2 rounded-[2px] ${isTheaterMode ? "border-white bg-white/20" : "border-white/60"}`} />
+              <span
+                className={`block w-[20px] h-[14px] border-2 rounded-[2px] ${isTheaterMode ? "border-white bg-white/20" : "border-white/60"}`}
+              />
             </button>
 
             {/* Fullscreen Toggle */}
@@ -318,7 +333,6 @@ export default function PlayerControls({
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

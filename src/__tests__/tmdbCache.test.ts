@@ -18,8 +18,8 @@ describe("TMDB Details Cache Helper", () => {
       poster_path: "/poster.jpg",
       title: "Test Anime Title",
       overview: "An amazing test anime.",
-      episodes: []
-    }
+      episodes: [],
+    },
   };
 
   beforeEach(() => {
@@ -56,7 +56,11 @@ describe("TMDB Details Cache Helper", () => {
   it("should fetch details from API and save to cache if not present", async () => {
     vi.mocked(fs.readFile).mockRejectedValue(new Error("File not found"));
 
-    const details = await getCachedTMDBDetails(99999, { themoviedb_id: 1111 }, "Fetched Title");
+    const details = await getCachedTMDBDetails(
+      99999,
+      { themoviedb_id: 1111 },
+      "Fetched Title",
+    );
 
     expect(details).not.toBeNull();
     expect(details?.title).toBe("Fetched Title");

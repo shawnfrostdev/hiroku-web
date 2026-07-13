@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface PlayerState {
   // 1. Core Playback State
@@ -11,7 +11,7 @@ interface PlayerState {
   volume: number;
   isMuted: boolean;
   playbackRate: number;
-  
+
   // Backwards Compatibility fields
   progressSeconds: number;
   durationSeconds: number;
@@ -20,12 +20,12 @@ interface PlayerState {
   isBuffering: boolean;
   currentResolution: string;
   availableResolutions: string[];
-  
+
   // 3. Metadata & Overlay State
   chapterMarkers: Array<{ title: string; startTime: number }>;
   skipIntroData: { start: number; end: number } | null;
   showSkipButton: boolean;
-  
+
   // 4. Actions (Called by the VideoCore or UI Components)
   play: () => void;
   pause: () => void;
@@ -40,9 +40,9 @@ interface PlayerState {
   setResolution: (resolution: string) => void;
   setPlaybackRate: (rate: number) => void;
   resetPlayer: () => void;
-  
+
   // Metadata Ingestion Point
-  ingestEpisodeData: (metadata: any) => void;
+  ingestEpisodeData: (metadata: Record<string, unknown>) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -56,14 +56,14 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   volume: 1,
   isMuted: false,
   playbackRate: 1,
-  
+
   progressSeconds: 0,
   durationSeconds: 0,
 
   isBuffering: true,
-  currentResolution: 'auto',
+  currentResolution: "auto",
   availableResolutions: [],
-  
+
   chapterMarkers: [],
   skipIntroData: null,
   showSkipButton: false,
@@ -72,7 +72,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   setPlaying: (isPlaying) => set({ isPlaying }),
-  
+
   playEpisode: (animeId, episodeNumber) =>
     set({
       animeId,
@@ -84,34 +84,38 @@ export const usePlayerStore = create<PlayerState>((set) => ({
       durationSeconds: 0,
     }),
 
-  setTime: (time) => set((state) => ({ 
-    currentTime: time,
-    progressSeconds: time,
-    // Automatically trigger skip button UI if within timestamp
-    showSkipButton: state.skipIntroData 
-      ? time >= state.skipIntroData.start && time <= state.skipIntroData.end 
-      : false 
-  })),
+  setTime: (time) =>
+    set((state) => ({
+      currentTime: time,
+      progressSeconds: time,
+      // Automatically trigger skip button UI if within timestamp
+      showSkipButton: state.skipIntroData
+        ? time >= state.skipIntroData.start && time <= state.skipIntroData.end
+        : false,
+    })),
 
-  setProgress: (seconds) => set((state) => ({
-    progressSeconds: seconds,
-    currentTime: seconds,
-    showSkipButton: state.skipIntroData
-      ? seconds >= state.skipIntroData.start && seconds <= state.skipIntroData.end
-      : false
-  })),
+  setProgress: (seconds) =>
+    set((state) => ({
+      progressSeconds: seconds,
+      currentTime: seconds,
+      showSkipButton: state.skipIntroData
+        ? seconds >= state.skipIntroData.start &&
+          seconds <= state.skipIntroData.end
+        : false,
+    })),
 
-  setDuration: (seconds) => set({ 
-    durationSeconds: seconds,
-    duration: seconds
-  }),
+  setDuration: (seconds) =>
+    set({
+      durationSeconds: seconds,
+      duration: seconds,
+    }),
 
   setVolume: (volume) => set({ volume, isMuted: volume === 0 }),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   setResolutions: (resolutions) => set({ availableResolutions: resolutions }),
   setResolution: (resolution) => set({ currentResolution: resolution }),
   setPlaybackRate: (playbackRate) => set({ playbackRate }),
-  
+
   resetPlayer: () =>
     set({
       animeId: null,
@@ -127,8 +131,9 @@ export const usePlayerStore = create<PlayerState>((set) => ({
       showSkipButton: false,
     }),
 
-  ingestEpisodeData: (metadata) => set({
-    chapterMarkers: metadata.chapters || [],
-    skipIntroData: metadata.intro || null,
-  }),
+  ingestEpisodeData: (metadata) =>
+    set({
+      chapterMarkers: metadata.chapters || [],
+      skipIntroData: metadata.intro || null,
+    }),
 }));

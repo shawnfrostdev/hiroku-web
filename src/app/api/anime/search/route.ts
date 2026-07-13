@@ -52,15 +52,73 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    const mappedData = json.data.Page.media.map((item: any) => ({
-      id: item.id,
-      title: item.title.english || item.title.romaji,
-      posterImage: item.coverImage.large,
-      score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "N/A",
-      format: item.format,
-      episodes: item.episodes,
-      year: item.startDate?.year,
-    }));
+    const mappedData = json.data.Page.media.map(
+      (item: {
+        id: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        media?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        averageScore?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        genres?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        recommendations?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        description?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => ({
+        id: item.id,
+        title: item.title.english || item.title.romaji,
+        posterImage: item.coverImage.large,
+        score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "N/A",
+        format: item.format,
+        episodes: item.episodes,
+        year: item.startDate?.year,
+      }),
+    );
 
     return NextResponse.json(mappedData, {
       headers: {
@@ -69,6 +127,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Search API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch search results" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch search results" },
+      { status: 500 },
+    );
   }
 }

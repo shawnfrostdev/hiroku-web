@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = './src/app/page.tsx';
-let content = fs.readFileSync(path, 'utf8');
+const fs = require("node:fs");
+const path = "./src/app/page.tsx";
+let content = fs.readFileSync(path, "utf8");
 
 // 1. Add Plus to import
 content = content.replace(
   'import { Bookmark, ChevronLeft, ChevronRight, Info, Play } from "lucide-react";',
-  'import { Bookmark, ChevronLeft, ChevronRight, Info, Play, Plus } from "lucide-react";'
+  'import { Bookmark, ChevronLeft, ChevronRight, Info, Play, Plus } from "lucide-react";',
 );
 
 // 2. Add to Trending Now, Popular This Season, All Time Popular
@@ -21,9 +21,8 @@ const posterAddButton = `
 
 content = content.replace(
   /(\{\/\* Poster Image \*\/\}\s*\{item\.posterImage \? \(\s*<img\s*src=\{item\.posterImage\}\s*alt=\{item\.title\}\s*className="w-full h-full object-cover"\s*loading="lazy"\s*\/>\s*\) : \(\s*<div[^>]*>[\s\S]*?<\/div>\s*\)\})/g,
-  `$1${posterAddButton}`
+  `$1${posterAddButton}`,
 );
-
 
 // 3. Add to Continue Watching / For You
 const landscapeAddButton = `
@@ -38,7 +37,7 @@ const landscapeAddButton = `
 
 content = content.replace(
   /(<div\s*className="absolute inset-0"\s*style=\{\{\s*background: "linear-gradient[^}]*\}\}\s*\/>\s*<\/div>\s*\)\})/g,
-  `$1${landscapeAddButton}`
+  `$1${landscapeAddButton}`,
 );
 
 // 4. Add to Schedule Section (using semantic variables, top left)
@@ -54,8 +53,8 @@ const scheduleAddButton = `
 
 content = content.replace(
   /(\{\/\* Time Badge \(Top Right\) \*\/\}\s*<div className="absolute top-\[8px\] right-\[8px\] pointer-events-none">\s*<span[^>]*>[\s\S]*?<\/span>\s*<\/div>)/g,
-  `$1${scheduleAddButton}`
+  `$1${scheduleAddButton}`,
 );
 
 fs.writeFileSync(path, content);
-console.log('Injected buttons.');
+console.log("Injected buttons.");

@@ -22,7 +22,11 @@ interface AniListScheduleItem {
   media: AniListScheduleMedia;
 }
 
-const fetchAniListSchedule = async (startAt: number, endAt: number, page: number = 1): Promise<AniListScheduleItem[]> => {
+const fetchAniListSchedule = async (
+  startAt: number,
+  endAt: number,
+  page: number = 1,
+): Promise<AniListScheduleItem[]> => {
   const query = `
     query ($page: Int, $startAt: Int, $endAt: Int) {
       Page(page: $page, perPage: 50) {
@@ -74,24 +78,28 @@ const fetchAniListSchedule = async (startAt: number, endAt: number, page: number
     console.error("AniList API Error:", json.errors);
     return [];
   }
-  
+
   return json.data.Page.airingSchedules;
 };
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const startAtParam = searchParams.get('startAt');
-    const endAtParam = searchParams.get('endAt');
+    const startAtParam = searchParams.get("startAt");
+    const endAtParam = searchParams.get("endAt");
 
     // Default to a 14-day window starting from today
-    let startAt = startAtParam ? parseInt(startAtParam, 10) : Math.floor(Date.now() / 1000) - 86400; // start from yesterday to cover all timezones loosely
-    let endAt = endAtParam ? parseInt(endAtParam, 10) : startAt + (86400 * 14);
+    const startAt = startAtParam
+      ? parseInt(startAtParam, 10)
+      : Math.floor(Date.now() / 1000) - 86400; // start from yesterday to cover all timezones loosely
+    const endAt = endAtParam ? parseInt(endAtParam, 10) : startAt + 86400 * 14;
 
     // We'll fetch 6 pages (300 items) concurrently to ensure we have enough data and to make it incredibly fast.
-    const pageRequests = Array.from({ length: 6 }, (_, i) => fetchAniListSchedule(startAt, endAt, i + 1));
+    const pageRequests = Array.from({ length: 6 }, (_, i) =>
+      fetchAniListSchedule(startAt, endAt, i + 1),
+    );
     const pagesResults = await Promise.all(pageRequests);
-    
+
     let allSchedules: AniListScheduleItem[] = [];
     pagesResults.forEach((items) => {
       if (items && items.length > 0) {
@@ -100,35 +108,152 @@ export async function GET(request: Request) {
     });
 
     // Filter out irrelevant or adult anime to keep the schedule clean
-    const filteredSchedules = allSchedules.filter((item: any) => {
-      const media = item.media;
-      if (!media) return false;
-      
-      // 1. Must be Japanese (removes Chinese donghua, etc.)
-      if (media.countryOfOrigin !== "JP") return false;
-      
-      // 2. Must not be adult content (Hentai)
-      if (media.isAdult) return false;
+    const filteredSchedules = allSchedules.filter(
+      (item: {
+        id: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        media?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        averageScore?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        genres?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        recommendations?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        description?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => {
+        const media = item.media;
+        if (!media) return false;
 
-      // 3. Must not be a Music Video
-      if (media.format === "MUSIC") return false;
+        // 1. Must be Japanese (removes Chinese donghua, etc.)
+        if (media.countryOfOrigin !== "JP") return false;
 
-      return true;
-    });
+        // 2. Must not be adult content (Hentai)
+        if (media.isAdult) return false;
 
-    const mappedData = filteredSchedules.map((item: any) => {
-      return {
-        id: item.media.id,
-        scheduleId: item.id,
-        title: item.media.title.english || item.media.title.romaji,
-        synopsis: item.media.description?.replace(/<[^>]*>?/gm, ''), // strip HTML tags
-        // Fallback to coverImage if bannerImage is null, just so the UI has an image
-        bannerImage: item.media.bannerImage || item.media.coverImage.extraLarge,
-        posterImage: item.media.coverImage.extraLarge,
-        episodes: item.episode.toString(),
-        airingAt: item.airingAt,
-      };
-    });
+        // 3. Must not be a Music Video
+        if (media.format === "MUSIC") return false;
+
+        return true;
+      },
+    );
+
+    const mappedData = filteredSchedules.map(
+      (item: {
+        id: number;
+        title?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        media?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        averageScore?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        genres?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        recommendations?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+        description?:
+          | Record<string, unknown>
+          | string
+          | number
+          | boolean
+          | null
+          | undefined
+          | unknown[]
+          | unknown;
+      }) => {
+        return {
+          id: item.media.id,
+          scheduleId: item.id,
+          title: item.media.title.english || item.media.title.romaji,
+          synopsis: item.media.description?.replace(/<[^>]*>?/gm, ""), // strip HTML tags
+          // Fallback to coverImage if bannerImage is null, just so the UI has an image
+          bannerImage:
+            item.media.bannerImage || item.media.coverImage.extraLarge,
+          posterImage: item.media.coverImage.extraLarge,
+          episodes: item.episode.toString(),
+          airingAt: item.airingAt,
+        };
+      },
+    );
 
     return NextResponse.json(mappedData, {
       headers: {
@@ -139,7 +264,7 @@ export async function GET(request: Request) {
     console.error("Error in schedule route:", error);
     return NextResponse.json(
       { error: "Failed to fetch schedule data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

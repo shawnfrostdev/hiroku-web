@@ -76,7 +76,9 @@ function cleanSynopsis(html: string) {
 export async function GET() {
   try {
     const animeListRaw = await fetchAniListPopularAllTime();
-    const animeList = animeListRaw.filter((item) => item.status !== "NOT_YET_RELEASED");
+    const animeList = animeListRaw.filter(
+      (item) => item.status !== "NOT_YET_RELEASED",
+    );
 
     const mappedEntries = await Promise.all(
       animeList.map(async (item) => {
@@ -103,30 +105,39 @@ export async function GET() {
           availableEpisodes = item.nextAiringEpisode.episode - 1;
         }
 
-        const episodesStr = item.format === "MOVIE"
-          ? "MOVIE"
-          : (availableEpisodes && availableEpisodes > 0
+        const episodesStr =
+          item.format === "MOVIE"
+            ? "MOVIE"
+            : availableEpisodes && availableEpisodes > 0
               ? `${availableEpisodes}EP`
-              : (item.format ? item.format.replace("_", " ") : "Popular"));
+              : item.format
+                ? item.format.replace("_", " ")
+                : "Popular";
 
         return {
           id: item.id,
           title,
           synopsis: tmdbDetails?.overview || cleanSynopsis(item.description),
-          score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "8.5",
+          score: item.averageScore
+            ? (item.averageScore / 10).toFixed(1)
+            : "8.5",
           episodes: episodesStr,
-          tagline: item.genres && item.genres.length > 0 ? item.genres[0] : "Popular",
+          tagline:
+            item.genres && item.genres.length > 0 ? item.genres[0] : "Popular",
           bannerImage,
           posterImage,
         };
-      })
+      }),
     );
 
     return NextResponse.json(mappedEntries.slice(0, 20));
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch popular all-time anime" },
-      { status: 500 }
+      {
+        error:
+          (error as Error).message || "Failed to fetch popular all-time anime",
+      },
+      { status: 500 },
     );
   }
 }

@@ -32,19 +32,26 @@ export async function GET() {
     const allTags = json.data?.MediaTagCollection || [];
     // Allow general 18+ content tags but filter out explicit Sexual Content and Hentai tags
     const tags = allTags
-      .filter((tag: any) => tag.category !== "Sexual Content" && tag.name !== "Hentai")
-      .map((tag: any) => tag.name);
+      .filter(
+        (tag: { name: string; category: string }) =>
+          tag.category !== "Sexual Content" && tag.name !== "Hentai",
+      )
+      .map((tag: { name: string; category: string }) => tag.name);
 
     // Sort alphabetically
     tags.sort();
 
     return NextResponse.json(tags, {
       headers: {
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control":
+          "public, s-maxage=86400, stale-while-revalidate=604800",
       },
     });
   } catch (error) {
     console.error("Tags API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch tags" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch tags" },
+      { status: 500 },
+    );
   }
 }

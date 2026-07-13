@@ -32,9 +32,9 @@ interface AiringScheduleNode {
 const fetchAniListRecentlyAired = async (): Promise<AiringScheduleNode[]> => {
   // Get current timestamp in seconds
   const currentEpoch = Math.floor(Date.now() / 1000);
-  
+
   // We look for schedules that aired in the past (up to 14 days ago to populate a solid list)
-  const oneWeekAgo = currentEpoch - (14 * 24 * 60 * 60);
+  const oneWeekAgo = currentEpoch - 14 * 24 * 60 * 60;
 
   const query = `
     query ($airingAt_greater: Int, $airingAt_lesser: Int) {
@@ -81,8 +81,8 @@ const fetchAniListRecentlyAired = async (): Promise<AiringScheduleNode[]> => {
       query,
       variables: {
         airingAt_greater: oneWeekAgo,
-        airingAt_lesser: currentEpoch
-      }
+        airingAt_lesser: currentEpoch,
+      },
     }),
   });
 
@@ -105,20 +105,22 @@ export async function GET() {
 
     // Filter out duplicate media IDs, NSFW titles, and low popularity (niche/kids) shows
     const seenMediaIds = new Set<number>();
-    const uniqueSchedules = rawSchedules.filter((schedule) => {
-      if (!schedule.media || schedule.media.isAdult) return false;
-      
-      // Filter out unwanted formats like Chibi shorts, specials, or music videos
-      const format = schedule.media.format;
-      if (["TV_SHORT", "SPECIAL", "MUSIC"].includes(format)) return false;
+    const uniqueSchedules = rawSchedules
+      .filter((schedule) => {
+        if (!schedule.media || schedule.media.isAdult) return false;
 
-      // Filter out low popularity to clean the feed of obscure spin-offs
-      if (schedule.media.popularity < 10000) return false;
-      
-      if (seenMediaIds.has(schedule.media.id)) return false;
-      seenMediaIds.add(schedule.media.id);
-      return true;
-    }).slice(0, 20); // Keep top 20 unique mainstream shows
+        // Filter out unwanted formats like Chibi shorts, specials, or music videos
+        const format = schedule.media.format;
+        if (["TV_SHORT", "SPECIAL", "MUSIC"].includes(format)) return false;
+
+        // Filter out low popularity to clean the feed of obscure spin-offs
+        if (schedule.media.popularity < 10000) return false;
+
+        if (seenMediaIds.has(schedule.media.id)) return false;
+        seenMediaIds.add(schedule.media.id);
+        return true;
+      })
+      .slice(0, 20); // Keep top 20 unique mainstream shows
 
     const mappedEntries = await Promise.all(
       uniqueSchedules.map(async (schedule) => {
@@ -148,20 +150,26 @@ export async function GET() {
           id: item.id,
           title,
           synopsis: tmdbDetails?.overview || cleanSynopsis(item.description),
-          score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "8.5",
+          score: item.averageScore
+            ? (item.averageScore / 10).toFixed(1)
+            : "8.5",
           episodes: episodesStr,
-          tagline: item.genres && item.genres.length > 0 ? item.genres[0] : "Airing",
+          tagline:
+            item.genres && item.genres.length > 0 ? item.genres[0] : "Airing",
           bannerImage,
           posterImage,
         };
-      })
+      }),
     );
 
     return NextResponse.json(mappedEntries);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch recently updated anime" },
-      { status: 500 }
+      {
+        error:
+          (error as Error).message || "Failed to fetch recently updated anime",
+      },
+      { status: 500 },
     );
   }
 }

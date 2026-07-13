@@ -1,9 +1,17 @@
-"use client";
+import Image from "next/image";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+("use client");
+
 import { useQuery } from "@tanstack/react-query";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  X,
+} from "lucide-react";
 import Link from "next/link";
-import { Search, X, ChevronDown, Loader2, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,7 +44,13 @@ interface BrowseResult {
 
 const FORMATS = ["TV", "TV_SHORT", "MOVIE", "SPECIAL", "OVA", "ONA", "MUSIC"];
 const SEASONS = ["WINTER", "SPRING", "SUMMER", "FALL"];
-const STATUSES = ["RELEASING", "FINISHED", "NOT_YET_RELEASED", "CANCELLED", "HIATUS"];
+const STATUSES = [
+  "RELEASING",
+  "FINISHED",
+  "NOT_YET_RELEASED",
+  "CANCELLED",
+  "HIATUS",
+];
 
 const STATUS_LABELS: Record<string, string> = {
   RELEASING: "Airing",
@@ -57,33 +71,99 @@ const FORMAT_LABELS: Record<string, string> = {
 };
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 1989 }, (_, i) => CURRENT_YEAR + 1 - i);
+const YEARS = Array.from(
+  { length: CURRENT_YEAR - 1989 },
+  (_, i) => CURRENT_YEAR + 1 - i,
+);
 
-const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  TV: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
-  MOVIE: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
-  ONA: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20" },
-  OVA: { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
-  SPECIAL: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
-  TV_SHORT: { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
-  ACTION: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
-  COMEDY: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20" },
-  DRAMA: { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20" },
-  FANTASY: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
-  ROMANCE: { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20" },
-  ADVENTURE: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
-  MYSTERY: { bg: "bg-violet-500/10", text: "text-violet-400", border: "border-violet-500/20" },
-};
+const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> =
+  {
+    TV: {
+      bg: "bg-blue-500/10",
+      text: "text-blue-400",
+      border: "border-blue-500/20",
+    },
+    MOVIE: {
+      bg: "bg-purple-500/10",
+      text: "text-purple-400",
+      border: "border-purple-500/20",
+    },
+    ONA: {
+      bg: "bg-pink-500/10",
+      text: "text-pink-400",
+      border: "border-pink-500/20",
+    },
+    OVA: {
+      bg: "bg-indigo-500/10",
+      text: "text-indigo-400",
+      border: "border-indigo-500/20",
+    },
+    SPECIAL: {
+      bg: "bg-amber-500/10",
+      text: "text-amber-400",
+      border: "border-amber-500/20",
+    },
+    TV_SHORT: {
+      bg: "bg-cyan-500/10",
+      text: "text-cyan-400",
+      border: "border-cyan-500/20",
+    },
+    ACTION: {
+      bg: "bg-red-500/10",
+      text: "text-red-400",
+      border: "border-red-500/20",
+    },
+    COMEDY: {
+      bg: "bg-yellow-500/10",
+      text: "text-yellow-400",
+      border: "border-yellow-500/20",
+    },
+    DRAMA: {
+      bg: "bg-teal-500/10",
+      text: "text-teal-400",
+      border: "border-teal-500/20",
+    },
+    FANTASY: {
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-400",
+      border: "border-emerald-500/20",
+    },
+    ROMANCE: {
+      bg: "bg-rose-500/10",
+      text: "text-rose-400",
+      border: "border-rose-500/20",
+    },
+    ADVENTURE: {
+      bg: "bg-orange-500/10",
+      text: "text-orange-400",
+      border: "border-orange-500/20",
+    },
+    MYSTERY: {
+      bg: "bg-violet-500/10",
+      text: "text-violet-400",
+      border: "border-violet-500/20",
+    },
+  };
 
 function getTagBadge(tag: string) {
   if (!tag) return null;
   const isEpCount = /^\d+EP$/.test(tag);
   const normalized = tag.toUpperCase().replace(/\s+/g, " ").trim();
   const style = isEpCount
-    ? { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" }
-    : TAG_COLORS[normalized] || { bg: "bg-neutral-500/10", text: "text-neutral-400", border: "border-neutral-500/20" };
+    ? {
+        bg: "bg-emerald-500/10",
+        text: "text-emerald-400",
+        border: "border-emerald-500/20",
+      }
+    : TAG_COLORS[normalized] || {
+        bg: "bg-neutral-500/10",
+        text: "text-neutral-400",
+        border: "border-neutral-500/20",
+      };
   return (
-    <span className={`text-[9px] font-bold px-[6px] py-[2px] rounded border uppercase tracking-wider shrink-0 ${style.bg} ${style.text} ${style.border}`}>
+    <span
+      className={`text-[9px] font-bold px-[6px] py-[2px] rounded border uppercase tracking-wider shrink-0 ${style.bg} ${style.text} ${style.border}`}
+    >
       {tag}
     </span>
   );
@@ -126,7 +206,7 @@ function Dropdown({ label, value, options, onChange, icon }: DropdownProps) {
   };
 
   const filteredOptions = options.filter((o) =>
-    o.label.toLowerCase().includes(search.toLowerCase())
+    o.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -135,21 +215,32 @@ function Dropdown({ label, value, options, onChange, icon }: DropdownProps) {
         {icon}
         <span>{label}</span>
       </div>
-      <div className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${value ? "border-white/30" : "border-border-line"}`}>
+      <div
+        className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${value ? "border-white/30" : "border-border-line"}`}
+      >
         <button
-          onClick={toggle}
           type="button"
+          onClick={toggle}
           className="flex-1 flex items-center gap-[8px] pr-[12px] cursor-pointer min-w-0"
         >
-          <span className={`text-sm font-bold truncate ${value ? "text-white" : "text-text-secondary"}`}>
-            {value ? (options.find((o) => o.value === value)?.label ?? value) : `Any ${label}`}
+          <span
+            className={`text-sm font-bold truncate ${value ? "text-white" : "text-text-secondary"}`}
+          >
+            {value
+              ? (options.find((o) => o.value === value)?.label ?? value)
+              : `Any ${label}`}
           </span>
-          <ChevronDown className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          />
         </button>
         {value && (
           <button
-            onClick={(e) => { e.stopPropagation(); onChange(null); }}
             type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(null);
+            }}
             className="px-[10px] h-full flex items-center text-text-secondary hover:text-white transition-colors shrink-0 border-l border-[#282828] cursor-pointer"
             title={`Clear ${label}`}
           >
@@ -158,7 +249,9 @@ function Dropdown({ label, value, options, onChange, icon }: DropdownProps) {
         )}
       </div>
       {open && (
-        <div className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 min-w-[160px] max-h-[240px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}>
+        <div
+          className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 min-w-[160px] max-h-[240px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}
+        >
           {/* Search box */}
           <div className="px-[6px] pt-[2px] pb-[6px] border-b border-[#282828]">
             <input
@@ -172,22 +265,34 @@ function Dropdown({ label, value, options, onChange, icon }: DropdownProps) {
           </div>
           <div className="flex-1 flex flex-col gap-[2px] overflow-y-auto scrollbar-dark max-h-[190px] pr-[8px]">
             <button
-              onClick={() => { onChange(null); setOpen(false); setSearch(""); }}
+              type="button"
+              onClick={() => {
+                onChange(null);
+                setOpen(false);
+                setSearch("");
+              }}
               className={`px-[10px] py-[8px] text-sm text-left rounded-[6px] font-bold cursor-pointer hover:bg-white hover:text-black transition-colors ${!value ? "bg-[#242424] text-white" : "text-text-secondary"}`}
             >
               Any {label}
             </button>
             {filteredOptions.map((opt) => (
               <button
+                type="button"
                 key={opt.value}
-                onClick={() => { onChange(opt.value); setOpen(false); setSearch(""); }}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                  setSearch("");
+                }}
                 className={`px-[10px] py-[8px] text-sm text-left rounded-[6px] font-bold cursor-pointer hover:bg-white hover:text-black transition-colors ${value === opt.value ? "bg-[#242424] text-white" : "text-text-secondary"}`}
               >
                 {opt.label}
               </button>
             ))}
             {filteredOptions.length === 0 && (
-              <span className="text-[11px] text-text-secondary text-center py-[8px]">No options</span>
+              <span className="text-[11px] text-text-secondary text-center py-[8px]">
+                No options
+              </span>
             )}
           </div>
         </div>
@@ -204,7 +309,11 @@ interface GenresDropdownProps {
   onChange: (genres: string[]) => void;
 }
 
-function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProps) {
+function GenresDropdown({
+  genres,
+  selectedGenres,
+  onChange,
+}: GenresDropdownProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -239,7 +348,7 @@ function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProp
   };
 
   const filteredGenres = genres.filter((g) =>
-    g.toLowerCase().includes(search.toLowerCase())
+    g.toLowerCase().includes(search.toLowerCase()),
   );
 
   const hasSelection = selectedGenres.length > 0;
@@ -254,19 +363,30 @@ function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProp
       <div className="flex items-center gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none">
         <span>Genres</span>
       </div>
-      <div className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${hasSelection ? "border-white/30" : "border-border-line"}`}>
+      <div
+        className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${hasSelection ? "border-white/30" : "border-border-line"}`}
+      >
         <button
-          onClick={toggle}
           type="button"
+          onClick={toggle}
           className="flex-1 flex items-center gap-[8px] pr-[12px] cursor-pointer hover:bg-transparent min-w-0"
         >
-          <span className={`text-sm font-bold truncate ${hasSelection ? "text-white" : "text-text-secondary"}`}>{displayLabel}</span>
-          <ChevronDown className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+          <span
+            className={`text-sm font-bold truncate ${hasSelection ? "text-white" : "text-text-secondary"}`}
+          >
+            {displayLabel}
+          </span>
+          <ChevronDown
+            className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          />
         </button>
         {hasSelection && (
           <button
-            onClick={(e) => { e.stopPropagation(); onChange([]); }}
             type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange([]);
+            }}
             className="px-[10px] h-full flex items-center text-text-secondary hover:text-white transition-colors shrink-0 border-l border-[#282828] cursor-pointer"
             title="Clear all genres"
           >
@@ -275,7 +395,9 @@ function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProp
         )}
       </div>
       {open && (
-        <div className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 w-[220px] max-h-[280px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}>
+        <div
+          className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 w-[220px] max-h-[280px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}
+        >
           {/* Search box */}
           <div className="px-[6px] pt-[2px] pb-[6px] border-b border-[#282828]">
             <input
@@ -292,6 +414,7 @@ function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProp
               const selected = selectedGenres.includes(genre);
               return (
                 <button
+                  type="button"
                   key={genre}
                   onClick={() => toggleGenre(genre)}
                   className={`px-[10px] py-[8px] text-sm text-left rounded-[6px] font-bold cursor-pointer transition-colors ${selected ? "bg-white text-black" : "text-text-secondary hover:bg-white hover:text-black"}`}
@@ -301,7 +424,9 @@ function GenresDropdown({ genres, selectedGenres, onChange }: GenresDropdownProp
               );
             })}
             {filteredGenres.length === 0 && (
-              <span className="text-[11px] text-text-secondary text-center py-[8px]">No genres found</span>
+              <span className="text-[11px] text-text-secondary text-center py-[8px]">
+                No genres found
+              </span>
             )}
           </div>
         </div>
@@ -351,7 +476,7 @@ function TagsDropdown({ tags, selectedTags, onChange }: TagsDropdownProps) {
   };
 
   const filteredTags = tags.filter((t) =>
-    t.toLowerCase().includes(search.toLowerCase())
+    t.toLowerCase().includes(search.toLowerCase()),
   );
 
   const hasSelection = selectedTags.length > 0;
@@ -366,19 +491,30 @@ function TagsDropdown({ tags, selectedTags, onChange }: TagsDropdownProps) {
       <div className="flex items-center gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none">
         <span>Tags</span>
       </div>
-      <div className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${hasSelection ? "border-white/30" : "border-border-line"}`}>
+      <div
+        className={`flex items-center bg-[#141414] border rounded-[8px] h-[40px] pl-[12px] gap-[4px] w-full ${hasSelection ? "border-white/30" : "border-border-line"}`}
+      >
         <button
-          onClick={toggle}
           type="button"
+          onClick={toggle}
           className="flex-1 flex items-center gap-[8px] pr-[12px] cursor-pointer hover:bg-transparent min-w-0"
         >
-          <span className={`text-sm font-bold truncate ${hasSelection ? "text-white" : "text-text-secondary"}`}>{displayLabel}</span>
-          <ChevronDown className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+          <span
+            className={`text-sm font-bold truncate ${hasSelection ? "text-white" : "text-text-secondary"}`}
+          >
+            {displayLabel}
+          </span>
+          <ChevronDown
+            className={`w-[12px] h-[12px] text-text-secondary shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          />
         </button>
         {hasSelection && (
           <button
-            onClick={(e) => { e.stopPropagation(); onChange([]); }}
             type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange([]);
+            }}
             className="px-[10px] h-full flex items-center text-text-secondary hover:text-white transition-colors shrink-0 border-l border-[#282828] cursor-pointer"
             title="Clear all tags"
           >
@@ -387,7 +523,9 @@ function TagsDropdown({ tags, selectedTags, onChange }: TagsDropdownProps) {
         )}
       </div>
       {open && (
-        <div className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 w-[220px] max-h-[280px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}>
+        <div
+          className={`absolute left-0 bg-[#121212] border border-[#282828] rounded-[8px] p-[4px] flex flex-col gap-[2px] shadow-2xl z-50 w-[220px] max-h-[280px] overflow-hidden ${openUp ? "bottom-[66px]" : "top-[66px]"}`}
+        >
           {/* Search box */}
           <div className="px-[6px] pt-[2px] pb-[6px] border-b border-[#282828]">
             <input
@@ -404,6 +542,7 @@ function TagsDropdown({ tags, selectedTags, onChange }: TagsDropdownProps) {
               const selected = selectedTags.includes(tag);
               return (
                 <button
+                  type="button"
                   key={tag}
                   onClick={() => toggleTag(tag)}
                   className={`px-[10px] py-[8px] text-sm text-left rounded-[6px] font-bold cursor-pointer transition-colors ${selected ? "bg-white text-black" : "text-text-secondary hover:bg-white hover:text-black"}`}
@@ -413,7 +552,9 @@ function TagsDropdown({ tags, selectedTags, onChange }: TagsDropdownProps) {
               );
             })}
             {filteredTags.length === 0 && (
-              <span className="text-[11px] text-text-secondary text-center py-[8px]">No tags found</span>
+              <span className="text-[11px] text-text-secondary text-center py-[8px]">
+                No tags found
+              </span>
             )}
           </div>
         </div>
@@ -432,7 +573,9 @@ function AnimeCard({ item }: { item: AnimeItem }) {
     >
       <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
         {item.posterImage ? (
-          <img
+          <Image
+            unoptimized
+            fill
             src={item.posterImage}
             alt={item.title}
             className="w-full h-full object-cover transform-gpu will-change-transform"
@@ -474,16 +617,30 @@ function SkeletonCard() {
 
 // ─── Category Section ─────────────────────────────────────────────────────────
 
-function CategorySection({ title, items, isLoading }: { title: string; items: AnimeItem[]; isLoading: boolean }) {
+function CategorySection({
+  title,
+  items,
+  isLoading,
+}: {
+  title: string;
+  items: AnimeItem[];
+  isLoading: boolean;
+}) {
   return (
     <div className="flex flex-col gap-[16px]">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-[#525252]">{title}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-[#525252]">
+          {title}
+        </h2>
       </div>
       <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-[6px] md:gap-[16px] w-full">
         {isLoading
-          ? Array.from({ length: 20 }).map((_, i) => <SkeletonCard key={i} />)
-          : items.slice(0, 20).map((item) => <AnimeCard key={item.id} item={item} />)}
+          ? Array.from({ length: 20 }, (_, i) => `skel-${i}`).map((id) => (
+              <SkeletonCard key={id} />
+            ))
+          : items
+              .slice(0, 20)
+              .map((item) => <AnimeCard key={item.id} item={item} />)}
       </div>
     </div>
   );
@@ -509,10 +666,16 @@ export default function BrowsePage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedQuery, selectedGenres, selectedTags, selectedYear, selectedSeason, selectedFormat, selectedStatus]);
+  }, []);
 
   const hasActiveFilters =
-    !!debouncedQuery || selectedGenres.length > 0 || selectedTags.length > 0 || !!selectedYear || !!selectedSeason || !!selectedFormat || !!selectedStatus;
+    !!debouncedQuery ||
+    selectedGenres.length > 0 ||
+    selectedTags.length > 0 ||
+    !!selectedYear ||
+    !!selectedSeason ||
+    !!selectedFormat ||
+    !!selectedStatus;
 
   const clearAllFilters = () => {
     setSearchQuery("");
@@ -551,27 +714,44 @@ export default function BrowsePage() {
   // ─── API: Filter/Search results ──────────────────────────────────────────
   const browseParams = new URLSearchParams();
   if (debouncedQuery) browseParams.set("q", debouncedQuery);
-  selectedGenres.forEach((g) => browseParams.append("genres", g));
-  selectedTags.forEach((t) => browseParams.append("tags", t));
+  selectedGenres.forEach((g) => {
+    browseParams.append("genres", g);
+  });
+  selectedTags.forEach((t) => {
+    browseParams.append("tags", t);
+  });
   if (selectedYear) browseParams.set("year", selectedYear);
   if (selectedSeason) browseParams.set("season", selectedSeason);
   if (selectedFormat) browseParams.set("format", selectedFormat);
   if (selectedStatus) browseParams.set("status", selectedStatus);
   browseParams.set("page", String(currentPage));
 
-  const { data: browseData, isLoading: isBrowseLoading } = useQuery<BrowseResult>({
-    queryKey: ["browse", debouncedQuery, selectedGenres, selectedTags, selectedYear, selectedSeason, selectedFormat, selectedStatus, currentPage],
-    queryFn: async () => {
-      const res = await fetch(`/api/anime/browse?${browseParams.toString()}`);
-      if (!res.ok) throw new Error("Failed");
-      return res.json();
-    },
-    enabled: hasActiveFilters,
-  });
+  const { data: browseData, isLoading: isBrowseLoading } =
+    useQuery<BrowseResult>({
+      queryKey: [
+        "browse",
+        debouncedQuery,
+        selectedGenres,
+        selectedTags,
+        selectedYear,
+        selectedSeason,
+        selectedFormat,
+        selectedStatus,
+        currentPage,
+      ],
+      queryFn: async () => {
+        const res = await fetch(`/api/anime/browse?${browseParams.toString()}`);
+        if (!res.ok) throw new Error("Failed");
+        return res.json();
+      },
+      enabled: hasActiveFilters,
+    });
 
   // ─── API: Category feeds (shown when no filters active) ──────────────────
 
-  const { data: trending = [], isLoading: isLoadingTrending } = useQuery<AnimeItem[]>({
+  const { data: trending = [], isLoading: isLoadingTrending } = useQuery<
+    AnimeItem[]
+  >({
     queryKey: ["trendingAnime"],
     queryFn: async () => {
       const res = await fetch("/api/anime/trending");
@@ -581,7 +761,9 @@ export default function BrowsePage() {
     enabled: !hasActiveFilters,
   });
 
-  const { data: popularSeason = [], isLoading: isLoadingPopular } = useQuery<AnimeItem[]>({
+  const { data: popularSeason = [], isLoading: isLoadingPopular } = useQuery<
+    AnimeItem[]
+  >({
     queryKey: ["popularSeasonAnime"],
     queryFn: async () => {
       const res = await fetch("/api/anime/popular-season");
@@ -591,7 +773,9 @@ export default function BrowsePage() {
     enabled: !hasActiveFilters,
   });
 
-  const { data: popularAllTime = [], isLoading: isLoadingAllTime } = useQuery<AnimeItem[]>({
+  const { data: popularAllTime = [], isLoading: isLoadingAllTime } = useQuery<
+    AnimeItem[]
+  >({
     queryKey: ["popularAllTimeAnime"],
     queryFn: async () => {
       const res = await fetch("/api/anime/popular-alltime");
@@ -604,12 +788,10 @@ export default function BrowsePage() {
   // Scroll to top when page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+  }, []);
 
   return (
     <main className="flex-1 flex flex-col gap-[24px] px-[24px] pb-[32px]">
-
-
       {/* ── Search Bar ── */}
       <div className="relative w-full">
         <Search className="absolute left-[16px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-text-secondary pointer-events-none" />
@@ -622,6 +804,7 @@ export default function BrowsePage() {
         />
         {searchQuery && (
           <button
+            type="button"
             onClick={() => setSearchQuery("")}
             className="absolute right-[16px] top-1/2 -translate-y-1/2 text-text-secondary hover:text-white transition-colors cursor-pointer"
           >
@@ -651,25 +834,35 @@ export default function BrowsePage() {
         <Dropdown
           label="Season"
           value={selectedSeason}
-          options={SEASONS.map((s) => ({ value: s, label: s.charAt(0) + s.slice(1).toLowerCase() }))}
+          options={SEASONS.map((s) => ({
+            value: s,
+            label: s.charAt(0) + s.slice(1).toLowerCase(),
+          }))}
           onChange={setSelectedSeason}
         />
         <Dropdown
           label="Format"
           value={selectedFormat}
-          options={FORMATS.map((f) => ({ value: f, label: FORMAT_LABELS[f] || f }))}
+          options={FORMATS.map((f) => ({
+            value: f,
+            label: FORMAT_LABELS[f] || f,
+          }))}
           onChange={setSelectedFormat}
         />
         <Dropdown
           label="Status"
           value={selectedStatus}
-          options={STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] || s }))}
+          options={STATUSES.map((s) => ({
+            value: s,
+            label: STATUS_LABELS[s] || s,
+          }))}
           onChange={setSelectedStatus}
         />
         {hasActiveFilters && (
           <div className="flex flex-col gap-[6px]">
             <div className="h-[16px]" />
             <button
+              type="button"
               onClick={clearAllFilters}
               className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[8px] border border-rose-500/30 bg-rose-500/10 text-rose-400 text-sm font-bold cursor-pointer hover:bg-rose-500/20 transition-colors"
             >
@@ -686,7 +879,9 @@ export default function BrowsePage() {
           {/* Result count */}
           {!isBrowseLoading && browseData && (
             <div className="flex items-center gap-[8px]">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#525252]">Results</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#525252]">
+                Results
+              </span>
               <span className="text-xs font-bold text-white bg-[#242424] border border-[#282828] px-[8px] py-[2px] rounded-full">
                 {browseData.results?.length ?? 0}
               </span>
@@ -695,50 +890,74 @@ export default function BrowsePage() {
 
           {/* Grid of results */}
           <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-[6px] md:gap-[16px] w-full">
-            {isBrowseLoading
-              ? Array.from({ length: 100 }).map((_, i) => <SkeletonCard key={i} />)
-              : browseData?.results?.length === 0
-              ? (
-                <div className="col-span-10 flex flex-col items-center justify-center py-[80px] gap-[12px]">
-                  <span className="text-4xl select-none">(◕︵◕)</span>
-                  <span className="text-text-secondary text-sm font-bold">No results found</span>
-                  <span className="text-text-secondary text-xs">Try adjusting your filters</span>
-                </div>
+            {isBrowseLoading ? (
+              Array.from({ length: 100 }, (_, i) => `skel-full-${i}`).map(
+                (id) => <SkeletonCard key={id} />,
               )
-              : browseData?.results?.map((item) => <AnimeCard key={item.id} item={item} />)}
+            ) : browseData?.results?.length === 0 ? (
+              <div className="col-span-10 flex flex-col items-center justify-center py-[80px] gap-[12px]">
+                <span className="text-4xl select-none">(◕︵◕)</span>
+                <span className="text-text-secondary text-sm font-bold">
+                  No results found
+                </span>
+                <span className="text-text-secondary text-xs">
+                  Try adjusting your filters
+                </span>
+              </div>
+            ) : (
+              browseData?.results?.map((item) => (
+                <AnimeCard key={item.id} item={item} />
+              ))
+            )}
           </div>
 
           {/* Pagination Controls */}
-          {!isBrowseLoading && browseData?.pageInfo && browseData.pageInfo.lastPage > 1 && (
-            <div className="flex items-center justify-center gap-[8px] mt-[32px]">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="flex items-center justify-center w-[36px] h-[36px] rounded-[8px] border border-border-line bg-[#141414] text-white hover:bg-control disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
-                aria-label="Previous Page"
-              >
-                <ChevronLeft className="w-[16px] h-[16px]" />
-              </button>
-              <span className="text-xs font-bold text-text-secondary select-none px-[12px] bg-[#141414] border border-border-line h-[36px] flex items-center rounded-[8px]">
-                Page {currentPage} of {browseData.pageInfo.lastPage}
-              </span>
-              <button
-                disabled={!browseData.pageInfo.hasNextPage}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="flex items-center justify-center w-[36px] h-[36px] rounded-[8px] border border-border-line bg-[#141414] text-white hover:bg-control disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
-                aria-label="Next Page"
-              >
-                <ChevronRight className="w-[16px] h-[16px]" />
-              </button>
-            </div>
-          )}
+          {!isBrowseLoading &&
+            browseData?.pageInfo &&
+            browseData.pageInfo.lastPage > 1 && (
+              <div className="flex items-center justify-center gap-[8px] mt-[32px]">
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="flex items-center justify-center w-[36px] h-[36px] rounded-[8px] border border-border-line bg-[#141414] text-white hover:bg-control disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  aria-label="Previous Page"
+                >
+                  <ChevronLeft className="w-[16px] h-[16px]" />
+                </button>
+                <span className="text-xs font-bold text-text-secondary select-none px-[12px] bg-[#141414] border border-border-line h-[36px] flex items-center rounded-[8px]">
+                  Page {currentPage} of {browseData.pageInfo.lastPage}
+                </span>
+                <button
+                  type="button"
+                  disabled={!browseData.pageInfo.hasNextPage}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="flex items-center justify-center w-[36px] h-[36px] rounded-[8px] border border-border-line bg-[#141414] text-white hover:bg-control disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  aria-label="Next Page"
+                >
+                  <ChevronRight className="w-[16px] h-[16px]" />
+                </button>
+              </div>
+            )}
         </div>
       ) : (
         /* ── Default Category Sections ── */
         <div className="flex flex-col gap-[32px]">
-          <CategorySection title="Trending Now" items={trending} isLoading={isLoadingTrending} />
-          <CategorySection title="Popular This Season" items={popularSeason} isLoading={isLoadingPopular} />
-          <CategorySection title="All Time Popular" items={popularAllTime} isLoading={isLoadingAllTime} />
+          <CategorySection
+            title="Trending Now"
+            items={trending}
+            isLoading={isLoadingTrending}
+          />
+          <CategorySection
+            title="Popular This Season"
+            items={popularSeason}
+            isLoading={isLoadingPopular}
+          />
+          <CategorySection
+            title="All Time Popular"
+            items={popularAllTime}
+            isLoading={isLoadingAllTime}
+          />
         </div>
       )}
     </main>

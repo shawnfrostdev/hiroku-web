@@ -30,7 +30,7 @@ const getCurrentSeasonAndYear = () => {
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth(); // 0-11
-  
+
   let season = "WINTER";
   if (month >= 2 && month <= 4) {
     season = "SPRING";
@@ -39,11 +39,14 @@ const getCurrentSeasonAndYear = () => {
   } else if (month >= 8 && month <= 10) {
     season = "FALL";
   }
-  
+
   return { season, year };
 };
 
-const fetchAniListPopularSeason = async (season: string, seasonYear: number): Promise<AniListMedia[]> => {
+const fetchAniListPopularSeason = async (
+  season: string,
+  seasonYear: number,
+): Promise<AniListMedia[]> => {
   const query = `
     query ($season: MediaSeason, $seasonYear: Int) {
       Page(page: 1, perPage: 30) {
@@ -123,30 +126,39 @@ export async function GET() {
           availableEpisodes = item.nextAiringEpisode.episode - 1;
         }
 
-        const episodesStr = item.format === "MOVIE"
-          ? "MOVIE"
-          : (availableEpisodes && availableEpisodes > 0
+        const episodesStr =
+          item.format === "MOVIE"
+            ? "MOVIE"
+            : availableEpisodes && availableEpisodes > 0
               ? `${availableEpisodes}EP`
-              : (item.format ? item.format.replace("_", " ") : "Anime"));
+              : item.format
+                ? item.format.replace("_", " ")
+                : "Anime";
 
         return {
           id: item.id,
           title,
           synopsis: tmdbDetails?.overview || cleanSynopsis(item.description),
-          score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "8.5",
+          score: item.averageScore
+            ? (item.averageScore / 10).toFixed(1)
+            : "8.5",
           episodes: episodesStr,
-          tagline: item.genres && item.genres.length > 0 ? item.genres[0] : "Popular",
+          tagline:
+            item.genres && item.genres.length > 0 ? item.genres[0] : "Popular",
           bannerImage,
           posterImage,
         };
-      })
+      }),
     );
 
     return NextResponse.json(mappedEntries.slice(0, 20));
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch popular seasonal anime" },
-      { status: 500 }
+      {
+        error:
+          (error as Error).message || "Failed to fetch popular seasonal anime",
+      },
+      { status: 500 },
     );
   }
 }
