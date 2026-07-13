@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -60,6 +60,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
   const resolvedParams = use(params);
   const animeId = resolvedParams.id;
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [commentInput, setCommentInput] = useState("");
@@ -99,6 +100,33 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ id: stri
       return res.json();
     },
   });
+
+  // Preload first episode servers and stream data in the background
+  useEffect(() => {
+    if (anime) {
+      const firstEp = anime.episodes?.[0]?.episode_number || 1;
+      queryClient.prefetchQuery({
+        queryKey: ["anime-servers", animeId, firstEp],
+        queryFn: async () => {
+          const res = await fetch(`/api/anime/servers?id=${animeId}&episode=${firstEp}`);
+          if (!res.ok) throw new Error("Failed to load servers");
+          const data = await res.json();
+
+          // After fetching servers, prefetch the default stream
+          queryClient.prefetchQuery({
+            queryKey: ["anime-stream", animeId, firstEp, "Auto", "Sub"],
+            queryFn: async () => {
+              const res = await fetch(`/api/anime/stream?id=${animeId}&episode=${firstEp}&server=Auto&category=sub`);
+              if (!res.ok) throw new Error("Failed to load video stream");
+              return res.json();
+            }
+          });
+
+          return data;
+        },
+      });
+    }
+  }, [anime, animeId, queryClient]);
 
   const [mounted, setMounted] = useState(false);
 

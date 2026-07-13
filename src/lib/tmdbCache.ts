@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 
 export interface TMDBDetails {
   backdrop_path: string | null;
@@ -9,7 +10,7 @@ export interface TMDBDetails {
   episodes?: any[];
 }
 
-const CACHE_DIR = path.join(process.cwd(), "node_modules", ".cache");
+const CACHE_DIR = path.join(os.tmpdir(), "hiroku-cache");
 const CACHE_FILE = path.join(CACHE_DIR, "tmdb-details-cache.json");
 
 let inMemoryCache: Record<number, TMDBDetails | null> | null = null;

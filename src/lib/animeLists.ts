@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 
 export interface AnimeMapping {
   livechart_id?: number;
@@ -29,8 +30,8 @@ export type MappingSource =
 
 const DATA_URL =
   "https://cdn.jsdelivr.net/gh/Fribb/anime-lists@master/anime-list-mini.json";
-// Store in node_modules/.cache which is gitignored
-const CACHE_DIR = path.join(process.cwd(), "node_modules", ".cache");
+// Store in tmp directory for serverless compatibility
+const CACHE_DIR = path.join(os.tmpdir(), "hiroku-cache");
 const CACHE_FILE = path.join(CACHE_DIR, "anime-list-mini.json");
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -78,7 +79,11 @@ export async function fetchAndCacheMappings(
   }
 
   // Ensure cache directory exists
-  await fs.mkdir(CACHE_DIR, { recursive: true });
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true });
+  } catch (err) {
+    console.warn("Could not create cache directory:", err);
+  }
 
   // Fetch from CDN
   const response = await fetch(DATA_URL);
@@ -94,7 +99,11 @@ export async function fetchAndCacheMappings(
   }
 
   // Save to disk
-  await fs.writeFile(CACHE_FILE, JSON.stringify(data), "utf-8");
+  try {
+    await fs.writeFile(CACHE_FILE, JSON.stringify(data), "utf-8");
+  } catch (err) {
+    console.error("Failed to save anime-list cache to disk:", err);
+  }
   cachedMappingsInMemory = data;
 
   return data;
