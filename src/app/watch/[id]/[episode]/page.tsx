@@ -600,7 +600,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                 setShowSpeedControls(false);
               }
             }}
-            className="group relative w-full aspect-video lg:aspect-auto max-h-[60vh] lg:max-h-none lg:flex-1 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
+            className="group relative w-full aspect-video lg:aspect-auto max-h-[60vh] lg:max-h-none lg:flex-1 min-h-0 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
           >
             {/* The Video Element or Embed Iframe */}
             {streamData?.sources?.[0]?.type === "embed" ? (
