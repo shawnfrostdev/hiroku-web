@@ -1,7 +1,0 @@
-fix: resolve linting and syntax errors
-
-This change addresses technical debt by resolving all remaining
-Biome linting errors, including duplicate JSX props, use of any
-types, exhaustive dependency violations, and missing array index keys.
-It hoists useCallbacks and replaces unoptimized image tags.
-This ensures the pre-commit husky hooks pass smoothly.
