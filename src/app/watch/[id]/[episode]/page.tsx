@@ -600,7 +600,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                 setShowSpeedControls(false);
               }
             }}
-            className="group relative w-full aspect-video bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none"
+            className="group relative w-full aspect-video max-h-[60vh] lg:max-h-[70vh] xl:max-h-[75vh] mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
           >
             {/* The Video Element or Embed Iframe */}
             {streamData?.sources?.[0]?.type === "embed" ? (
@@ -618,6 +618,8 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                   onEnded={handleVideoEnded}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
                   autoPlay
                   crossOrigin="anonymous"
                 >
