@@ -5,7 +5,6 @@ export const formatProviderName = (prov: string) => {
   if (prov === 'lunar') return 'Lunar';
   if (prov === 'prism') return 'Prism';
   if (prov === 'lynx') return 'Lynx';
-  if (prov === 'orion') return 'Orion';
   if (prov === 'frost') return 'Frost';
   if (prov === 'nexus') return 'Nexus';
   return prov.charAt(0).toUpperCase() + prov.slice(1);
