@@ -605,7 +605,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
       <div className={`w-full px-[12px] md:px-[24px] pt-[12px] md:pt-0 flex flex-col gap-[12px] md:gap-[24px] ${isTheaterMode ? "" : "lg:flex-row lg:items-start lg:gap-[24px]"}`}>
 
         {/* Left Cinematic Column: Video Player and details */}
-        <div className={`flex-1 flex flex-col min-w-0 ${isTheaterMode ? "w-full" : "lg:h-[calc(100vh-50px)]"}`}>
+        <div className={`flex-1 flex flex-col min-w-0 ${isTheaterMode ? "w-full" : "lg:h-[calc(100vh-140px)]"}`}>
 
           {/* Custom Video Player Container */}
           <div
@@ -661,12 +661,12 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                 </video>
 
                 {/* Loading Overlay */}
-                {(isStreamLoading || isBuffering) && (
-                  <div className={`absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center ${isStreamLoading ? "pointer-events-auto cursor-wait" : "pointer-events-none"}`}>
+                {isStreamLoading && (
+                  <div className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto cursor-wait">
                     <div className="flex items-center gap-[12px] bg-black/80 px-[24px] py-[16px] rounded-[12px] border border-[#282828] shadow-2xl backdrop-blur-md">
                       <Loader2 className="w-[24px] h-[24px] text-white animate-spin" />
                       <span className="text-white text-sm font-bold">
-                        {isStreamLoading ? "Loading Streams" : "Buffering"}
+                        Loading Streams
                       </span>
                     </div>
                   </div>
