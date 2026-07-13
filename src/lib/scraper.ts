@@ -40,8 +40,8 @@ export async function fetchAnimeEpisodes(anilistId: string) {
         });
       }
       const existing = epMap.get(epNum);
-      // Avoid duplicate provider+category combos
-      if (!existing.providers.some((prov: any) => prov.provider === providerId && prov.category === category)) {
+      // Avoid duplicate provider+category combos and explicitly ignore 'orion'
+      if (providerId !== 'orion' && !existing.providers.some((prov: any) => prov.provider === providerId && prov.category === category)) {
         existing.providers.push({ provider: providerId, category });
       }
     };
