@@ -74,7 +74,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   // Interactive Server & Audio Dropdown states
-  const [selectedAudio, setSelectedAudio] = useState<"Sub" | "Dub">("Sub");
+  const [selectedAudio, setSelectedAudio] = useState<"Sub" | "Dub" | "Softsub">("Sub");
   const [currentSubtitle, setCurrentSubtitle] = useState<string>("Off");
   const [availableSubtitles, setAvailableSubtitles] = useState<string[]>(["Off"]);
   const [selectedServer, setSelectedServer] = useState<string>("Auto");
@@ -114,26 +114,38 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
     ? serversData.dub.map((s: any) => s.serverName || s.name || s) 
     : serversArray.map((s: any) => s.serverName || s.name || s);
 
+  const softsubServers = serversData?.softsub
+    ? serversData.softsub.map((s: any) => s.serverName || s.name || s)
+    : [];
+
   const availableAudioModes = serversData 
     ? [
         ...(subServers.length > 0 ? ["Sub"] : []),
+        ...(softsubServers.length > 0 ? ["Softsub"] : []),
         ...(dubServers.length > 0 ? ["Dub"] : [])
       ]
-    : ["Sub", "Dub"];
+    : ["Sub", "Softsub", "Dub"];
 
-  const currentServers = selectedAudio === "Sub" ? (subServers.length > 0 ? subServers : ["Auto"]) : (dubServers.length > 0 ? dubServers : ["Auto"]);
+  const currentServers = selectedAudio === "Softsub"
+    ? (softsubServers.length > 0 ? softsubServers : ["Auto"])
+    : selectedAudio === "Sub" 
+      ? (subServers.length > 0 ? subServers : ["Auto"]) 
+      : (dubServers.length > 0 ? dubServers : ["Auto"]);
 
   useEffect(() => {
     if (serversData) {
-      if (selectedAudio === "Dub" && dubServers.length === 0 && subServers.length > 0) {
-        setSelectedAudio("Sub");
+      if (selectedAudio === "Dub" && dubServers.length === 0) {
+        setSelectedAudio(subServers.length > 0 ? "Sub" : (softsubServers.length > 0 ? "Softsub" : "Sub"));
         setSelectedServer("Auto");
-      } else if (selectedAudio === "Sub" && subServers.length === 0 && dubServers.length > 0) {
-        setSelectedAudio("Dub");
+      } else if (selectedAudio === "Sub" && subServers.length === 0) {
+        setSelectedAudio(softsubServers.length > 0 ? "Softsub" : (dubServers.length > 0 ? "Dub" : "Sub"));
+        setSelectedServer("Auto");
+      } else if (selectedAudio === "Softsub" && softsubServers.length === 0) {
+        setSelectedAudio(subServers.length > 0 ? "Sub" : (dubServers.length > 0 ? "Dub" : "Sub"));
         setSelectedServer("Auto");
       }
     }
-  }, [serversData, selectedAudio, subServers.length, dubServers.length]);
+  }, [serversData, selectedAudio, subServers.length, dubServers.length, softsubServers.length]);
 
   useEffect(() => {
     if (currentServers.length > 0 && (!currentServers.includes(selectedServer) || selectedServer === "Auto")) {

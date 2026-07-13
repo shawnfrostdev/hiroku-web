@@ -119,189 +119,204 @@ export default function PlayerControls({
         
         {/* Left Side Controls */}
         <div className="flex items-center gap-[8px] md:gap-[16px]">
-          {/* Previous Episode */}
-          <button
-            type="button"
-            onClick={onPrevEpisode}
-            disabled={currentEpNum === 1}
-            className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent"
-            title="Previous Episode"
-            aria-label="Previous Episode"
-          >
-            <SkipBack className="w-[14px] h-[14px] md:w-[18px] md:h-[18px]" />
-          </button>
+          
+          {/* Group 1: Play/Pause */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
+            {/* Play/Pause Toggle */}
+            <button
+              type="button"
+              onClick={onPlayToggle}
+              className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? (
+                <Pause className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />
+              ) : (
+                <Play className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" />
+              )}
+            </button>
+          </div>
 
-          {/* Play/Pause Toggle */}
-          <button
-            type="button"
-            onClick={onPlayToggle}
-            className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer"
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? (
-              <Pause className="w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />
-            ) : (
-              <Play className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] fill-current" />
-            )}
-          </button>
+          {/* Group 2: Prev / Next */}
+          <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
+            {/* Previous Episode */}
+            <button
+              type="button"
+              onClick={onPrevEpisode}
+              disabled={currentEpNum === 1}
+              className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent"
+              title="Previous Episode"
+              aria-label="Previous Episode"
+            >
+              <SkipBack className="w-[14px] h-[14px] md:w-[18px] md:h-[18px]" />
+            </button>
 
-          {/* Next Episode */}
-          <button
-            type="button"
-            onClick={onNextEpisode}
-            disabled={currentEpNum === episodesCount}
-            className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent"
-            title="Next Episode"
-            aria-label="Next Episode"
-          >
-            <SkipForward className="w-[14px] h-[14px] md:w-[18px] md:h-[18px]" />
-          </button>
+            {/* Next Episode */}
+            <button
+              type="button"
+              onClick={onNextEpisode}
+              disabled={currentEpNum === episodesCount}
+              className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent"
+              title="Next Episode"
+              aria-label="Next Episode"
+            >
+              <SkipForward className="w-[14px] h-[14px] md:w-[18px] md:h-[18px]" />
+            </button>
+          </div>
 
-          {/* Volume slider */}
-          <VolumeControl onVolumeChange={onVolumeChange} onToggleMute={onToggleMute} />
+          {/* Group 2: Volume */}
+          <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px] px-[8px]">
+            <VolumeControl onVolumeChange={onVolumeChange} onToggleMute={onToggleMute} />
+          </div>
 
-          {/* Timing counter */}
-          <div className="h-[28px] md:h-[32px] px-[6px] md:px-[10px] bg-white/5 border border-white/10 rounded-[6px] flex items-center justify-center text-[10px] md:text-sm font-bold text-white/90 select-none shrink-0">
+          {/* Group 3: Timestamps */}
+          <div className="h-[36px] md:h-[40px] px-[10px] md:px-[14px] bg-white/5 border border-white/10 rounded-[8px] flex items-center justify-center text-[10px] md:text-sm font-bold text-white/90 select-none shrink-0">
             {formatTime(currentTime)} <span className="text-white/40 mx-[2px] md:mx-[4px]">/</span> {formatTime(duration)}
           </div>
         </div>
 
         {/* Right Side Controls */}
-        <div className="flex items-center gap-[6px] md:gap-[12px] relative shrink-0">
+        <div className="flex items-center gap-[8px] md:gap-[16px] relative shrink-0">
           
-          {/* Speed Selector */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setShowSpeed((prev) => !prev);
-                setShowAudio(false);
-                setShowQuality(false);
-              }}
-              className="h-[28px] md:h-[32px] px-[6px] md:px-[12px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
-              aria-expanded={showSpeed}
-              aria-label="Playback Speed"
-            >
-              <span className="whitespace-nowrap">{playbackRate}x</span>
-            </button>
-            {showSpeed && (
-              <div className="absolute bottom-[40px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
-                {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
-                  <button
-                    key={rate}
-                    type="button"
-                    onClick={() => {
-                      onPlaybackRateChange(rate);
-                      setShowSpeed(false);
-                    }}
-                    className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black ${
-                      playbackRate === rate ? "bg-white text-black" : "text-text-secondary"
-                    }`}
-                  >
-                    {rate}x
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Group 4: Settings (Speed, CC, Quality) */}
+          <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
+            {/* Speed Selector */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSpeed((prev) => !prev);
+                  setShowAudio(false);
+                  setShowQuality(false);
+                }}
+                className="h-[28px] md:h-[32px] px-[8px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
+                aria-expanded={showSpeed}
+                aria-label="Playback Speed"
+              >
+                <span className="whitespace-nowrap">{playbackRate}x</span>
+              </button>
+              {showSpeed && (
+                <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
+                  {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      onClick={() => {
+                        onPlaybackRateChange(rate);
+                        setShowSpeed(false);
+                      }}
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black ${
+                        playbackRate === rate ? "bg-white text-black" : "text-text-secondary"
+                      }`}
+                    >
+                      {rate}x
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Subtitle Selector */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAudio((prev) => !prev);
+                  setShowSpeed(false);
+                  setShowQuality(false);
+                }}
+                className="h-[28px] md:h-[32px] px-[8px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
+                aria-expanded={showAudio}
+                aria-label="Subtitle Language"
+              >
+                <span className="capitalize truncate whitespace-nowrap">{currentSubtitle === "Off" ? "CC" : currentSubtitle}</span>
+              </button>
+              {showAudio && (
+                <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
+                  {availableSubtitles.map((sub: string) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      onClick={() => {
+                        onSubtitleChange(sub);
+                        setShowAudio(false);
+                      }}
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
+                        currentSubtitle === sub ? "bg-white text-black" : "text-text-secondary"
+                      }`}
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Quality Selector */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQuality((prev) => !prev);
+                  setShowSpeed(false);
+                  setShowAudio(false);
+                }}
+                className="h-[28px] md:h-[32px] px-[8px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
+                aria-expanded={showQuality}
+                aria-label="Video Quality"
+              >
+                <span className="whitespace-nowrap">{currentResolution}</span>
+              </button>
+              {showQuality && (
+                <div className="absolute bottom-[48px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[90px]">
+                  {resolutions.map((res) => (
+                    <button
+                      key={res}
+                      type="button"
+                      onClick={() => {
+                        onResolutionChange(res);
+                        setShowQuality(false);
+                      }}
+                      className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
+                        currentResolution === res || (res === "Auto" && !currentResolution) ? "bg-white text-black" : "text-text-secondary"
+                      }`}
+                    >
+                      {res}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Subtitle Selector */}
-          <div className="relative">
+          {/* Group 5: View Mode (Theater, Fullscreen) */}
+          <div className="flex items-center gap-[2px] bg-white/5 border border-white/10 rounded-[8px] p-[4px]">
+            {/* Theater Toggle */}
             <button
               type="button"
-              onClick={() => {
-                setShowAudio((prev) => !prev);
-                setShowSpeed(false);
-                setShowQuality(false);
-              }}
-              className="h-[28px] md:h-[32px] px-[6px] md:px-[12px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
-              aria-expanded={showAudio}
-              aria-label="Subtitle Language"
+              onClick={onTheaterToggle}
+              className="hidden md:flex h-[28px] w-[28px] md:h-[32px] md:w-[32px] items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer"
+              title={isTheaterMode ? "Default View" : "Theater Mode"}
+              aria-label="Toggle Theater Mode"
             >
-              <span className="capitalize truncate whitespace-nowrap">{currentSubtitle === "Off" ? "CC" : currentSubtitle}</span>
+              <span className={`block w-[20px] h-[14px] border-2 rounded-[2px] ${isTheaterMode ? "border-white bg-white/20" : "border-white/60"}`} />
             </button>
-            {showAudio && (
-              <div className="absolute bottom-[40px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
-                {availableSubtitles.map((sub: string) => (
-                  <button
-                    key={sub}
-                    type="button"
-                    onClick={() => {
-                      onSubtitleChange(sub);
-                      setShowAudio(false);
-                    }}
-                    className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
-                      currentSubtitle === sub ? "bg-white text-black" : "text-text-secondary"
-                    }`}
-                  >
-                    {sub}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* Quality Selector */}
-          <div className="relative">
+            {/* Fullscreen Toggle */}
             <button
               type="button"
-              onClick={() => {
-                setShowQuality((prev) => !prev);
-                setShowSpeed(false);
-                setShowAudio(false);
-              }}
-              className="h-[28px] md:h-[32px] px-[6px] md:px-[12px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer text-[10px] md:text-xs font-bold"
-              aria-expanded={showQuality}
-              aria-label="Video Quality"
+              onClick={onFullscreenToggle}
+              className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer shrink-0"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              aria-label="Toggle Fullscreen"
             >
-              <span className="whitespace-nowrap">{currentResolution}</span>
+              {isFullscreen ? (
+                <Minimize2 className="w-[14px] h-[14px] md:w-[16px] md:h-[16px]" />
+              ) : (
+                <Maximize2 className="w-[14px] h-[14px] md:w-[16px] md:h-[16px]" />
+              )}
             </button>
-            {showQuality && (
-              <div className="absolute bottom-[40px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[90px]">
-                {resolutions.map((res) => (
-                  <button
-                    key={res}
-                    type="button"
-                    onClick={() => {
-                      onResolutionChange(res);
-                      setShowQuality(false);
-                    }}
-                    className={`px-[10px] py-[6px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize ${
-                      currentResolution === res || (res === "Auto" && !currentResolution) ? "bg-white text-black" : "text-text-secondary"
-                    }`}
-                  >
-                    {res}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-
-          {/* Theater Toggle */}
-          <button
-            type="button"
-            onClick={onTheaterToggle}
-            className="hidden md:flex h-[32px] w-[32px] items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer"
-            title={isTheaterMode ? "Default View" : "Theater Mode"}
-            aria-label="Toggle Theater Mode"
-          >
-            <span className={`block w-[20px] h-[14px] border-2 rounded-[2px] ${isTheaterMode ? "border-white bg-white/20" : "border-white/60"}`} />
-          </button>
-
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={onFullscreenToggle}
-            className="h-[28px] w-[28px] md:h-[32px] md:w-[32px] flex items-center justify-center bg-white/5 border border-white/10 rounded-[6px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer shrink-0"
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            aria-label="Toggle Fullscreen"
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-[14px] h-[14px] md:w-[16px] md:h-[16px]" />
-            ) : (
-              <Maximize2 className="w-[14px] h-[14px] md:w-[16px] md:h-[16px]" />
-            )}
-          </button>
         </div>
 
       </div>
