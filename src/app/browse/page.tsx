@@ -1,7 +1,4 @@
-import Image from "next/image";
-
-("use client");
-
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronDown,
@@ -10,6 +7,7 @@ import {
   Search,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 

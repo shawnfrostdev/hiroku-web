@@ -1,7 +1,4 @@
-import Image from "next/image";
-
-("use client");
-
+"use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -21,6 +18,7 @@ import {
   VolumeX,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

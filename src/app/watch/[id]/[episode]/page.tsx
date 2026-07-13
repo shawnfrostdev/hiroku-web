@@ -1,8 +1,4 @@
-import Image from "next/image";
-import { useCallback } from "react";
-
-("use client");
-
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import Hls from "hls.js";
 import {
@@ -20,10 +16,11 @@ import {
   Share2,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import PlayerControls from "@/components/PlayerControls";
 import { Button } from "@/components/ui/button";
 import { usePlayerStore } from "@/store/usePlayerStore";

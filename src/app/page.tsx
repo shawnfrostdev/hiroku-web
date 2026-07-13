@@ -1,10 +1,8 @@
-import Image from "next/image";
-
-("use client");
-
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, ChevronLeft, ChevronRight, Info, Play } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
