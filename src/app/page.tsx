@@ -1792,7 +1792,7 @@ function ScheduleSection() {
       {/* Day Tabs Container - horizontally scrollable for 14 items */}
       <div className="flex flex-nowrap overflow-x-auto gap-8px md:gap-12px pb-8px scrollbar-none w-full">
         {isLoading
-          ? Array.from({ length: 14 }).map((_, _i) => (
+          ? Array.from({ length: 14 }, (_, i) => `skel-hero-${i}`).map((id) => (
               <div
                 key={id}
                 className="flex flex-col items-center justify-center min-w-[64px] md:min-w-[72px] h-[46px] rounded-lg bg-surface animate-pulse border border-border-line shrink-0"
@@ -1872,7 +1872,7 @@ function ScheduleSection() {
         >
           {isLoading ? (
             // Loading Skeletons
-            Array.from({ length: 6 }).map((_, _i) => (
+            Array.from({ length: 6 }, (_, i) => `skel-cont-${i}`).map((id) => (
               <div
                 key={id}
                 className="flex flex-col gap-8px p-8px -m-8px shrink-0 w-[120px] md:w-[160px]"

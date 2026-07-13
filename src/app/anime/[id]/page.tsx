@@ -258,7 +258,7 @@ export default function AnimeDetailPage({
                 <div className="h-[28px] w-[100px] bg-[#282828] rounded-[8px]" />
               </div>
               <div className="flex flex-col gap-[12px]">
-                {[...Array(5)].map((_, _i) => (
+                {Array.from({ length: 5 }, (_, i) => `skel-${i}`).map((id) => (
                   <div
                     key={id}
                     className="flex gap-[16px] p-[12px] rounded-[8px] bg-surface border border-border-line animate-pulse"
