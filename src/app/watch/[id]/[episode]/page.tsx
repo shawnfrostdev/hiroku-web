@@ -585,10 +585,10 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
   return (
     <main className="flex-1 flex flex-col bg-black min-h-screen text-text-primary">
       {/* Cinematic Main Section: Player + Title/buttons row with sidebar */}
-      <div className={`w-full px-[12px] md:px-[24px] pt-[12px] md:pt-0 flex flex-col gap-[12px] md:gap-[24px] ${isTheaterMode ? "" : "lg:flex-row lg:items-stretch lg:gap-[24px] lg:min-h-[calc(100vh-90px)]"}`}>
+      <div className={`w-full px-[12px] md:px-[24px] pt-[12px] md:pt-0 flex flex-col gap-[12px] md:gap-[24px] ${isTheaterMode ? "" : "lg:flex-row lg:items-start lg:gap-[24px]"}`}>
 
         {/* Left Cinematic Column: Video Player and details */}
-        <div className={`flex-1 flex flex-col min-w-0 ${isTheaterMode ? "w-full" : ""}`}>
+        <div className={`flex-1 flex flex-col min-w-0 ${isTheaterMode ? "w-full" : "lg:h-[calc(100vh-50px)]"}`}>
 
           {/* Custom Video Player Container */}
           <div
@@ -600,7 +600,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                 setShowSpeedControls(false);
               }
             }}
-            className="group relative w-full aspect-video lg:aspect-auto max-h-[60vh] lg:max-h-none lg:flex-1 min-h-0 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
+            className="group relative w-full aspect-video lg:aspect-auto max-h-[60vh] lg:max-h-none lg:flex-1 lg:min-h-0 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
           >
             {/* The Video Element or Embed Iframe */}
             {streamData?.sources?.[0]?.type === "embed" ? (
