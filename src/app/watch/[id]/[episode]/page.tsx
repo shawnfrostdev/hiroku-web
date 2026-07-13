@@ -52,6 +52,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
   const hlsRef = useRef<Hls | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -182,7 +183,23 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
       if (timeToResume > 0) {
         videoEl.currentTime = timeToResume;
       }
-      videoEl.play().catch(() => {});
+      attemptPlay();
+    };
+
+    const attemptPlay = async () => {
+      try {
+        await videoEl.play();
+      } catch (err) {
+        console.warn("Autoplay blocked, attempting muted autoplay", err);
+        videoEl.muted = true;
+        setIsMuted(true);
+        if (typeof player.setVolume === "function") player.setVolume(0);
+        try {
+          await videoEl.play();
+        } catch (e) {
+          console.warn("Muted autoplay also failed", e);
+        }
+      }
     };
 
     if (isM3U8 && Hls.isSupported()) {
@@ -194,7 +211,7 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
         if (timeToResume > 0) {
           videoEl.currentTime = timeToResume;
         }
-        videoEl.play().catch(() => {});
+        attemptPlay();
         // Expose available quality levels to the store
         const levelLabels = data.levels.map((l: any) => `${l.height}p`);
         if (levelLabels.length > 0) {
@@ -618,8 +635,16 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                   onEnded={handleVideoEnded}
-                  onPlay={() => setIsPlaying(true)}
+                  onPlay={() => {
+                    setIsPlaying(true);
+                    setIsBuffering(false);
+                  }}
                   onPause={() => setIsPlaying(false)}
+                  onWaiting={() => setIsBuffering(true)}
+                  onPlaying={() => setIsBuffering(false)}
+                  onCanPlay={() => setIsBuffering(false)}
+                  onLoadStart={() => setIsBuffering(true)}
+                  onLoadedData={() => setIsBuffering(false)}
                   autoPlay
                   crossOrigin="anonymous"
                 >
@@ -635,12 +660,14 @@ export default function WatchPage({ params }: { params: Promise<{ id: string; ep
                   ))}
                 </video>
 
-                                {/* Loading Overlay — captures all pointer events to block controls beneath */}
-                {isStreamLoading && (
-                  <div className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto cursor-wait">
+                {/* Loading Overlay */}
+                {(isStreamLoading || isBuffering) && (
+                  <div className={`absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center ${isStreamLoading ? "pointer-events-auto cursor-wait" : "pointer-events-none"}`}>
                     <div className="flex items-center gap-[12px] bg-black/80 px-[24px] py-[16px] rounded-[12px] border border-[#282828] shadow-2xl backdrop-blur-md">
                       <Loader2 className="w-[24px] h-[24px] text-white animate-spin" />
-                      <span className="text-white text-sm font-bold">Loading Streams</span>
+                      <span className="text-white text-sm font-bold">
+                        {isStreamLoading ? "Loading Streams" : "Buffering"}
+                      </span>
                     </div>
                   </div>
                 )}
