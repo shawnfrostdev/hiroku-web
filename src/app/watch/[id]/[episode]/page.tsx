@@ -365,18 +365,16 @@ export default function WatchPage({
   );
 
   // Synchronize with Player Store (mock globally active episode)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional dependency selection
   useEffect(() => {
     setCurrentTime(0); // Reset time when episode changes
     player.playEpisode(animeId, currentEpNum);
-    player.setPlaying(isPlaying);
-    return () => {
-      player.setPlaying(false);
-    };
-  }, [animeId, currentEpNum, isPlaying, player.playEpisode, player.setPlaying]);
+  }, [animeId, currentEpNum, player.playEpisode]);
 
   // Synchronize playing state with store
   useEffect(() => {
     player.setPlaying(isPlaying);
+    return () => player.setPlaying(false);
   }, [isPlaying, player.setPlaying]);
 
   // Add to Continue Watching
