@@ -242,7 +242,11 @@ export default function WatchPage({
     if (subs.length > 0) {
       const labels = subs.map((s) => s.label);
       setAvailableSubtitles([...labels, "Off"]);
-      setCurrentSubtitle(labels[0]);
+      // Prefer English by default
+      const englishSub = labels.find(
+        (l) => l.toLowerCase().includes("english") || l.toLowerCase() === "en",
+      );
+      setCurrentSubtitle(englishSub || labels[0]);
     } else {
       setAvailableSubtitles(["Off"]);
       setCurrentSubtitle("Off");

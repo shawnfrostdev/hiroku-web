@@ -6,6 +6,43 @@ const SCRAPER_URL = (
   process.env.NEXT_PUBLIC_SCRAPER_API_URL || "http://localhost:4000"
 ).replace(/\/v1$/, "");
 
+function normalizeSubtitles(
+  rawData: { subtitles?: unknown[]; tracks?: unknown[] } | null | undefined,
+): Array<{ file: string; label: string; kind: string }> {
+  if (!rawData) return [];
+
+  // Consumet and other extractors may return subtitles in `subtitles` or `tracks` array
+  const rawList = Array.isArray(rawData.subtitles)
+    ? rawData.subtitles
+    : Array.isArray(rawData.tracks)
+      ? rawData.tracks
+      : [];
+
+  const normalized: Array<{ file: string; label: string; kind: string }> = [];
+
+  for (const item of rawList) {
+    if (!item || typeof item !== "object") continue;
+
+    // Handle properties based on varying provider structures
+    const file =
+      (item as { url?: string; file?: string }).url ||
+      (item as { url?: string; file?: string }).file;
+    const label =
+      (item as { lang?: string; language?: string; label?: string }).label ||
+      (item as { lang?: string; language?: string; label?: string }).lang ||
+      (item as { lang?: string; language?: string; label?: string }).language ||
+      "Unknown";
+    const kind = (item as { kind?: string }).kind || "captions";
+
+    // Filter out thumbnails, sprites, or invalid tracks
+    if (kind.toLowerCase() === "thumbnails" || !file) continue;
+
+    normalized.push({ file, label, kind });
+  }
+
+  return normalized;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const animeId = searchParams.get("id");
@@ -75,19 +112,19 @@ export async function GET(request: Request) {
           if (temp?.streams && temp.streams.length > 0) {
             data = temp;
 
+            // Normalize subtitles immediately
+            data.subtitles = normalizeSubtitles(data);
+
             // If watching dub and no subtitles are present, attempt to fetch subtitles from the sub source
-            if (
-              audioType === "dub" &&
-              (!data?.subtitles ||
-                (Array.isArray(data.subtitles) && data.subtitles.length === 0))
-            ) {
+            if (audioType === "dub" && data.subtitles.length === 0) {
               const subWatchUrl = `${SCRAPER_URL}/api/watch/${activeServer}/${animeId}/sub/${episodeNumber}`;
               try {
                 const subRes = await fetch(subWatchUrl, { cache: "no-store" });
                 if (subRes.ok) {
                   const subTemp = await subRes.json();
-                  if (subTemp?.subtitles && subTemp.subtitles.length > 0) {
-                    if (data) data.subtitles = subTemp.subtitles;
+                  const subNorm = normalizeSubtitles(subTemp);
+                  if (subNorm.length > 0) {
+                    data.subtitles = subNorm;
                     console.log(
                       `[Next.js Stream API] Injected subtitles from sub source for ${activeServer}`,
                     );
