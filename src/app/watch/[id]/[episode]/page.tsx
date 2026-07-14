@@ -45,10 +45,17 @@ export default function WatchPage({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
-  // Always-fresh refs so the HLS effect can read the latest values without
-  // needing them in the dependency array (which would cause unnecessary reloads)
-  const resumeTimeRef = useRef<number>(0);
+  // Tracks the true episode-level playback position. Written ONLY by handleTimeUpdate
+  // and reset ONLY when the episode changes. HLS teardown/recreate cannot touch it,
+  // so server switches always resume from the correct timestamp.
+  const episodePositionRef = useRef<number>(0);
+  // Tracks whether the user deliberately had the video playing before a server switch.
+  // Written by user interactions (togglePlay) and the video's onPlay/onPause events, but
+  // guarded so that browser-initiated pauses from HLS teardown don't clear it.
   const wasPlayingRef = useRef<boolean>(false);
+  // Set to true briefly while we're swapping HLS instances so we can ignore
+  // browser-initiated pause events that happen as a side effect of src teardown.
+  const isSwappingSourceRef = useRef<boolean>(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [_isBuffering, setIsBuffering] = useState(true);
   const [currentTime, setCurrentTime] = useState(() => {
@@ -257,13 +264,17 @@ export default function WatchPage({
     }
   }, [streamData, rawSubtitles]);
 
-  // Keep the refs in sync with the latest state values on every render
-  resumeTimeRef.current = currentTime;
-  wasPlayingRef.current = isPlaying;
+  // IMPORTANT: Do NOT set episodePositionRef or wasPlayingRef here during render.
+  // They are written only in event handlers to prevent HLS teardown side-effects
+  // from poisoning their values between the cleanup and the new setup.
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     if (!videoRef.current || !VIDEO_SOURCE) return;
+
+    // Mark that we are in the middle of swapping sources so that browser-triggered
+    // pause/timeupdate events during HLS destroy don't corrupt our position ref.
+    isSwappingSourceRef.current = true;
 
     let hls: Hls | null = null;
     const isM3U8 =
@@ -272,10 +283,13 @@ export default function WatchPage({
       VIDEO_SOURCE.includes("/m3u8");
     const videoEl = videoRef.current;
 
-    // Read from refs at mount-time to get the true latest values even though
-    // neither currentTime nor isPlaying are in the dependency array
-    const timeToResume = resumeTimeRef.current;
+    // Read from the episode-level position ref. This is NEVER reset by HLS
+    // teardown — only by handleTimeUpdate and the episode-change effect.
+    const timeToResume = episodePositionRef.current;
     const shouldResumePlaying = wasPlayingRef.current;
+
+    // Done setting up — allow normal event handling again.
+    isSwappingSourceRef.current = false;
 
     const attemptPlay = async () => {
       try {
@@ -359,11 +373,17 @@ export default function WatchPage({
     }
 
     return () => {
+      // Mark teardown so event handlers know to ignore browser-triggered events
+      isSwappingSourceRef.current = true;
       if (hls) {
         hls.destroy();
         hlsRef.current = null;
       }
       videoEl.removeEventListener("loadedmetadata", handleMetadata);
+      // Clear the flag after a microtask so async browser events still get filtered
+      Promise.resolve().then(() => {
+        isSwappingSourceRef.current = false;
+      });
     };
   }, [
     VIDEO_SOURCE,
@@ -389,8 +409,12 @@ export default function WatchPage({
   );
 
   // Synchronize with Player Store (mock globally active episode)
+  // IMPORTANT: Also reset the episode-level position ref so server switches
+  // within the NEW episode start from 0, not the previous episode's position.
   useEffect(() => {
-    setCurrentTime(0); // Reset time when episode changes
+    episodePositionRef.current = 0;
+    wasPlayingRef.current = false;
+    setCurrentTime(0);
     player.playEpisode(animeId, currentEpNum);
   }, [animeId, currentEpNum, player.playEpisode]);
 
@@ -486,7 +510,12 @@ export default function WatchPage({
 
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
+    // Guard: ignore time updates triggered by HLS teardown (they emit 0)
+    if (isSwappingSourceRef.current) return;
     const t = videoRef.current.currentTime;
+    // episodePositionRef is the single source of truth for resume position.
+    // It persists across server switches and is only reset on episode change.
+    episodePositionRef.current = t;
     setCurrentTime(t);
     player.setTime(t);
   };
@@ -876,10 +905,20 @@ export default function WatchPage({
                   }}
                   onEnded={handleVideoEnded}
                   onPlay={() => {
+                    // Guard: ignore browser-initiated play events from HLS teardown
+                    if (!isSwappingSourceRef.current) {
+                      wasPlayingRef.current = true;
+                    }
                     setIsPlaying(true);
                     setIsBuffering(false);
                   }}
-                  onPause={() => setIsPlaying(false)}
+                  onPause={() => {
+                    // Guard: ignore browser-initiated pause events from HLS teardown
+                    if (!isSwappingSourceRef.current) {
+                      wasPlayingRef.current = false;
+                    }
+                    setIsPlaying(false);
+                  }}
                   onWaiting={() => setIsBuffering(true)}
                   onPlaying={() => setIsBuffering(false)}
                   onCanPlay={() => setIsBuffering(false)}
