@@ -249,6 +249,7 @@ export default function WatchPage({
     }
   }, [streamData, rawSubtitles]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     if (!videoRef.current || !VIDEO_SOURCE) return;
 
@@ -342,7 +343,6 @@ export default function WatchPage({
     };
   }, [
     VIDEO_SOURCE,
-    currentTime,
     player.setResolutions,
     player.setVolume,
     streamData?.sources?.[0]?.isM3U8,
