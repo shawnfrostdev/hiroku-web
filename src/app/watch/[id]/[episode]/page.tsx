@@ -410,11 +410,12 @@ export default function WatchPage({
             String(animeId),
             Number(currentEpNum) || 1,
             currentTime,
+            _duration,
           );
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [currentTime, animeId, currentEpNum]);
+  }, [currentTime, animeId, currentEpNum, _duration]);
 
   // Video Event Handlers
   const togglePlay = useCallback(() => {
@@ -1310,7 +1311,7 @@ export default function WatchPage({
           <div className="flex-1 min-w-0">
             <div className="bg-surface border border-border-line rounded-[12px] p-[24px] flex flex-col md:flex-row gap-[24px] h-full">
               {anime?.posterImage && (
-                <div className="w-[120px] md:w-[150px] aspect-[2/3] rounded-[8px] overflow-hidden bg-[#121212] shrink-0 border border-border-line">
+                <div className="relative w-[120px] md:w-[150px] aspect-[2/3] rounded-[8px] overflow-hidden bg-[#121212] shrink-0 border border-border-line">
                   <Image
                     unoptimized
                     fill

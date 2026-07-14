@@ -815,17 +815,19 @@ export default function Page() {
         <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-[8px] md:gap-[16px] overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-[4px] md:pb-0">
           {isMounted && watchingItems.length > 0
             ? watchingItems.slice(0, 5).map((item, idx) => {
-                const mockProgress = [75, 40, 90, 55, 30][idx % 5];
-                const mockTimeLeft = [
-                  "6m left",
-                  "14m left",
-                  "2m left",
-                  "10m left",
-                  "18m left",
-                ][idx % 5];
+                const progressSeconds = item.progressSeconds || 0;
+                const duration = item.duration || 1440; // Default to 24 mins if unknown
+                const progressPercentage = Math.min(
+                  100,
+                  Math.max(0, (progressSeconds / duration) * 100),
+                );
+                const timeLeftSeconds = Math.max(0, duration - progressSeconds);
+                const timeLeftMins = Math.ceil(timeLeftSeconds / 60);
+                const timeLeftStr = `${timeLeftMins}m left`;
+
                 return (
                   <Link
-                    href={`/anime/${item.animeId}`}
+                    href={`/watch/${item.animeId}/${item.currentEpisode || 1}`}
                     key={`watching-${item.animeId || idx}`}
                     className="group relative h-[100px] md:h-[130px] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden cursor-pointer hover:border-[#FFFFFF]/60 transition-all flex flex-col justify-end p-[12px] shrink-0 snap-start w-[60vw] sm:w-[40vw] md:w-auto"
                   >
@@ -851,15 +853,15 @@ export default function Page() {
                         {item.animeTitle}
                       </span>
                       <div className="flex items-center justify-between text-[11px] text-[#A3A3A3]">
-                        <span>Episode 1</span>
-                        <span>{mockTimeLeft}</span>
+                        <span>Episode {item.currentEpisode || 1}</span>
+                        <span>{timeLeftStr}</span>
                       </div>
                     </div>
 
                     <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#282828]">
                       <div
                         className="h-full bg-[#FFFFFF]"
-                        style={{ width: `${mockProgress}%` }}
+                        style={{ width: `${progressPercentage}%` }}
                       />
                     </div>
 

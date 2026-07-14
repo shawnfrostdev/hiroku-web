@@ -90,7 +90,7 @@ export default function PlayerControls({
       : ["1080p", "720p", "480p", "Auto"];
 
   const activeSkip = skipTimes?.find(
-    (skip) => currentTime >= skip.startTime && currentTime <= skip.endTime,
+    (skip) => currentTime >= skip.startTime - 3 && currentTime <= skip.endTime,
   );
 
   return (
@@ -116,7 +116,7 @@ export default function PlayerControls({
       )}
 
       {/* Headless progress slider bar */}
-      <TimelineBar onSeek={onSeek} />
+      <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
 
       {/* Buttons dashboard */}
       <div className="flex items-center justify-between w-full text-white">
