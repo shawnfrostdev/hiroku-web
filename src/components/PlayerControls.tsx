@@ -107,7 +107,7 @@ export default function PlayerControls({
           Sits in the upper portion, above the control bar.
           ============================================================ */}
       <div
-        className={`md:hidden absolute inset-x-0 top-0 bottom-[96px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
+        className={`md:hidden absolute inset-0 pb-[72px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -120,10 +120,10 @@ export default function PlayerControls({
             aria-label="Previous Episode"
             className="flex flex-col items-center gap-[5px] disabled:opacity-30"
           >
-            <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <SkipBack className="w-[24px] h-[24px] text-white" />
+            <div className="w-[42px] h-[42px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
+              <SkipBack className="w-[18px] h-[18px] text-white" />
             </div>
-            <span className="text-[10px] font-semibold text-white/55 select-none tracking-wide">
+            <span className="text-[9px] font-semibold text-white/50 select-none tracking-wide">
               Prev
             </span>
           </button>
@@ -133,12 +133,12 @@ export default function PlayerControls({
             type="button"
             onClick={onPlayToggle}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="w-[68px] h-[68px] rounded-full bg-black/60 border border-white/30 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform shadow-lg"
+            className="w-[52px] h-[52px] rounded-full bg-black/60 border border-white/30 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform shadow-lg"
           >
             {isPlaying ? (
-              <Pause className="w-[30px] h-[30px] text-white" />
+              <Pause className="w-[22px] h-[22px] text-white" />
             ) : (
-              <Play className="w-[30px] h-[30px] text-white fill-current translate-x-[2px]" />
+              <Play className="w-[22px] h-[22px] text-white fill-current translate-x-[2px]" />
             )}
           </button>
 
@@ -150,10 +150,10 @@ export default function PlayerControls({
             aria-label="Next Episode"
             className="flex flex-col items-center gap-[5px] disabled:opacity-30"
           >
-            <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <SkipForward className="w-[24px] h-[24px] text-white" />
+            <div className="w-[42px] h-[42px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
+              <SkipForward className="w-[18px] h-[18px] text-white" />
             </div>
-            <span className="text-[10px] font-semibold text-white/55 select-none tracking-wide">
+            <span className="text-[9px] font-semibold text-white/50 select-none tracking-wide">
               Next
             </span>
           </button>
@@ -327,8 +327,10 @@ export default function PlayerControls({
             </div>
           </div>
 
-          {/* Timeline — full width, below the control row */}
-          <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
+          {/* Timeline — full width, ~4px below the control row */}
+          <div className="-mt-[10px]">
+            <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
+          </div>
         </div>
 
         {/* ── DESKTOP LAYOUT ── (hidden on mobile, shown on md+) */}
