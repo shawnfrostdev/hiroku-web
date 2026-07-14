@@ -105,24 +105,25 @@ export default function PlayerControls({
     <>
       {/* ============================================================
           MOBILE CENTER OVERLAY — play/pause + skip 10s (hidden on md+)
+          Pushed up from bottom to avoid overlapping the control bar.
           ============================================================ */}
       <div
-        className={`md:hidden absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
+        className={`md:hidden absolute inset-x-0 top-0 bottom-[120px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-[28px] pointer-events-auto">
+        <div className="flex items-center gap-[32px] pointer-events-auto">
           {/* Skip Backward 10s */}
           <button
             type="button"
             onClick={onSkipBackward}
             aria-label="Rewind 10 seconds"
-            className="flex flex-col items-center gap-[4px] group"
+            className="flex flex-col items-center gap-[6px]"
           >
-            <div className="w-[52px] h-[52px] rounded-full bg-black/40 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <RotateCcw className="w-[22px] h-[22px] text-white" />
+            <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
+              <RotateCcw className="w-[24px] h-[24px] text-white" />
             </div>
-            <span className="text-[10px] font-bold text-white/70 select-none">
+            <span className="text-[10px] font-bold text-white/60 select-none tracking-wide">
               10s
             </span>
           </button>
@@ -132,12 +133,12 @@ export default function PlayerControls({
             type="button"
             onClick={onPlayToggle}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="w-[64px] h-[64px] rounded-full bg-black/50 border border-white/25 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform"
+            className="w-[68px] h-[68px] rounded-full bg-black/60 border border-white/30 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform shadow-lg"
           >
             {isPlaying ? (
-              <Pause className="w-[28px] h-[28px] text-white" />
+              <Pause className="w-[30px] h-[30px] text-white" />
             ) : (
-              <Play className="w-[28px] h-[28px] text-white fill-current translate-x-[2px]" />
+              <Play className="w-[30px] h-[30px] text-white fill-current translate-x-[2px]" />
             )}
           </button>
 
@@ -146,12 +147,12 @@ export default function PlayerControls({
             type="button"
             onClick={onSkipForward}
             aria-label="Skip forward 10 seconds"
-            className="flex flex-col items-center gap-[4px] group"
+            className="flex flex-col items-center gap-[6px]"
           >
-            <div className="w-[52px] h-[52px] rounded-full bg-black/40 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <RotateCw className="w-[22px] h-[22px] text-white" />
+            <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
+              <RotateCw className="w-[24px] h-[24px] text-white" />
             </div>
-            <span className="text-[10px] font-bold text-white/70 select-none">
+            <span className="text-[10px] font-bold text-white/60 select-none tracking-wide">
               10s
             </span>
           </button>
@@ -162,13 +163,13 @@ export default function PlayerControls({
           BOTTOM CONTROL BAR
           ============================================================ */}
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col z-10 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex flex-col z-10 transition-opacity duration-300 ${
           controlsVisible
             ? "opacity-100"
             : "opacity-0 md:group-hover:opacity-100"
         }`}
       >
-        {/* Skip OP/ED Button — positioned above timeline */}
+        {/* Skip OP/ED Button */}
         {activeSkip && (
           <div className="flex justify-end px-[12px] md:px-[20px] pb-[4px]">
             <button
@@ -183,48 +184,36 @@ export default function PlayerControls({
         )}
 
         {/* ── MOBILE LAYOUT ── (hidden on md+) */}
-        <div className="md:hidden flex flex-col px-[10px] pb-[10px] gap-[2px]">
-          {/* Row 1: Prev/Next Episode + Volume (left) — Time + Settings (right) */}
+        <div className="md:hidden flex flex-col px-[12px] pb-[10px] gap-0">
+          {/* Row 1: Prev/Next left — Timestamp right. No volume (use phone buttons). */}
           <div className="flex items-center justify-between w-full text-white">
-            {/* Left: Prev/Next + Volume */}
-            <div className="flex items-center gap-[4px]">
-              {/* Prev Episode */}
+            <div className="flex items-center gap-[2px]">
               <button
                 type="button"
                 onClick={onPrevEpisode}
                 disabled={currentEpNum === 1}
-                className="h-[44px] w-[44px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40"
-                title="Previous Episode"
+                className="h-[40px] w-[40px] flex items-center justify-center rounded-[6px] text-white/80 active:bg-white/10 cursor-pointer disabled:opacity-30"
                 aria-label="Previous Episode"
               >
-                <SkipBack className="w-[16px] h-[16px]" />
+                <SkipBack className="w-[17px] h-[17px]" />
               </button>
-
-              {/* Next Episode */}
               <button
                 type="button"
                 onClick={onNextEpisode}
                 disabled={currentEpNum === episodesCount}
-                className="h-[44px] w-[44px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer disabled:opacity-40"
-                title="Next Episode"
+                className="h-[40px] w-[40px] flex items-center justify-center rounded-[6px] text-white/80 active:bg-white/10 cursor-pointer disabled:opacity-30"
                 aria-label="Next Episode"
               >
-                <SkipForward className="w-[16px] h-[16px]" />
+                <SkipForward className="w-[17px] h-[17px]" />
               </button>
-
-              {/* Volume */}
-              <VolumeControl
-                onVolumeChange={onVolumeChange}
-                onToggleMute={onToggleMute}
-              />
             </div>
 
-            {/* Right: Timestamp */}
-            <div className="h-[36px] px-[10px] flex items-center text-[11px] font-bold text-white/90 select-none shrink-0">
+            {/* Timestamp — tabular-nums ensures consistent width */}
+            <span className="text-[12px] font-semibold text-white/85 select-none tabular-nums">
               {formatTime(currentTime)}
-              <span className="text-white/40 mx-[3px]">/</span>
+              <span className="text-white/35 mx-[5px]">/</span>
               {formatTime(duration)}
-            </div>
+            </span>
           </div>
 
           {/* Row 2: Timeline full-width */}
