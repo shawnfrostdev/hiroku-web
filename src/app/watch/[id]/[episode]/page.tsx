@@ -276,7 +276,7 @@ export default function WatchPage({
         console.warn("Autoplay blocked, attempting muted autoplay", err);
         videoEl.muted = true;
         setIsMuted(true);
-        if (typeof player.setVolume === "function") player.setVolume(0);
+        if (typeof player.setIsMuted === "function") player.setIsMuted(true);
         try {
           await videoEl.play();
         } catch (e) {
@@ -534,9 +534,16 @@ export default function WatchPage({
     if (!videoRef.current) return;
     const nextMute = !isMuted;
     setIsMuted(nextMute);
-    if (typeof player.toggleMute === "function") {
+
+    // If we are unmuting but the slider is stuck at 0, pop it back to 1
+    if (!nextMute && volume === 0) {
+      setVolume(1);
+      if (typeof player.setVolume === "function") player.setVolume(1);
+      videoRef.current.volume = 1;
+    } else if (typeof player.toggleMute === "function") {
       player.toggleMute();
     }
+
     videoRef.current.muted = nextMute;
   };
 

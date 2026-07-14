@@ -39,6 +39,7 @@ interface PlayerState {
   setResolutions: (resolutions: string[]) => void;
   setResolution: (resolution: string) => void;
   setPlaybackRate: (rate: number) => void;
+  setIsMuted: (isMuted: boolean) => void;
   resetPlayer: () => void;
 
   // Metadata Ingestion Point
@@ -118,6 +119,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   setResolutions: (resolutions) => set({ availableResolutions: resolutions }),
   setResolution: (resolution) => set({ currentResolution: resolution }),
   setPlaybackRate: (playbackRate) => set({ playbackRate }),
+  setIsMuted: (isMuted) => set({ isMuted }),
 
   resetPlayer: () =>
     set({
