@@ -280,6 +280,8 @@ export default function WatchPage({
           await videoEl.play();
         } catch (e) {
           console.warn("Muted autoplay also failed", e);
+          setIsPlaying(false);
+          setIsBuffering(false);
         }
       }
     };
@@ -827,6 +829,7 @@ export default function WatchPage({
                   onLoadStart={() => setIsBuffering(true)}
                   onLoadedData={() => setIsBuffering(false)}
                   autoPlay
+                  playsInline
                   crossOrigin="anonymous"
                 >
                   {rawSubtitles.map((sub) => (
