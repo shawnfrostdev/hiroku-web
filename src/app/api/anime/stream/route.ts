@@ -110,13 +110,14 @@ export async function GET(request: Request) {
         if (res.ok) {
           const temp = await res.json();
           if (temp?.streams && temp.streams.length > 0) {
-            data = temp;
-
-            // Normalize subtitles immediately
-            data.subtitles = normalizeSubtitles(data);
+            // Assign to a local non-null variable to satisfy the type checker
+            const resolved: Record<string, unknown> = temp;
+            resolved.subtitles = normalizeSubtitles(resolved);
+            data = resolved;
 
             // If watching dub and no subtitles are present, attempt to fetch subtitles from the sub source
-            if (audioType === "dub" && data.subtitles.length === 0) {
+            const currentSubs = resolved.subtitles as unknown[];
+            if (audioType === "dub" && currentSubs.length === 0) {
               const subWatchUrl = `${SCRAPER_URL}/api/watch/${activeServer}/${animeId}/sub/${episodeNumber}`;
               try {
                 const subRes = await fetch(subWatchUrl, { cache: "no-store" });
@@ -124,7 +125,7 @@ export async function GET(request: Request) {
                   const subTemp = await subRes.json();
                   const subNorm = normalizeSubtitles(subTemp);
                   if (subNorm.length > 0) {
-                    data.subtitles = subNorm;
+                    resolved.subtitles = subNorm;
                     console.log(
                       `[Next.js Stream API] Injected subtitles from sub source for ${activeServer}`,
                     );

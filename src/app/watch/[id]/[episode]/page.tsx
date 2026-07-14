@@ -369,7 +369,6 @@ export default function WatchPage({
   );
 
   // Synchronize with Player Store (mock globally active episode)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional dependency selection
   useEffect(() => {
     setCurrentTime(0); // Reset time when episode changes
     player.playEpisode(animeId, currentEpNum);
