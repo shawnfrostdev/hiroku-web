@@ -69,7 +69,7 @@ export default function TimelineBar({
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: timeline interaction wrapper
     <div
-      className="w-full flex items-center relative group py-[14px] md:py-[10px] cursor-pointer touch-none"
+      className="w-full flex items-center relative group py-[10px] md:py-[10px] cursor-pointer touch-none"
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

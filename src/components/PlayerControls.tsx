@@ -103,11 +103,11 @@ export default function PlayerControls({
     <>
       {/* ============================================================
           MOBILE CENTER OVERLAY — Prev Ep | Play/Pause | Next Ep
-          Double-tap left/right sides of the video = ±10s skip.
-          Sits in the upper portion, above the control bar.
+          Uses inset-0 so it is always centered in the FULL player area,
+          independent of the bottom control bar height or visibility.
           ============================================================ */}
       <div
-        className={`md:hidden absolute inset-0 pb-[72px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
+        className={`md:hidden absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -185,13 +185,13 @@ export default function PlayerControls({
         )}
 
         {/* ── MOBILE LAYOUT ── (hidden on md+) */}
-        <div className="md:hidden flex flex-col px-[10px] pb-[8px]">
-          {/* Single row: Timestamp (left) — Settings (right) */}
-          <div className="flex items-center justify-between w-full text-white">
+        <div className="md:hidden flex flex-col pb-[6px]">
+          {/* Single row: Timestamp (left) — Settings (right) — compact ~24px height */}
+          <div className="flex items-center justify-between w-full text-white px-[10px]">
             {/* Timestamp */}
-            <span className="text-[12px] font-semibold text-white/85 select-none tabular-nums pl-[2px]">
+            <span className="text-[11px] font-semibold text-white/80 select-none tabular-nums">
               {formatTime(currentTime)}
-              <span className="text-white/35 mx-[5px]">/</span>
+              <span className="text-white/35 mx-[4px]">/</span>
               {formatTime(duration)}
             </span>
 
@@ -206,13 +206,13 @@ export default function PlayerControls({
                     setShowAudio(false);
                     setShowQuality(false);
                   }}
-                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
                   aria-label="Playback Speed"
                 >
                   {playbackRate}x
                 </button>
                 {showSpeed && (
-                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[72px]">
+                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[72px]">
                     {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
                       <button
                         type="button"
@@ -221,7 +221,7 @@ export default function PlayerControls({
                           onPlaybackRateChange(rate);
                           setShowSpeed(false);
                         }}
-                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
+                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
                           playbackRate === rate
                             ? "bg-white text-black"
                             : "text-text-secondary"
@@ -243,7 +243,7 @@ export default function PlayerControls({
                     setShowSpeed(false);
                     setShowQuality(false);
                   }}
-                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
                   aria-label="Subtitle Language"
                 >
                   <span className="capitalize truncate whitespace-nowrap">
@@ -251,7 +251,7 @@ export default function PlayerControls({
                   </span>
                 </button>
                 {showAudio && (
-                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
+                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
                     {availableSubtitles.map((sub: string) => (
                       <button
                         type="button"
@@ -260,7 +260,7 @@ export default function PlayerControls({
                           onSubtitleChange(sub);
                           setShowAudio(false);
                         }}
-                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
                           currentSubtitle === sub
                             ? "bg-white text-black"
                             : "text-text-secondary"
@@ -282,13 +282,13 @@ export default function PlayerControls({
                     setShowSpeed(false);
                     setShowAudio(false);
                   }}
-                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
                   aria-label="Video Quality"
                 >
                   <span className="whitespace-nowrap">{currentResolution}</span>
                 </button>
                 {showQuality && (
-                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
+                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
                     {resolutions.map((res) => (
                       <button
                         type="button"
@@ -297,7 +297,7 @@ export default function PlayerControls({
                           onResolutionChange(res);
                           setShowQuality(false);
                         }}
-                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
                           currentResolution === res ||
                           (res === "Auto" && !currentResolution)
                             ? "bg-white text-black"
@@ -315,20 +315,20 @@ export default function PlayerControls({
               <button
                 type="button"
                 onClick={onFullscreenToggle}
-                className="h-[44px] w-[44px] flex items-center justify-center text-white/85 cursor-pointer"
+                className="h-[28px] w-[28px] flex items-center justify-center text-white/80 cursor-pointer"
                 aria-label="Toggle Fullscreen"
               >
                 {isFullscreen ? (
-                  <Minimize2 className="w-[16px] h-[16px]" />
+                  <Minimize2 className="w-[13px] h-[13px]" />
                 ) : (
-                  <Maximize2 className="w-[16px] h-[16px]" />
+                  <Maximize2 className="w-[13px] h-[13px]" />
                 )}
               </button>
             </div>
           </div>
 
-          {/* Timeline — full width, ~4px below the control row */}
-          <div className="-mt-[10px]">
+          {/* Timeline — no horizontal padding, stretches to player edges */}
+          <div className="-mt-[4px]">
             <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
           </div>
         </div>
