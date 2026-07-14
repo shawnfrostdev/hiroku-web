@@ -1248,7 +1248,7 @@ export default function WatchPage({
                       >
                         {/* Thumbnail / EP tag */}
                         {thumbnail ? (
-                          <div className="w-[100px] aspect-[16/9] rounded-[4px] overflow-hidden bg-[#121212] shrink-0 border border-border-line">
+                          <div className="relative w-[100px] aspect-[16/9] rounded-[4px] overflow-hidden bg-[#121212] shrink-0 border border-border-line">
                             <Image
                               unoptimized
                               fill
