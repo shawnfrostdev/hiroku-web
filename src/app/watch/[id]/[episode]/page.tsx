@@ -472,8 +472,11 @@ export default function WatchPage({
 
   const handleLoadedMetadata = () => {
     if (!videoRef.current) return;
-    setDuration(videoRef.current.duration);
-    player.setDuration(videoRef.current.duration);
+    const dur = videoRef.current.duration;
+    if (dur && !Number.isNaN(dur) && dur !== Infinity) {
+      setDuration(dur);
+      player.setDuration(dur);
+    }
   };
 
   const handleVideoEnded = () => {
@@ -824,6 +827,13 @@ export default function WatchPage({
                   className="w-full h-full object-contain"
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
+                  onDurationChange={(e) => {
+                    const dur = e.currentTarget.duration;
+                    if (dur && !Number.isNaN(dur) && dur !== Infinity) {
+                      setDuration(dur);
+                      player.setDuration(dur);
+                    }
+                  }}
                   onEnded={handleVideoEnded}
                   onPlay={() => {
                     setIsPlaying(true);
