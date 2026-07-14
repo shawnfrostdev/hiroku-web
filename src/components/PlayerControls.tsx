@@ -5,8 +5,6 @@ import {
   Minimize2,
   Pause,
   Play,
-  RotateCcw,
-  RotateCw,
   SkipBack,
   SkipForward,
 } from "lucide-react";
@@ -104,27 +102,29 @@ export default function PlayerControls({
   return (
     <>
       {/* ============================================================
-          MOBILE CENTER OVERLAY — play/pause + skip 10s (hidden on md+)
-          Pushed up from bottom to avoid overlapping the control bar.
+          MOBILE CENTER OVERLAY — Prev Ep | Play/Pause | Next Ep
+          Double-tap left/right sides of the video = ±10s skip.
+          Sits in the upper portion, above the control bar.
           ============================================================ */}
       <div
-        className={`md:hidden absolute inset-x-0 top-0 bottom-[120px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
+        className={`md:hidden absolute inset-x-0 top-0 bottom-[96px] flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300 ${
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-[32px] pointer-events-auto">
-          {/* Skip Backward 10s */}
+        <div className="flex items-center gap-[28px] pointer-events-auto">
+          {/* Previous Episode */}
           <button
             type="button"
-            onClick={onSkipBackward}
-            aria-label="Rewind 10 seconds"
-            className="flex flex-col items-center gap-[6px]"
+            onClick={onPrevEpisode}
+            disabled={currentEpNum === 1}
+            aria-label="Previous Episode"
+            className="flex flex-col items-center gap-[5px] disabled:opacity-30"
           >
             <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <RotateCcw className="w-[24px] h-[24px] text-white" />
+              <SkipBack className="w-[24px] h-[24px] text-white" />
             </div>
-            <span className="text-[10px] font-bold text-white/60 select-none tracking-wide">
-              10s
+            <span className="text-[10px] font-semibold text-white/55 select-none tracking-wide">
+              Prev
             </span>
           </button>
 
@@ -142,18 +142,19 @@ export default function PlayerControls({
             )}
           </button>
 
-          {/* Skip Forward 10s */}
+          {/* Next Episode */}
           <button
             type="button"
-            onClick={onSkipForward}
-            aria-label="Skip forward 10 seconds"
-            className="flex flex-col items-center gap-[6px]"
+            onClick={onNextEpisode}
+            disabled={currentEpNum === episodesCount}
+            aria-label="Next Episode"
+            className="flex flex-col items-center gap-[5px] disabled:opacity-30"
           >
             <div className="w-[54px] h-[54px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <RotateCw className="w-[24px] h-[24px] text-white" />
+              <SkipForward className="w-[24px] h-[24px] text-white" />
             </div>
-            <span className="text-[10px] font-bold text-white/60 select-none tracking-wide">
-              10s
+            <span className="text-[10px] font-semibold text-white/55 select-none tracking-wide">
+              Next
             </span>
           </button>
         </div>
@@ -184,175 +185,150 @@ export default function PlayerControls({
         )}
 
         {/* ── MOBILE LAYOUT ── (hidden on md+) */}
-        <div className="md:hidden flex flex-col px-[12px] pb-[10px] gap-0">
-          {/* Row 1: Prev/Next left — Timestamp right. No volume (use phone buttons). */}
+        <div className="md:hidden flex flex-col px-[10px] pb-[8px]">
+          {/* Single row: Timestamp (left) — Settings (right) */}
           <div className="flex items-center justify-between w-full text-white">
-            <div className="flex items-center gap-[2px]">
-              <button
-                type="button"
-                onClick={onPrevEpisode}
-                disabled={currentEpNum === 1}
-                className="h-[40px] w-[40px] flex items-center justify-center rounded-[6px] text-white/80 active:bg-white/10 cursor-pointer disabled:opacity-30"
-                aria-label="Previous Episode"
-              >
-                <SkipBack className="w-[17px] h-[17px]" />
-              </button>
-              <button
-                type="button"
-                onClick={onNextEpisode}
-                disabled={currentEpNum === episodesCount}
-                className="h-[40px] w-[40px] flex items-center justify-center rounded-[6px] text-white/80 active:bg-white/10 cursor-pointer disabled:opacity-30"
-                aria-label="Next Episode"
-              >
-                <SkipForward className="w-[17px] h-[17px]" />
-              </button>
-            </div>
-
-            {/* Timestamp — tabular-nums ensures consistent width */}
-            <span className="text-[12px] font-semibold text-white/85 select-none tabular-nums">
+            {/* Timestamp */}
+            <span className="text-[12px] font-semibold text-white/85 select-none tabular-nums pl-[2px]">
               {formatTime(currentTime)}
               <span className="text-white/35 mx-[5px]">/</span>
               {formatTime(duration)}
             </span>
+
+            {/* Settings: Speed | CC | Quality | Fullscreen */}
+            <div className="flex items-center">
+              {/* Speed */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSpeed((prev) => !prev);
+                    setShowAudio(false);
+                    setShowQuality(false);
+                  }}
+                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  aria-label="Playback Speed"
+                >
+                  {playbackRate}x
+                </button>
+                {showSpeed && (
+                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[72px]">
+                    {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
+                      <button
+                        type="button"
+                        key={rate}
+                        onClick={() => {
+                          onPlaybackRateChange(rate);
+                          setShowSpeed(false);
+                        }}
+                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
+                          playbackRate === rate
+                            ? "bg-white text-black"
+                            : "text-text-secondary"
+                        }`}
+                      >
+                        {rate}x
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Subtitle / CC */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAudio((prev) => !prev);
+                    setShowSpeed(false);
+                    setShowQuality(false);
+                  }}
+                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  aria-label="Subtitle Language"
+                >
+                  <span className="capitalize truncate whitespace-nowrap">
+                    {currentSubtitle === "Off" ? "CC" : currentSubtitle}
+                  </span>
+                </button>
+                {showAudio && (
+                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
+                    {availableSubtitles.map((sub: string) => (
+                      <button
+                        type="button"
+                        key={sub}
+                        onClick={() => {
+                          onSubtitleChange(sub);
+                          setShowAudio(false);
+                        }}
+                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                          currentSubtitle === sub
+                            ? "bg-white text-black"
+                            : "text-text-secondary"
+                        }`}
+                      >
+                        {sub}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quality */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowQuality((prev) => !prev);
+                    setShowSpeed(false);
+                    setShowAudio(false);
+                  }}
+                  className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center text-white/85 text-[11px] font-bold cursor-pointer"
+                  aria-label="Video Quality"
+                >
+                  <span className="whitespace-nowrap">{currentResolution}</span>
+                </button>
+                {showQuality && (
+                  <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
+                    {resolutions.map((res) => (
+                      <button
+                        type="button"
+                        key={res}
+                        onClick={() => {
+                          onResolutionChange(res);
+                          setShowQuality(false);
+                        }}
+                        className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
+                          currentResolution === res ||
+                          (res === "Auto" && !currentResolution)
+                            ? "bg-white text-black"
+                            : "text-text-secondary"
+                        }`}
+                      >
+                        {res}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Fullscreen */}
+              <button
+                type="button"
+                onClick={onFullscreenToggle}
+                className="h-[44px] w-[44px] flex items-center justify-center text-white/85 cursor-pointer"
+                aria-label="Toggle Fullscreen"
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="w-[16px] h-[16px]" />
+                ) : (
+                  <Maximize2 className="w-[16px] h-[16px]" />
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Row 2: Timeline full-width */}
+          {/* Timeline — full width, below the control row */}
           <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
-
-          {/* Row 3: Settings (speed / CC / quality / fullscreen) */}
-          <div className="flex items-center justify-end gap-[2px] text-white">
-            {/* Speed */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSpeed((prev) => !prev);
-                  setShowAudio(false);
-                  setShowQuality(false);
-                }}
-                className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 text-[11px] font-bold cursor-pointer"
-                aria-expanded={showSpeed}
-                aria-label="Playback Speed"
-              >
-                {playbackRate}x
-              </button>
-              {showSpeed && (
-                <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[72px]">
-                  {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
-                    <button
-                      type="button"
-                      key={rate}
-                      onClick={() => {
-                        onPlaybackRateChange(rate);
-                        setShowSpeed(false);
-                      }}
-                      className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
-                        playbackRate === rate
-                          ? "bg-white text-black"
-                          : "text-text-secondary"
-                      }`}
-                    >
-                      {rate}x
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Subtitle */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAudio((prev) => !prev);
-                  setShowSpeed(false);
-                  setShowQuality(false);
-                }}
-                className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 text-[11px] font-bold cursor-pointer"
-                aria-expanded={showAudio}
-                aria-label="Subtitle Language"
-              >
-                <span className="capitalize truncate whitespace-nowrap">
-                  {currentSubtitle === "Off" ? "CC" : currentSubtitle}
-                </span>
-              </button>
-              {showAudio && (
-                <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
-                  {availableSubtitles.map((sub: string) => (
-                    <button
-                      type="button"
-                      key={sub}
-                      onClick={() => {
-                        onSubtitleChange(sub);
-                        setShowAudio(false);
-                      }}
-                      className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
-                        currentSubtitle === sub
-                          ? "bg-white text-black"
-                          : "text-text-secondary"
-                      }`}
-                    >
-                      {sub}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quality */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowQuality((prev) => !prev);
-                  setShowSpeed(false);
-                  setShowAudio(false);
-                }}
-                className="h-[44px] min-w-[44px] px-[8px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 text-[11px] font-bold cursor-pointer"
-                aria-expanded={showQuality}
-                aria-label="Video Quality"
-              >
-                <span className="whitespace-nowrap">{currentResolution}</span>
-              </button>
-              {showQuality && (
-                <div className="absolute bottom-[52px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
-                  {resolutions.map((res) => (
-                    <button
-                      type="button"
-                      key={res}
-                      onClick={() => {
-                        onResolutionChange(res);
-                        setShowQuality(false);
-                      }}
-                      className={`px-[10px] py-[8px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
-                        currentResolution === res ||
-                        (res === "Auto" && !currentResolution)
-                          ? "bg-white text-black"
-                          : "text-text-secondary"
-                      }`}
-                    >
-                      {res}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Fullscreen */}
-            <button
-              type="button"
-              onClick={onFullscreenToggle}
-              className="h-[44px] w-[44px] flex items-center justify-center rounded-[8px] hover:bg-white/15 text-white/90 hover:text-white transition-all duration-150 cursor-pointer"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-              aria-label="Toggle Fullscreen"
-            >
-              {isFullscreen ? (
-                <Minimize2 className="w-[16px] h-[16px]" />
-              ) : (
-                <Maximize2 className="w-[16px] h-[16px]" />
-              )}
-            </button>
-          </div>
         </div>
 
         {/* ── DESKTOP LAYOUT ── (hidden on mobile, shown on md+) */}
