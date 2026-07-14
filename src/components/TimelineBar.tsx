@@ -35,6 +35,22 @@ export default function TimelineBar({
     setHoverPercent(x / rect.width);
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!containerRef.current || !duration) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(touch.clientX - rect.left, rect.width));
+    setHoverX(x);
+    setHoverPercent(x / rect.width);
+  };
+
+  const handleTouchEnd = () => {
+    if (!duration) return;
+    onSeek(hoverPercent * duration);
+    setHoverX(null);
+  };
+
   const handleMouseLeave = () => {
     setHoverX(null);
   };
@@ -53,10 +69,12 @@ export default function TimelineBar({
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: timeline interaction wrapper
     <div
-      className="w-full flex items-center relative group py-[10px] cursor-pointer"
+      className="w-full flex items-center relative group py-[14px] md:py-[10px] cursor-pointer touch-none"
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* OP/ED Highlights */}
       {duration > 0 &&

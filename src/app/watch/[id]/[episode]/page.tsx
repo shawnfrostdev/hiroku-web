@@ -526,6 +526,25 @@ export default function WatchPage({
     player.setTime(time);
   };
 
+  const handleSkipBackward = () => {
+    if (!videoRef.current) return;
+    const newTime = Math.max(0, videoRef.current.currentTime - 10);
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+    player.setTime(newTime);
+  };
+
+  const handleSkipForward = () => {
+    if (!videoRef.current) return;
+    const newTime = Math.min(
+      videoRef.current.duration || Number.POSITIVE_INFINITY,
+      videoRef.current.currentTime + 10,
+    );
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+    player.setTime(newTime);
+  };
+
   const adjustVolume = useCallback(
     (delta: number) => {
       const newVol = Math.max(0, Math.min(1, volume + delta));
@@ -830,7 +849,7 @@ export default function WatchPage({
                 setShowSpeedControls(false);
               }
             }}
-            className="group relative w-full aspect-video lg:aspect-auto max-h-[60vh] lg:max-h-none lg:flex-1 lg:min-h-0 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
+            className="group relative w-full aspect-video lg:aspect-auto max-h-[48vh] sm:max-h-[55vh] md:max-h-[60vh] lg:max-h-none lg:flex-1 lg:min-h-0 mx-auto bg-black rounded-0 md:rounded-[12px] overflow-hidden border border-border-line shadow-2xl select-none flex justify-center items-center"
           >
             {/* The Video Element or Embed Iframe */}
             {streamData?.sources?.[0]?.type === "embed" ? (
@@ -982,6 +1001,8 @@ export default function WatchPage({
                     onPrevEpisode={navigateToPrevEpisode}
                     onNextEpisode={navigateToNextEpisode}
                     onSeek={handleSeekChange}
+                    onSkipBackward={handleSkipBackward}
+                    onSkipForward={handleSkipForward}
                     onVolumeChange={handleVolumeChange}
                     onToggleMute={toggleMute}
                     onPlaybackRateChange={handlePlaybackRateChange}
