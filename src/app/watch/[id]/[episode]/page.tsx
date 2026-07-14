@@ -10,8 +10,6 @@ import {
   Headphones,
   LayoutList,
   Loader2,
-  Pause,
-  Play,
   Server,
   Share2,
   Zap,
@@ -72,8 +70,6 @@ export default function WatchPage({
   const [isHoveringControls, setIsHoveringControls] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const playFlashTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [playFlash, setPlayFlash] = useState<"play" | "pause" | null>(null);
 
   // Autoplay next episode
   const [autoplayNext, _setAutoplayNext] = useState(true);
@@ -472,24 +468,24 @@ export default function WatchPage({
       videoRef.current.play().catch(() => {});
       setIsPlaying(true);
       setCountdown(null);
-      setPlayFlash("play");
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
-      setPlayFlash("pause");
     }
-    // Clear flash after animation
-    if (playFlashTimerRef.current) clearTimeout(playFlashTimerRef.current);
-    playFlashTimerRef.current = setTimeout(() => setPlayFlash(null), 700);
   }, [isPlaying]);
 
   // Unified click handler that differentiates single vs double click.
   // Double click left half = rewind 10s, right half = forward 10s.
-  // Prevents double-click from triggering browser fullscreen.
+  // On mobile (touch) a single tap only shows/hides controls — no play/pause.
   const handlePlayerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    // Detect touch: PointerEvent with pointerType="touch" or no pointerId (synthetic)
+    const isTouch =
+      (e.nativeEvent as PointerEvent).pointerType === "touch" ||
+      window.matchMedia("(pointer: coarse)").matches;
+
     if (clickTimerRef.current) {
-      // Second click - it's a double click
+      // Second click / double-tap — skip ±10s on both desktop and mobile
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -500,10 +496,15 @@ export default function WatchPage({
         seekRelative(10);
       }
     } else {
-      // First click - wait to see if a second comes
+      // First click — wait to see if a second comes
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;
-        togglePlay();
+        // On mobile: single tap only shows/hides controls, not play/pause
+        if (!isTouch) {
+          togglePlay();
+        } else {
+          setIsHoveringControls((prev) => !prev);
+        }
       }, 220);
     }
   };
@@ -982,22 +983,6 @@ export default function WatchPage({
                   }
                   className="absolute inset-0 flex items-center justify-center bg-black/10 cursor-pointer select-none"
                 >
-                  {/* Play / Pause flash indicator */}
-                  {playFlash !== null && (
-                    <div
-                      key={playFlash}
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none animate-ping-once"
-                    >
-                      <div className="w-[72px] h-[72px] rounded-[6px] flex items-center justify-center bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
-                        {playFlash === "play" ? (
-                          <Play className="w-[32px] h-[32px] text-white/90 fill-current" />
-                        ) : (
-                          <Pause className="w-[32px] h-[32px] text-white/90" />
-                        )}
-                      </div>
-                    </div>
-                  )}
-
                   {countdown !== null && (
                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-[16px] text-center p-[24px]">
                       <span className="text-sm font-semibold tracking-wider text-text-muted uppercase">
