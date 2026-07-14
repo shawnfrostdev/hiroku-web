@@ -56,7 +56,8 @@ export function Navbar() {
 
   const allLinks = [
     { label: "Home", href: "/" },
-
+    { label: "Browse", href: "/browse" },
+    { label: "Bookmarks", href: "/bookmarks" },
     { label: "Profile", href: "/profile" },
     { label: "Settings", href: "/settings" },
   ];
@@ -74,7 +75,10 @@ export function Navbar() {
             hiroku
           </Link>
           <div className="hidden md:flex items-center gap-[16px]">
-            {[{ label: "Library", href: "/bookmarks" }].map((item) => (
+            {[
+              { label: "Browse", href: "/browse" },
+              { label: "Bookmarks", href: "/bookmarks" },
+            ].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

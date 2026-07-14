@@ -6,6 +6,8 @@ export interface WatchlistItem {
   animeTitle: string;
   animeImage?: string;
   status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
+  currentEpisode?: number;
+  progressSeconds?: number;
 }
 
 interface WatchlistState {
@@ -13,6 +15,11 @@ interface WatchlistState {
   addItem: (item: WatchlistItem) => void;
   removeItem: (animeId: string) => void;
   updateStatus: (animeId: string, status: WatchlistItem["status"]) => void;
+  updateProgress: (
+    animeId: string,
+    currentEpisode: number,
+    progressSeconds?: number,
+  ) => void;
   setItems: (items: WatchlistItem[]) => void;
 }
 
@@ -22,13 +29,31 @@ export const useWatchlistStore = create<WatchlistState>()(
       items: {},
       addItem: (item) =>
         set((state) => ({
-          items: { ...state.items, [item.animeId]: item },
+          items: {
+            ...state.items,
+            [item.animeId]: { ...(state.items[item.animeId] || {}), ...item },
+          },
         })),
       removeItem: (animeId) =>
         set((state) => {
           const newItems = { ...state.items };
           delete newItems[animeId];
           return { items: newItems };
+        }),
+      updateProgress: (animeId, currentEpisode, progressSeconds) =>
+        set((state) => {
+          const item = state.items[animeId];
+          if (!item) return {};
+          return {
+            items: {
+              ...state.items,
+              [animeId]: {
+                ...item,
+                currentEpisode,
+                progressSeconds: progressSeconds ?? item.progressSeconds,
+              },
+            },
+          };
         }),
       updateStatus: (animeId, status) =>
         set((state) => {

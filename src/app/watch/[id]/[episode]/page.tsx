@@ -47,7 +47,10 @@ export default function WatchPage({
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [_isBuffering, setIsBuffering] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(() => {
+    const saved = useWatchlistStore.getState().items[animeId]?.progressSeconds;
+    return saved || 0;
+  });
   const [_duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
@@ -392,11 +395,27 @@ export default function WatchPage({
           typeof currentTitle === "string" ? currentTitle : "Unknown Title",
         animeImage: currentImage,
         status: "watching",
+        currentEpisode: Number(currentEpNum) || 1,
       });
     }
-  }, [anime]);
+  }, [anime, currentEpNum]);
 
   // Keyboard controls
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (currentTime > 0) {
+        useWatchlistStore
+          .getState()
+          .updateProgress(
+            String(animeId),
+            Number(currentEpNum) || 1,
+            currentTime,
+          );
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentTime, animeId, currentEpNum]);
+
   // Video Event Handlers
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
