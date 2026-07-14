@@ -45,6 +45,10 @@ export default function WatchPage({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+  // Always-fresh refs so the HLS effect can read the latest values without
+  // needing them in the dependency array (which would cause unnecessary reloads)
+  const resumeTimeRef = useRef<number>(0);
+  const wasPlayingRef = useRef<boolean>(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [_isBuffering, setIsBuffering] = useState(true);
   const [currentTime, setCurrentTime] = useState(() => {
@@ -253,6 +257,10 @@ export default function WatchPage({
     }
   }, [streamData, rawSubtitles]);
 
+  // Keep the refs in sync with the latest state values on every render
+  resumeTimeRef.current = currentTime;
+  wasPlayingRef.current = isPlaying;
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     if (!videoRef.current || !VIDEO_SOURCE) return;
@@ -264,14 +272,10 @@ export default function WatchPage({
       VIDEO_SOURCE.includes("/m3u8");
     const videoEl = videoRef.current;
 
-    const timeToResume = currentTime; // Capture time exactly when stream switches
-
-    const handleMetadata = () => {
-      if (timeToResume > 0) {
-        videoEl.currentTime = timeToResume;
-      }
-      attemptPlay();
-    };
+    // Read from refs at mount-time to get the true latest values even though
+    // neither currentTime nor isPlaying are in the dependency array
+    const timeToResume = resumeTimeRef.current;
+    const shouldResumePlaying = wasPlayingRef.current;
 
     const attemptPlay = async () => {
       try {
@@ -288,6 +292,23 @@ export default function WatchPage({
           setIsPlaying(false);
           setIsBuffering(false);
         }
+      }
+    };
+
+    const handleMetadata = () => {
+      // Clamp to the actual duration to handle servers with differing lengths
+      const clampedTime =
+        videoEl.duration > 0
+          ? Math.min(timeToResume, videoEl.duration - 0.5)
+          : timeToResume;
+      if (clampedTime > 0) {
+        videoEl.currentTime = clampedTime;
+      }
+      if (shouldResumePlaying) {
+        attemptPlay();
+      } else {
+        videoEl.pause();
+        setIsPlaying(false);
       }
     };
 
@@ -317,10 +338,6 @@ export default function WatchPage({
       });
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        if (timeToResume > 0) {
-          videoEl.currentTime = timeToResume;
-        }
-        attemptPlay();
         // Expose available quality levels to the store
         const levelLabels = data.levels.map(
           (l: { height: number }) => `${l.height}p`,
@@ -328,6 +345,9 @@ export default function WatchPage({
         if (levelLabels.length > 0) {
           player.setResolutions([...levelLabels, "Auto"]);
         }
+        // For HLS streams, seeking is reliable after MANIFEST_PARSED. Use
+        // handleMetadata to do the clamped seek + conditional play/pause.
+        handleMetadata();
       });
     } else if (isM3U8 && videoEl.canPlayType("application/vnd.apple.mpegurl")) {
       videoEl.src = VIDEO_SOURCE;
