@@ -9,6 +9,7 @@ export interface WatchlistItem {
   currentEpisode?: number;
   progressSeconds?: number;
   duration?: number;
+  updatedAt?: number;
 }
 
 interface WatchlistState {
@@ -33,7 +34,11 @@ export const useWatchlistStore = create<WatchlistState>()(
         set((state) => ({
           items: {
             ...state.items,
-            [item.animeId]: { ...(state.items[item.animeId] || {}), ...item },
+            [item.animeId]: {
+              ...(state.items[item.animeId] || {}),
+              ...item,
+              updatedAt: Date.now(),
+            },
           },
         })),
       removeItem: (animeId) =>
@@ -54,6 +59,7 @@ export const useWatchlistStore = create<WatchlistState>()(
                 currentEpisode,
                 progressSeconds: progressSeconds ?? item.progressSeconds,
                 duration: duration ?? item.duration,
+                updatedAt: Date.now(),
               },
             },
           };
@@ -65,7 +71,7 @@ export const useWatchlistStore = create<WatchlistState>()(
           return {
             items: {
               ...state.items,
-              [animeId]: { ...item, status },
+              [animeId]: { ...item, status, updatedAt: Date.now() },
             },
           };
         }),

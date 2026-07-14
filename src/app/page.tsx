@@ -306,9 +306,9 @@ export default function Page() {
   });
 
   const watchlist = useWatchlistStore((state) => state.items);
-  const watchingItems = Object.values(watchlist).filter(
-    (item) => item.status === "watching",
-  );
+  const watchingItems = Object.values(watchlist)
+    .filter((item) => item.status === "watching")
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
   const heroEntries =
     entries && Array.isArray(entries) ? entries.slice(0, 5) : [];
@@ -322,6 +322,7 @@ export default function Page() {
 
   const [forYouEntries, setForYouEntries] = useState<AnimeItem[]>([]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional interval reset
   useEffect(() => {
     if (heroEntries.length === 0) return;
     setProgress(0);
@@ -336,7 +337,7 @@ export default function Page() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [heroEntries.length]);
+  }, [heroEntries.length, activeIndex]);
 
   useEffect(() => {
     if (!entries || !Array.isArray(entries) || entries.length === 0) {
@@ -667,7 +668,7 @@ export default function Page() {
             {/* Action buttons */}
             <div className="flex flex-wrap items-center gap-[8px] md:gap-[12px] mt-[6px] md:mt-[8px]">
               <Button variant="primary" size="md" className="gap-[8px]" asChild>
-                <Link href={`/anime/${activeEntry.id}`}>
+                <Link href={`/watch/${activeEntry.id}/1`}>
                   <Play className="h-[16px] w-[16px] fill-current" />
                   Watch Now
                 </Link>
