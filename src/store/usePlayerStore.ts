@@ -42,7 +42,10 @@ interface PlayerState {
   resetPlayer: () => void;
 
   // Metadata Ingestion Point
-  ingestEpisodeData: (metadata: Record<string, unknown>) => void;
+  ingestEpisodeData: (metadata: {
+    chapters?: Array<{ title: string; startTime: number }>;
+    intro?: { start: number; end: number };
+  }) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({

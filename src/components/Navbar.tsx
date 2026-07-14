@@ -56,8 +56,7 @@ export function Navbar() {
 
   const allLinks = [
     { label: "Home", href: "/" },
-    { label: "Browse", href: "/browse" },
-    { label: "Bookmarks", href: "/bookmarks" },
+
     { label: "Profile", href: "/profile" },
     { label: "Settings", href: "/settings" },
   ];
@@ -67,12 +66,29 @@ export function Navbar() {
       {/* Main Navbar Row */}
       <nav className="mx-[12px] mt-[12px] md:m-[24px] bg-[#141414] border border-[#282828] rounded-[12px] h-[56px] md:h-[64px] px-[12px] md:px-[16px] flex items-center justify-between gap-[12px] md:gap-[32px]">
         {/* Left: Logo */}
-        <Link
-          href="/"
-          className="text-xl font-logo text-[#FFFFFF] hover:opacity-80 transition-opacity lowercase shrink-0"
-        >
-          hiroku
-        </Link>
+        <div className="flex items-center gap-[24px] shrink-0">
+          <Link
+            href="/"
+            className="text-xl font-logo text-[#FFFFFF] hover:opacity-80 transition-opacity lowercase shrink-0"
+          >
+            hiroku
+          </Link>
+          <div className="hidden md:flex items-center gap-[16px]">
+            {[{ label: "Library", href: "/bookmarks" }].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                  pathname === item.href
+                    ? "text-[#FFFFFF]"
+                    : "text-[#A3A3A3] hover:text-[#FFFFFF]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Desktop Center: Search bar */}
         <div className="hidden md:flex flex-1 min-w-[120px]" ref={dropdownRef}>
@@ -108,61 +124,13 @@ export function Navbar() {
                   <div className="flex flex-col p-[8px] gap-[4px]">
                     {searchResults.map(
                       (item: {
-                        id: number;
-                        title?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        media?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        averageScore?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        genres?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        recommendations?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        description?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
+                        id: string | number;
+                        title?: string;
+                        posterImage?: string;
+                        year?: string | number;
+                        format?: string;
+                        episodes?: number;
+                        score?: string | number;
                       }) => (
                         <Link
                           href={`/anime/${item.id}`}
@@ -176,7 +144,7 @@ export function Navbar() {
                                 unoptimized
                                 fill
                                 src={item.posterImage}
-                                alt={item.title}
+                                alt={item.title || "Poster"}
                                 className="w-full h-full object-cover"
                               />
                             )}
@@ -345,61 +313,13 @@ export function Navbar() {
                   <div className="flex flex-col p-[8px] gap-[4px]">
                     {searchResults.map(
                       (item: {
-                        id: number;
-                        title?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        media?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        averageScore?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        genres?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        recommendations?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
-                        description?:
-                          | Record<string, unknown>
-                          | string
-                          | number
-                          | boolean
-                          | null
-                          | undefined
-                          | unknown[]
-                          | unknown;
+                        id: string | number;
+                        title?: string;
+                        posterImage?: string;
+                        year?: string | number;
+                        format?: string;
+                        episodes?: number;
+                        score?: string | number;
                       }) => (
                         <Link
                           href={`/anime/${item.id}`}
@@ -416,7 +336,7 @@ export function Navbar() {
                                 unoptimized
                                 fill
                                 src={item.posterImage}
-                                alt={item.title}
+                                alt={item.title || "Poster"}
                                 className="w-full h-full object-cover"
                               />
                             )}

@@ -54,65 +54,17 @@ export async function GET(request: Request) {
 
     const mappedData = json.data.Page.media.map(
       (item: {
-        id: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        media?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        averageScore?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        genres?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        recommendations?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        description?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
+        id: string | number;
+        title?: { english?: string; romaji?: string };
+        coverImage?: { large?: string };
+        averageScore?: number;
+        format?: string;
+        episodes?: number;
+        startDate?: { year?: number };
       }) => ({
         id: item.id,
-        title: item.title.english || item.title.romaji,
-        posterImage: item.coverImage.large,
+        title: item.title?.english || item.title?.romaji,
+        posterImage: item.coverImage?.large,
         score: item.averageScore ? (item.averageScore / 10).toFixed(1) : "N/A",
         format: item.format,
         episodes: item.episodes,

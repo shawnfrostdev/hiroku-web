@@ -21,20 +21,8 @@ export async function GET(request: Request) {
     const { fetchAnimeEpisodes } = await import("@/lib/scraper");
     const episodesRes = await fetchAnimeEpisodes(animeId);
     const episode = episodesRes.data.find(
-      (ep: {
-        number: number;
-        id: string;
-        title: string;
-        providers:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown[];
-      }) => ep.number.toString() === episodeNumber,
+      (ep: { number: number | string }) =>
+        ep.number.toString() === episodeNumber,
     );
 
     if (!episode) {
@@ -42,15 +30,11 @@ export async function GET(request: Request) {
     }
 
     // Determine the list of providers to try
-    let providersToTry:
-      | Record<string, unknown>
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown[]
-      | unknown[] = [];
+    let providersToTry: {
+      provider?: string;
+      category?: string;
+      url?: string;
+    }[] = [];
     if (server && server !== "auto") {
       providersToTry = [{ provider: server, category }];
     } else {
@@ -58,24 +42,8 @@ export async function GET(request: Request) {
       // Prioritize the matching category, then prioritize 'lynx' as the default server
       providersToTry.sort(
         (
-          a:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-          b:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
+          a: { category?: string; provider?: string },
+          b: { category?: string; provider?: string },
         ) => {
           if (a.category === category && b.category !== category) return -1;
           if (a.category !== category && b.category === category) return 1;
@@ -88,24 +56,8 @@ export async function GET(request: Request) {
       );
     }
 
-    let lastError:
-      | Record<string, unknown>
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown[]
-      | unknown = null;
-    let data:
-      | Record<string, unknown>
-      | string
-      | number
-      | boolean
-      | null
-      | undefined
-      | unknown[]
-      | unknown = null;
+    let lastError: Error | null = null;
+    let data: Record<string, unknown> | null = null;
 
     for (const provInfo of providersToTry) {
       const activeServer = provInfo.provider;
@@ -126,7 +78,8 @@ export async function GET(request: Request) {
             // If watching dub and no subtitles are present, attempt to fetch subtitles from the sub source
             if (
               audioType === "dub" &&
-              (!data.subtitles || data.subtitles.length === 0)
+              (!data?.subtitles ||
+                (Array.isArray(data.subtitles) && data.subtitles.length === 0))
             ) {
               const subWatchUrl = `${SCRAPER_URL}/api/watch/${activeServer}/${animeId}/sub/${episodeNumber}`;
               try {
@@ -134,7 +87,7 @@ export async function GET(request: Request) {
                 if (subRes.ok) {
                   const subTemp = await subRes.json();
                   if (subTemp?.subtitles && subTemp.subtitles.length > 0) {
-                    data.subtitles = subTemp.subtitles;
+                    if (data) data.subtitles = subTemp.subtitles;
                     console.log(
                       `[Next.js Stream API] Injected subtitles from sub source for ${activeServer}`,
                     );
@@ -164,9 +117,9 @@ export async function GET(request: Request) {
           );
         }
       } catch (err: unknown) {
-        lastError = err;
+        lastError = err instanceof Error ? err : new Error(String(err));
         console.warn(
-          `[Next.js Stream API] Provider ${activeServer} threw error: ${err.message}`,
+          `[Next.js Stream API] Provider ${activeServer} threw error: ${(err as Error).message}`,
         );
       }
     }
@@ -179,18 +132,15 @@ export async function GET(request: Request) {
 
     // Map response streams to what the watch page expects:
     // Watch page expects: { sources: [ { url, type, isM3U8 } ], subtitles: [] }
-    const sources = (data.streams || []).map(
-      (
-        s:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown,
-      ) => {
+    const sources = (
+      (data?.streams as Array<{
+        url?: string;
+        file?: string;
+        type?: string;
+        isM3U8?: boolean;
+      }>) || []
+    ).map(
+      (s: { url?: string; file?: string; type?: string; isM3U8?: boolean }) => {
         const url = s.url || s.file;
         return {
           url,
@@ -216,17 +166,10 @@ export async function GET(request: Request) {
           const skipData = await skipRes.json();
           if (skipData.found && Array.isArray(skipData.results)) {
             skipTimes = skipData.results.map(
-              (
-                r:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown,
-              ) => ({
+              (r: {
+                skipType: string;
+                interval: { startTime: number; endTime: number };
+              }) => ({
                 type: r.skipType, // 'op' | 'ed'
                 startTime: r.interval.startTime,
                 endTime: r.interval.endTime,
@@ -250,7 +193,10 @@ export async function GET(request: Request) {
     });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: (error as Error).message, stack: error.stack },
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
       { status: 500 },
     );
   }

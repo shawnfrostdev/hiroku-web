@@ -97,39 +97,19 @@ const fetchAniListFinishedAndMovies = async (): Promise<{
   const json = await response.json();
   const finishedFiltered = (json.data.finished.media || [])
     .filter(
-      (m: {
-        id: number;
-        isAdult: boolean;
-        popularity: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => !m.isAdult && m.popularity >= 1500,
+      (
+        // biome-ignore lint/suspicious/noExplicitAny: API response
+        m: any,
+      ) => !m.isAdult && m.popularity >= 1500,
     )
     .slice(0, 10);
 
   const moviesFiltered = (json.data.movies.media || [])
     .filter(
-      (m: {
-        id: number;
-        isAdult: boolean;
-        popularity: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => !m.isAdult,
+      (
+        // biome-ignore lint/suspicious/noExplicitAny: API response
+        m: any,
+      ) => !m.isAdult,
     )
     .slice(0, 10);
 

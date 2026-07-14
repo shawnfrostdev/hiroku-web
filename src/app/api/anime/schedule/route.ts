@@ -109,63 +109,10 @@ export async function GET(request: Request) {
 
     // Filter out irrelevant or adult anime to keep the schedule clean
     const filteredSchedules = allSchedules.filter(
-      (item: {
-        id: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        media?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        averageScore?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        genres?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        recommendations?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        description?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => {
+      (
+        // biome-ignore lint/suspicious/noExplicitAny: API response
+        item: any,
+      ) => {
         const media = item.media;
         if (!media) return false;
 
@@ -183,63 +130,10 @@ export async function GET(request: Request) {
     );
 
     const mappedData = filteredSchedules.map(
-      (item: {
-        id: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        media?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        averageScore?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        genres?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        recommendations?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        description?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => {
+      (
+        // biome-ignore lint/suspicious/noExplicitAny: API response
+        item: any,
+      ) => {
         return {
           id: item.media.id,
           scheduleId: item.id,

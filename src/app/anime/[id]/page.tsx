@@ -999,202 +999,251 @@ export default function AnimeDetailPage({
                 {/* List View (full width cards) */}
                 {episodeView === "list" && (
                   <div className="flex flex-col gap-[12px]">
-                    {paginatedEpisodes.map((ep: unknown, index: number) => {
-                      const epNum = ep.episode_number || index + 1;
-                      const isCurrentlyPlaying =
-                        player.animeId === animeId &&
-                        player.episodeNumber === epNum &&
-                        player.isPlaying;
-                      const thumbnail = ep.still_path
-                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
-                        : null;
-                      return (
-                        <button
-                          type="button"
-                          key={ep.id || index}
-                          onClick={() => handlePlayEpisode(epNum)}
-                          className={`group relative flex items-center gap-[16px] p-[12px] rounded-[8px] border text-left cursor-pointer transition-all hover:bg-control w-full ${
-                            isCurrentlyPlaying
-                              ? "bg-control border-white"
-                              : "bg-surface border-border-line"
-                          }`}
-                        >
-                          {thumbnail ? (
-                            <div className="w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] overflow-hidden border border-border-line bg-background shrink-0 relative">
-                              <Image
-                                unoptimized
-                                fill
-                                src={thumbnail}
-                                alt={ep.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                {ep.runtime || 24} MIN
-                              </span>
-                              {isCurrentlyPlaying && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                                    Playing
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div
-                              className={`w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] flex items-center justify-center border text-base font-bold shrink-0 relative ${
-                                isCurrentlyPlaying
-                                  ? "bg-white text-black border-white"
-                                  : "bg-control border-border-line text-text-primary"
-                              }`}
-                            >
-                              EP {epNum}
-                              <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                {ep.runtime || 24} MIN
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
-                            <div className="flex items-center gap-[6px] text-[11px] text-text-muted font-semibold uppercase tracking-wider">
-                              <span>Episode {epNum}</span>
-                              <span>•</span>
-                              <span>{formatDate(ep.air_date)}</span>
-                            </div>
-                            <span className="text-base font-bold text-text-primary truncate">
-                              {ep.name || `Episode ${epNum}`}
-                            </span>
-                            {ep.overview && (
-                              <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
-                                {ep.overview}
-                              </p>
-                            )}
-                          </div>
-                          <div
-                            className={`w-[36px] h-[36px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                    {paginatedEpisodes.map(
+                      (
+                        ep: {
+                          id: string | number;
+                          title?: string;
+                          name?: string;
+                          number?: number;
+                          image?: string;
+                          isFiller?: boolean;
+                          episode_number?: number;
+                          still_path?: string | null;
+                          runtime?: number;
+                          overview?: string;
+                          air_date?: string;
+                        },
+                        index: number,
+                      ) => {
+                        const epNum = ep.episode_number || index + 1;
+                        const isCurrentlyPlaying =
+                          player.animeId === animeId &&
+                          player.episodeNumber === epNum &&
+                          player.isPlaying;
+                        const thumbnail = ep.still_path
+                          ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                          : null;
+                        return (
+                          <button
+                            type="button"
+                            key={ep.id || index}
+                            onClick={() => handlePlayEpisode(epNum)}
+                            className={`group relative flex items-center gap-[16px] p-[12px] rounded-[8px] border text-left cursor-pointer transition-all hover:bg-control w-full ${
                               isCurrentlyPlaying
-                                ? "bg-white text-black border-white"
-                                : "bg-control border-border-line group-hover:bg-white group-hover:text-black group-hover:border-white"
+                                ? "bg-control border-white"
+                                : "bg-surface border-border-line"
                             }`}
                           >
-                            <Play className="w-[12px] h-[12px] fill-current" />
-                          </div>
-                        </button>
-                      );
-                    })}
+                            {thumbnail ? (
+                              <div className="w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] overflow-hidden border border-border-line bg-background shrink-0 relative">
+                                <Image
+                                  unoptimized
+                                  fill
+                                  src={thumbnail}
+                                  alt={ep.name || "Episode thumbnail"}
+                                  className="w-full h-full object-cover"
+                                />
+                                <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  {ep.runtime || 24} MIN
+                                </span>
+                                {isCurrentlyPlaying && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                      Playing
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div
+                                className={`w-[160px] sm:w-[200px] aspect-[16/9] rounded-[6px] flex items-center justify-center border text-base font-bold shrink-0 relative ${
+                                  isCurrentlyPlaying
+                                    ? "bg-white text-black border-white"
+                                    : "bg-control border-border-line text-text-primary"
+                                }`}
+                              >
+                                EP {epNum}
+                                <span className="absolute bottom-[8px] right-[8px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  {ep.runtime || 24} MIN
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
+                              <div className="flex items-center gap-[6px] text-[11px] text-text-muted font-semibold uppercase tracking-wider">
+                                <span>Episode {epNum}</span>
+                                <span>•</span>
+                                <span>
+                                  {ep.air_date ? formatDate(ep.air_date) : ""}
+                                </span>
+                              </div>
+                              <span className="text-base font-bold text-text-primary truncate">
+                                {ep.name || `Episode ${epNum}`}
+                              </span>
+                              {ep.overview && (
+                                <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
+                                  {ep.overview}
+                                </p>
+                              )}
+                            </div>
+                            <div
+                              className={`w-[36px] h-[36px] rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                isCurrentlyPlaying
+                                  ? "bg-white text-black border-white"
+                                  : "bg-control border-border-line group-hover:bg-white group-hover:text-black group-hover:border-white"
+                              }`}
+                            >
+                              <Play className="w-[12px] h-[12px] fill-current" />
+                            </div>
+                          </button>
+                        );
+                      },
+                    )}
                   </div>
                 )}
 
                 {/* Grid View (5 cards per row on desktop, smaller cards) */}
                 {episodeView === "grid" && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[12px]">
-                    {paginatedEpisodes.map((ep: unknown, index: number) => {
-                      const epNum = ep.episode_number || index + 1;
-                      const isCurrentlyPlaying =
-                        player.animeId === animeId &&
-                        player.episodeNumber === epNum &&
-                        player.isPlaying;
-                      const thumbnail = ep.still_path
-                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
-                        : null;
-                      return (
-                        <button
-                          type="button"
-                          key={ep.id || index}
-                          onClick={() => handlePlayEpisode(epNum)}
-                          className={`group relative flex flex-col rounded-[8px] border overflow-hidden text-left cursor-pointer transition-all hover:bg-control ${
-                            isCurrentlyPlaying
-                              ? "bg-control border-white"
-                              : "bg-surface border-border-line"
-                          }`}
-                        >
-                          {thumbnail ? (
-                            <div className="w-full aspect-[16/9] bg-background relative border-b border-border-line">
-                              <Image
-                                unoptimized
-                                fill
-                                src={thumbnail}
-                                alt={ep.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                              <span className="absolute bottom-[8px] left-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                EP {epNum}
+                    {paginatedEpisodes.map(
+                      (
+                        ep: {
+                          id: string | number;
+                          title?: string;
+                          name?: string;
+                          number?: number;
+                          image?: string;
+                          isFiller?: boolean;
+                          episode_number?: number;
+                          still_path?: string | null;
+                          runtime?: number;
+                          overview?: string;
+                          air_date?: string;
+                        },
+                        index: number,
+                      ) => {
+                        const epNum = ep.episode_number || index + 1;
+                        const isCurrentlyPlaying =
+                          player.animeId === animeId &&
+                          player.episodeNumber === epNum &&
+                          player.isPlaying;
+                        const thumbnail = ep.still_path
+                          ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                          : null;
+                        return (
+                          <button
+                            type="button"
+                            key={ep.id || index}
+                            onClick={() => handlePlayEpisode(epNum)}
+                            className={`group relative flex flex-col rounded-[8px] border overflow-hidden text-left cursor-pointer transition-all hover:bg-control ${
+                              isCurrentlyPlaying
+                                ? "bg-control border-white"
+                                : "bg-surface border-border-line"
+                            }`}
+                          >
+                            {thumbnail ? (
+                              <div className="w-full aspect-[16/9] bg-background relative border-b border-border-line">
+                                <Image
+                                  unoptimized
+                                  fill
+                                  src={thumbnail}
+                                  alt={ep.name || "Episode thumbnail"}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                <span className="absolute bottom-[8px] left-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  EP {epNum}
+                                </span>
+                                <span className="absolute bottom-[8px] right-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  {ep.runtime || 24} MIN
+                                </span>
+                                {isCurrentlyPlaying && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                      Playing
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="w-full aspect-[16/9] bg-control relative border-b border-border-line flex items-center justify-center">
+                                <Tv className="w-[24px] h-[24px] text-text-muted opacity-40" />
+                                <span className="absolute bottom-[8px] left-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  EP {epNum}
+                                </span>
+                                <span className="absolute bottom-[8px] right-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
+                                  {ep.runtime || 24} MIN
+                                </span>
+                                {isCurrentlyPlaying && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                                      Playing
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            <div className="p-[16px] flex flex-col flex-1">
+                              <span className="text-base font-bold text-text-primary truncate">
+                                {ep.name || `Episode ${epNum}`}
                               </span>
-                              <span className="absolute bottom-[8px] right-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                {ep.runtime || 24} MIN
-                              </span>
-                              {isCurrentlyPlaying && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                                    Playing
-                                  </span>
-                                </div>
-                              )}
+                              <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
+                                {ep.overview ||
+                                  "No description available for this episode."}
+                              </p>
+                              <div className="flex items-center justify-between w-full mt-auto pt-[12px]">
+                                <span className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
+                                  Uploaded:{" "}
+                                  {ep.air_date ? formatDate(ep.air_date) : ""}
+                                </span>
+                                <span className="opacity-0 group-hover:opacity-100 transition-opacity p-[6px] rounded-full bg-white text-black">
+                                  <Play className="w-[12px] h-[12px] fill-current" />
+                                </span>
+                              </div>
                             </div>
-                          ) : (
-                            <div className="w-full aspect-[16/9] bg-control relative border-b border-border-line flex items-center justify-center">
-                              <Tv className="w-[24px] h-[24px] text-text-muted opacity-40" />
-                              <span className="absolute bottom-[8px] left-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                EP {epNum}
-                              </span>
-                              <span className="absolute bottom-[8px] right-[12px] text-xs text-text-primary font-bold bg-black/60 px-[8px] py-[2px] rounded border border-border-line backdrop-blur-[2px]">
-                                {ep.runtime || 24} MIN
-                              </span>
-                              {isCurrentlyPlaying && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                                    Playing
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <div className="p-[16px] flex flex-col flex-1">
-                            <span className="text-base font-bold text-text-primary truncate">
-                              {ep.name || `Episode ${epNum}`}
-                            </span>
-                            <p className="text-sm text-text-muted line-clamp-2 mt-[4px] leading-relaxed">
-                              {ep.overview ||
-                                "No description available for this episode."}
-                            </p>
-                            <div className="flex items-center justify-between w-full mt-auto pt-[12px]">
-                              <span className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
-                                Uploaded: {formatDate(ep.air_date)}
-                              </span>
-                              <span className="opacity-0 group-hover:opacity-100 transition-opacity p-[6px] rounded-full bg-white text-black">
-                                <Play className="w-[12px] h-[12px] fill-current" />
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      },
+                    )}
                   </div>
                 )}
 
                 {/* Small Grid View (Squares with episode numbers) */}
                 {episodeView === "small" && (
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-[8px]">
-                    {paginatedEpisodes.map((ep: unknown, index: number) => {
-                      const epNum = ep.episode_number || index + 1;
-                      const isCurrentlyPlaying =
-                        player.animeId === animeId &&
-                        player.episodeNumber === epNum &&
-                        player.isPlaying;
-                      return (
-                        <button
-                          type="button"
-                          key={ep.id || index}
-                          onClick={() => handlePlayEpisode(epNum)}
-                          className={`w-full aspect-square rounded-[8px] border flex items-center justify-center text-sm font-bold transition-all hover:bg-control cursor-pointer ${
-                            isCurrentlyPlaying
-                              ? "bg-control border-white text-white"
-                              : "bg-surface border-border-line text-text-secondary"
-                          }`}
-                        >
-                          {epNum}
-                        </button>
-                      );
-                    })}
+                    {paginatedEpisodes.map(
+                      (
+                        ep: {
+                          id: string;
+                          title?: string;
+                          number?: number;
+                          image?: string;
+                          isFiller?: boolean;
+                          episode_number?: number;
+                        },
+                        index: number,
+                      ) => {
+                        const epNum = ep.episode_number || index + 1;
+                        const isCurrentlyPlaying =
+                          player.animeId === animeId &&
+                          player.episodeNumber === epNum &&
+                          player.isPlaying;
+                        return (
+                          <button
+                            type="button"
+                            key={ep.id || index}
+                            onClick={() => handlePlayEpisode(epNum)}
+                            className={`w-full aspect-square rounded-[8px] border flex items-center justify-center text-sm font-bold transition-all hover:bg-control cursor-pointer ${
+                              isCurrentlyPlaying
+                                ? "bg-control border-white text-white"
+                                : "bg-surface border-border-line text-text-secondary"
+                            }`}
+                          >
+                            {epNum}
+                          </button>
+                        );
+                      },
+                    )}
                   </div>
                 )}
 

@@ -199,69 +199,27 @@ export async function GET(request: Request) {
 
     const studioEdges = item.studios?.edges || [];
     const mainStudios = studioEdges
-      .filter(
-        (
-          e:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => e.isMain,
-      )
-      .map(
-        (
-          e:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => e.node.name,
-      );
+      // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+      .filter((e: any) => e.isMain)
+      // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+      .map((e: any) => e.node.name);
     const producersList = studioEdges
-      .filter(
-        (
-          e:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => !e.isMain,
-      )
-      .map(
-        (
-          e:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => e.node.name,
-      );
+      // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+      .filter((e: any) => !e.isMain)
+      // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+      .map((e: any) => e.node.name);
 
     const studio = mainStudios.join(", ") || "Unknown Studio";
     const producers =
       producersList.slice(0, 10).join(", ") || "Unknown Producer";
 
-    const formatAniListDate = (dateObj: {
-      year?: number;
-      month?: number;
-      day?: number;
-    }) => {
+    const formatAniListDate = (
+      dateObj: {
+        year?: number | null;
+        month?: number | null;
+        day?: number | null;
+      } | null,
+    ) => {
       if (!dateObj || !dateObj.year) return null;
       const { year, month, day } = dateObj;
       if (!month) return `${year}`;
@@ -307,47 +265,25 @@ export async function GET(request: Request) {
       posterImage,
       episodes: (tmdbDetails?.episodes || []).slice(0, availableEpisodes),
       recommendations: (item.recommendations?.nodes || [])
-        .filter(
-          (n: {
-            mediaRecommendation:
-              | Record<string, unknown>
-              | string
-              | number
-              | boolean
-              | null
-              | undefined
-              | unknown[]
-              | unknown;
-          }) => n.mediaRecommendation,
-        )
+        // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+        .filter((n: any) => n.mediaRecommendation)
         .slice(0, 8)
-        .map(
-          (n: {
-            mediaRecommendation:
-              | Record<string, unknown>
-              | string
-              | number
-              | boolean
-              | null
-              | undefined
-              | unknown[]
-              | unknown;
-          }) => ({
-            id: n.mediaRecommendation.id,
-            title:
-              n.mediaRecommendation.title.english ||
-              n.mediaRecommendation.title.romaji,
-            poster:
-              n.mediaRecommendation.coverImage?.extraLarge ||
-              n.mediaRecommendation.coverImage?.large ||
-              null,
-            score: n.mediaRecommendation.averageScore
-              ? (n.mediaRecommendation.averageScore / 10).toFixed(1)
-              : null,
-            format: n.mediaRecommendation.format || null,
-            episodes: n.mediaRecommendation.episodes || null,
-          }),
-        ),
+        // biome-ignore lint/suspicious/noExplicitAny: AniList API response
+        .map((n: any) => ({
+          id: n.mediaRecommendation.id,
+          title:
+            n.mediaRecommendation.title.english ||
+            n.mediaRecommendation.title.romaji,
+          poster:
+            n.mediaRecommendation.coverImage?.extraLarge ||
+            n.mediaRecommendation.coverImage?.large ||
+            null,
+          score: n.mediaRecommendation.averageScore
+            ? (n.mediaRecommendation.averageScore / 10).toFixed(1)
+            : null,
+          format: n.mediaRecommendation.format || null,
+          episodes: n.mediaRecommendation.episodes || null,
+        })),
     };
 
     return NextResponse.json(detailData);

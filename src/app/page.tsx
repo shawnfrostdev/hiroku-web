@@ -3,8 +3,34 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, ChevronLeft, ChevronRight, Info, Play } from "lucide-react";
 import Image from "next/image";
+
+interface AnimeItem {
+  id: string | number;
+  title?:
+    | string
+    | { english?: string; romaji?: string; userPreferred?: string };
+  posterImage?: string;
+  coverImage?: string | { large?: string };
+  bannerImage?: string;
+  description?: string;
+  genres?: string[];
+  status?: string;
+  currentEpisode?: number;
+  year?: string | number;
+  format?: string;
+  episodes?: number;
+  score?: string | number;
+  tagline?: string;
+  airingAt?: number;
+  media?: {
+    id: string | number;
+    title?: { english?: string; romaji?: string };
+    coverImage?: { large?: string };
+  };
+}
+
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useWatchlistStore } from "@/store/useWatchlistStore";
 
@@ -289,9 +315,12 @@ export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const activeEntry = heroEntries[activeIndex];
-  const [forYouEntries, setForYouEntries] = useState<Record<string, unknown>[]>(
-    [],
-  );
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const [forYouEntries, setForYouEntries] = useState<AnimeItem[]>([]);
 
   useEffect(() => {
     if (heroEntries.length === 0) return;
@@ -777,12 +806,14 @@ export default function Page() {
       <div className="flex flex-col gap-[12px] mt-[8px] md:mt-[0px]">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-widest text-[#525252]">
-            {watchingItems.length > 0 ? "Continue Watching" : "For You"}
+            {isMounted && watchingItems.length > 0
+              ? "Continue Watching"
+              : "For You"}
           </h2>
         </div>
 
         <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-[8px] md:gap-[16px] overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none pb-[4px] md:pb-0">
-          {watchingItems.length > 0
+          {isMounted && watchingItems.length > 0
             ? watchingItems.slice(0, 5).map((item, idx) => {
                 const mockProgress = [75, 40, 90, 55, 30][idx % 5];
                 const mockTimeLeft = [
@@ -840,7 +871,7 @@ export default function Page() {
                   </Link>
                 );
               })
-            : forYouEntries.map((item, index) => {
+            : forYouEntries.map((item: AnimeItem, index: number) => {
                 const tags = [
                   {
                     text: "RECOMMENDED",
@@ -901,10 +932,33 @@ export default function Page() {
                         {/* Bottom area: Title / Name & Tagline */}
                         <div className="flex flex-col gap-[2px]">
                           <span className="text-sm font-extrabold text-[#FFFFFF] truncate">
-                            {item.title}
+                            {typeof item.title === "string"
+                              ? item.title
+                              : (
+                                  item.title as unknown as {
+                                    english?: string;
+                                    romaji?: string;
+                                    userPreferred?: string;
+                                  }
+                                )?.english ||
+                                (
+                                  item.title as unknown as {
+                                    english?: string;
+                                    romaji?: string;
+                                    userPreferred?: string;
+                                  }
+                                )?.romaji ||
+                                (
+                                  item.title as unknown as {
+                                    english?: string;
+                                    romaji?: string;
+                                    userPreferred?: string;
+                                  }
+                                )?.userPreferred ||
+                                ""}
                           </span>
                           <div className="flex mt-[2px]">
-                            {getTagBadge(item.tagline)}
+                            {item.tagline ? getTagBadge(item.tagline) : null}
                           </div>
                         </div>
                       </div>
@@ -936,104 +990,115 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[8px] md:gap-[16px] pb-[4px] md:pb-0">
-          {recentlyUpdated
-            .slice(0, 10)
-            .map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[26vw] sm:w-[20vw] md:w-auto"
-                >
-                  {/* Card Image Container */}
-                  <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover transform-gpu will-change-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
-                        {item.title}
-                      </div>
-                    )}
+          {recentlyUpdated.slice(0, 10).map((item: AnimeItem) => (
+            <Link
+              href={`/anime/${item.id}`}
+              key={item.id}
+              className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[26vw] sm:w-[20vw] md:w-auto"
+            >
+              {/* Card Image Container */}
+              <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
+                {item.posterImage ? (
+                  <Image
+                    unoptimized
+                    fill
+                    src={item.posterImage}
+                    alt={
+                      typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""
+                    }
+                    className="w-full h-full object-cover transform-gpu will-change-transform"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
+                  </div>
+                )}
 
-                    {/* Score badge top-left */}
-                    <div className="absolute top-[8px] left-[8px] pointer-events-none">
-                      <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
-                        {item.score} ★
-                      </span>
-                    </div>
-                  </div>
-                  {/* Details Below */}
-                  <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
-                    <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
-                      {item.title}
-                    </span>
-                    {item.episodes && getTagBadge(item.episodes)}
-                  </div>
-                </Link>
-              ),
-            )}
+                {/* Score badge top-left */}
+                <div className="absolute top-[8px] left-[8px] pointer-events-none">
+                  <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
+                    {item.score} ★
+                  </span>
+                </div>
+              </div>
+              {/* Details Below */}
+              <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
+                <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
+                  {typeof item.title === "string"
+                    ? item.title
+                    : (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.english ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.romaji ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.userPreferred ||
+                      ""}
+                </span>
+                {item.episodes && getTagBadge(String(item.episodes))}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -1051,106 +1116,117 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {entries
-            .slice(0, 10)
-            .map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
-                >
-                  {/* Card Image Container */}
-                  <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
-                    {/* Poster Image */}
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover transform-gpu will-change-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
-                        {item.title}
-                      </div>
-                    )}
-
-                    {/* Rating Badge (Top Left) */}
-                    <div className="absolute top-[8px] left-[8px] pointer-events-none">
-                      <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
-                        {item.score} ★
-                      </span>
-                    </div>
+          {entries.slice(0, 10).map((item: AnimeItem) => (
+            <Link
+              href={`/anime/${item.id}`}
+              key={item.id}
+              className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
+            >
+              {/* Card Image Container */}
+              <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
+                {/* Poster Image */}
+                {item.posterImage ? (
+                  <Image
+                    unoptimized
+                    fill
+                    src={item.posterImage}
+                    alt={
+                      typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""
+                    }
+                    className="w-full h-full object-cover transform-gpu will-change-transform"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
                   </div>
+                )}
 
-                  {/* Details Below Card Image */}
-                  <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
-                    <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
-                      {item.title}
-                    </span>
-                    {item.episodes && getTagBadge(item.episodes)}
-                  </div>
-                </Link>
-              ),
-            )}
+                {/* Rating Badge (Top Left) */}
+                <div className="absolute top-[8px] left-[8px] pointer-events-none">
+                  <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
+                    {item.score} ★
+                  </span>
+                </div>
+              </div>
+
+              {/* Details Below Card Image */}
+              <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
+                <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
+                  {typeof item.title === "string"
+                    ? item.title
+                    : (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.english ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.romaji ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.userPreferred ||
+                      ""}
+                </span>
+                {item.episodes && getTagBadge(String(item.episodes))}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -1168,106 +1244,117 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {popularSeason
-            .slice(0, 10)
-            .map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
-                >
-                  {/* Card Image Container */}
-                  <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
-                    {/* Poster Image */}
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
-                        {item.title}
-                      </div>
-                    )}
-
-                    {/* Rating Badge (Top Left) */}
-                    <div className="absolute top-[8px] left-[8px] pointer-events-none">
-                      <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
-                        {item.score} ★
-                      </span>
-                    </div>
+          {popularSeason.slice(0, 10).map((item: AnimeItem) => (
+            <Link
+              href={`/anime/${item.id}`}
+              key={item.id}
+              className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
+            >
+              {/* Card Image Container */}
+              <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
+                {/* Poster Image */}
+                {item.posterImage ? (
+                  <Image
+                    unoptimized
+                    fill
+                    src={item.posterImage}
+                    alt={
+                      typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""
+                    }
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
                   </div>
+                )}
 
-                  {/* Details Below Card Image */}
-                  <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
-                    <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
-                      {item.title}
-                    </span>
-                    {item.episodes && getTagBadge(item.episodes)}
-                  </div>
-                </Link>
-              ),
-            )}
+                {/* Rating Badge (Top Left) */}
+                <div className="absolute top-[8px] left-[8px] pointer-events-none">
+                  <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
+                    {item.score} ★
+                  </span>
+                </div>
+              </div>
+
+              {/* Details Below Card Image */}
+              <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
+                <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
+                  {typeof item.title === "string"
+                    ? item.title
+                    : (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.english ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.romaji ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.userPreferred ||
+                      ""}
+                </span>
+                {item.episodes && getTagBadge(String(item.episodes))}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -1285,106 +1372,117 @@ export default function Page() {
           </a>
         </div>
         <div className="flex md:grid md:grid-cols-5 lg:grid-cols-10 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scrollbar-none gap-[10px] md:gap-[16px] pb-[4px] md:pb-0">
-          {popularAllTime
-            .slice(0, 10)
-            .map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
-                >
-                  {/* Card Image Container */}
-                  <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
-                    {/* Poster Image */}
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
-                        {item.title}
-                      </div>
-                    )}
-
-                    {/* Rating Badge (Top Left) */}
-                    <div className="absolute top-[8px] left-[8px] pointer-events-none">
-                      <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
-                        {item.score} ★
-                      </span>
-                    </div>
+          {popularAllTime.slice(0, 10).map((item: AnimeItem) => (
+            <Link
+              href={`/anime/${item.id}`}
+              key={item.id}
+              className="group flex flex-col gap-[8px] md:p-[8px] md:-m-[8px] rounded-[12px] hover:bg-[#242424] transition-colors cursor-pointer shrink-0 snap-start w-[28vw] sm:w-[22vw] md:w-auto"
+            >
+              {/* Card Image Container */}
+              <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
+                {/* Poster Image */}
+                {item.posterImage ? (
+                  <Image
+                    unoptimized
+                    fill
+                    src={item.posterImage}
+                    alt={
+                      typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""
+                    }
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
                   </div>
+                )}
 
-                  {/* Details Below Card Image */}
-                  <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
-                    <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
-                      {item.title}
-                    </span>
-                    {item.episodes && getTagBadge(item.episodes)}
-                  </div>
-                </Link>
-              ),
-            )}
+                {/* Rating Badge (Top Left) */}
+                <div className="absolute top-[8px] left-[8px] pointer-events-none">
+                  <span className="text-[9px] text-[#FFFFFF] font-black bg-[#10b981] px-[6px] py-[2px] rounded uppercase tracking-wider shadow-md">
+                    {item.score} ★
+                  </span>
+                </div>
+              </div>
+
+              {/* Details Below Card Image */}
+              <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
+                <span className="text-xs md:text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-tight flex-1">
+                  {typeof item.title === "string"
+                    ? item.title
+                    : (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.english ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.romaji ||
+                      (
+                        item.title as unknown as {
+                          english?: string;
+                          romaji?: string;
+                          userPreferred?: string;
+                        }
+                      )?.userPreferred ||
+                      ""}
+                </span>
+                {item.episodes && getTagBadge(String(item.episodes))}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -1404,120 +1502,133 @@ export default function Page() {
             </a>
           </div>
           <div className="flex flex-col gap-[12px]">
-            {finishedMovies.finished.map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group isolate relative overflow-hidden flex items-center gap-[16px] p-[12px] rounded-[8px] hover:bg-[#242424]/40 transition-colors cursor-pointer border border-transparent hover:border-[#282828]"
-                >
-                  {/* Background image & gradient overlay */}
-                  {item.bannerImage && (
+            {finishedMovies.finished.map((item: AnimeItem) => (
+              <Link
+                href={`/anime/${item.id}`}
+                key={item.id}
+                className="group isolate relative overflow-hidden flex items-center gap-[16px] p-[12px] rounded-[8px] hover:bg-[#242424]/40 transition-colors cursor-pointer border border-transparent hover:border-[#282828]"
+              >
+                {/* Background image & gradient overlay */}
+                {item.bannerImage && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-right transition-all duration-500 z-0 pointer-events-none grayscale group-hover:grayscale-0 opacity-20 group-hover:opacity-40"
+                    style={{
+                      backgroundImage: `url(${item.bannerImage})`,
+                    }}
+                  >
                     <div
-                      className="absolute inset-0 bg-cover bg-right transition-all duration-500 z-0 pointer-events-none grayscale group-hover:grayscale-0 opacity-20 group-hover:opacity-40"
+                      className="absolute inset-0"
                       style={{
-                        backgroundImage: `url(${item.bannerImage})`,
+                        background:
+                          "linear-gradient(to right, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.4) 40%, transparent 100%)",
                       }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to right, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.4) 40%, transparent 100%)",
-                        }}
-                      />
+                    />
+                  </div>
+                )}
+
+                {/* Thumbnail Poster */}
+                <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
+                  {item.posterImage ? (
+                    <Image
+                      unoptimized
+                      fill
+                      src={item.posterImage}
+                      alt={
+                        typeof item.title === "string"
+                          ? item.title
+                          : (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.english ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.romaji ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.userPreferred ||
+                            ""
+                      }
+                      className="w-full h-full object-cover transform-gpu will-change-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
+                      {typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""}
                     </div>
                   )}
+                </div>
 
-                  {/* Thumbnail Poster */}
-                  <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover transform-gpu will-change-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
-                        {item.title}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex flex-col gap-[2px] min-w-0 flex-1 z-10 relative">
-                    <span className="text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-snug group-hover:text-emerald-400 transition-colors">
-                      {item.title}
+                {/* Details */}
+                <div className="flex flex-col gap-[2px] min-w-0 flex-1 z-10 relative">
+                  <span className="text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-snug group-hover:text-emerald-400 transition-colors">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
+                  </span>
+                  <div className="flex items-center gap-[6px] text-xs text-[#A3A3A3] mt-[4px]">
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded text-[9px] shrink-0">
+                      {item.score} ★
                     </span>
-                    <div className="flex items-center gap-[6px] text-xs text-[#A3A3A3] mt-[4px]">
-                      <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded text-[9px] shrink-0">
-                        {item.score} ★
-                      </span>
-                      {getTagBadge(item.episodes)}
-                      {getTagBadge(item.tagline)}
-                    </div>
+                    {getTagBadge(String(item.episodes))}
+                    {item.tagline ? getTagBadge(item.tagline) : null}
                   </div>
-                </Link>
-              ),
-            )}
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -1535,120 +1646,133 @@ export default function Page() {
             </a>
           </div>
           <div className="flex flex-col gap-[12px]">
-            {finishedMovies.movies.map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => (
-                <Link
-                  href={`/anime/${item.id}`}
-                  key={item.id}
-                  className="group isolate relative overflow-hidden flex items-center gap-[16px] p-[12px] rounded-[8px] hover:bg-[#242424]/40 transition-colors cursor-pointer border border-transparent hover:border-[#282828]"
-                >
-                  {/* Background image & gradient overlay */}
-                  {item.bannerImage && (
+            {finishedMovies.movies.map((item: AnimeItem) => (
+              <Link
+                href={`/anime/${item.id}`}
+                key={item.id}
+                className="group isolate relative overflow-hidden flex items-center gap-[16px] p-[12px] rounded-[8px] hover:bg-[#242424]/40 transition-colors cursor-pointer border border-transparent hover:border-[#282828]"
+              >
+                {/* Background image & gradient overlay */}
+                {item.bannerImage && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-right transition-all duration-500 z-0 pointer-events-none grayscale group-hover:grayscale-0 opacity-20 group-hover:opacity-40"
+                    style={{
+                      backgroundImage: `url(${item.bannerImage})`,
+                    }}
+                  >
                     <div
-                      className="absolute inset-0 bg-cover bg-right transition-all duration-500 z-0 pointer-events-none grayscale group-hover:grayscale-0 opacity-20 group-hover:opacity-40"
+                      className="absolute inset-0"
                       style={{
-                        backgroundImage: `url(${item.bannerImage})`,
+                        background:
+                          "linear-gradient(to right, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.4) 40%, transparent 100%)",
                       }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to right, rgba(20, 20, 20, 1) 0%, rgba(20, 20, 20, 0.4) 40%, transparent 100%)",
-                        }}
-                      />
+                    />
+                  </div>
+                )}
+
+                {/* Thumbnail Poster */}
+                <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
+                  {item.posterImage ? (
+                    <Image
+                      unoptimized
+                      fill
+                      src={item.posterImage}
+                      alt={
+                        typeof item.title === "string"
+                          ? item.title
+                          : (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.english ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.romaji ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.userPreferred ||
+                            ""
+                      }
+                      className="w-full h-full object-cover transform-gpu will-change-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
+                      {typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""}
                     </div>
                   )}
+                </div>
 
-                  {/* Thumbnail Poster */}
-                  <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
-                    {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
-                        src={item.posterImage}
-                        alt={item.title}
-                        className="w-full h-full object-cover transform-gpu will-change-transform"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
-                        {item.title}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex flex-col gap-[2px] min-w-0 flex-1 z-10 relative">
-                    <span className="text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-snug group-hover:text-emerald-400 transition-colors">
-                      {item.title}
+                {/* Details */}
+                <div className="flex flex-col gap-[2px] min-w-0 flex-1 z-10 relative">
+                  <span className="text-sm font-bold text-[#FFFFFF] line-clamp-1 leading-snug group-hover:text-emerald-400 transition-colors">
+                    {typeof item.title === "string"
+                      ? item.title
+                      : (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.english ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.romaji ||
+                        (
+                          item.title as unknown as {
+                            english?: string;
+                            romaji?: string;
+                            userPreferred?: string;
+                          }
+                        )?.userPreferred ||
+                        ""}
+                  </span>
+                  <div className="flex items-center gap-[6px] text-xs text-[#A3A3A3] mt-[4px]">
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded text-[9px] shrink-0">
+                      {item.score} ★
                     </span>
-                    <div className="flex items-center gap-[6px] text-xs text-[#A3A3A3] mt-[4px]">
-                      <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded text-[9px] shrink-0">
-                        {item.score} ★
-                      </span>
-                      {getTagBadge(item.episodes)}
-                      {getTagBadge(item.tagline)}
-                    </div>
+                    {getTagBadge(String(item.episodes))}
+                    {item.tagline ? getTagBadge(item.tagline) : null}
                   </div>
-                </Link>
-              ),
-            )}
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
@@ -1714,63 +1838,10 @@ function ScheduleSection() {
     const monthName = date.toLocaleDateString("en-US", { month: "short" });
 
     const releases = scheduleData.filter(
-      (item: {
-        id: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        media?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        averageScore?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        genres?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        recommendations?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        description?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => item.airingAt >= startOfDay && item.airingAt < endOfDay,
+      (item: AnimeItem) =>
+        item.airingAt !== undefined &&
+        item.airingAt >= startOfDay &&
+        item.airingAt < endOfDay,
     );
     const hasData = releases.length > 0;
 
@@ -1886,114 +1957,127 @@ function ScheduleSection() {
               No anime scheduled for this day.
             </div>
           ) : (
-            activeReleases.map(
-              (item: {
-                id: number;
-                title?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                media?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                averageScore?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                genres?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                recommendations?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-                description?:
-                  | Record<string, unknown>
-                  | string
-                  | number
-                  | boolean
-                  | null
-                  | undefined
-                  | unknown[]
-                  | unknown;
-              }) => {
-                const releaseDate = new Date(item.airingAt * 1000);
-                const timeString = releaseDate.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                });
+            activeReleases.map((item: AnimeItem) => {
+              const releaseDate = new Date((item.airingAt || 0) * 1000);
+              const timeString = releaseDate.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              });
 
-                return (
-                  <Link
-                    href={`/anime/${item.id}`}
-                    key={item.scheduleId || item.id}
-                    className="group flex flex-col gap-8px p-8px -m-8px rounded-lg hover:bg-control transition-colors cursor-pointer shrink-0 w-[120px] md:w-[160px] snap-start animate-fade-in"
-                  >
-                    {/* Card Image Container */}
-                    <div className="relative aspect-[2/3] rounded-md border border-border-line bg-surface overflow-hidden shadow-md">
-                      {/* Poster Image */}
-                      {item.posterImage ? (
-                        <Image
-                          unoptimized
-                          fill
-                          src={item.posterImage}
-                          alt={item.title}
-                          className="w-full h-full object-cover transform-gpu will-change-transform"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center p-16px text-center text-xs text-text-secondary">
-                          {item.title}
-                        </div>
-                      )}
-
-                      {/* Time Badge (Top Right) */}
-                      <div className="absolute top-[8px] right-[8px] pointer-events-none">
-                        <span className="text-[9px] text-pure font-black bg-text-primary/90 backdrop-blur-sm px-[6px] py-[2px] rounded shadow-md uppercase tracking-wider">
-                          {timeString}
-                        </span>
+              return (
+                <Link
+                  href={`/anime/${item.id}`}
+                  key={item.id || item.id}
+                  className="group flex flex-col gap-8px p-8px -m-8px rounded-lg hover:bg-control transition-colors cursor-pointer shrink-0 w-[120px] md:w-[160px] snap-start animate-fade-in"
+                >
+                  {/* Card Image Container */}
+                  <div className="relative aspect-[2/3] rounded-md border border-border-line bg-surface overflow-hidden shadow-md">
+                    {/* Poster Image */}
+                    {item.posterImage ? (
+                      <Image
+                        unoptimized
+                        fill
+                        src={item.posterImage}
+                        alt={
+                          typeof item.title === "string"
+                            ? item.title
+                            : (
+                                item.title as unknown as {
+                                  english?: string;
+                                  romaji?: string;
+                                  userPreferred?: string;
+                                }
+                              )?.english ||
+                              (
+                                item.title as unknown as {
+                                  english?: string;
+                                  romaji?: string;
+                                  userPreferred?: string;
+                                }
+                              )?.romaji ||
+                              (
+                                item.title as unknown as {
+                                  english?: string;
+                                  romaji?: string;
+                                  userPreferred?: string;
+                                }
+                              )?.userPreferred ||
+                              ""
+                        }
+                        className="w-full h-full object-cover transform-gpu will-change-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center p-16px text-center text-xs text-text-secondary">
+                        {typeof item.title === "string"
+                          ? item.title
+                          : (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.english ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.romaji ||
+                            (
+                              item.title as unknown as {
+                                english?: string;
+                                romaji?: string;
+                                userPreferred?: string;
+                              }
+                            )?.userPreferred ||
+                            ""}
                       </div>
-                    </div>
+                    )}
 
-                    {/* Details Below Card Image */}
-                    <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
-                      <span className="text-xs md:text-sm font-bold text-text-primary line-clamp-1 leading-tight flex-1">
-                        {item.title}
-                      </span>
-                      <span className="text-[10px] text-text-secondary font-bold tracking-wider uppercase shrink-0 mt-[1px]">
-                        {item.episodes ? `EP ${item.episodes}` : "EP 1"}
+                    {/* Time Badge (Top Right) */}
+                    <div className="absolute top-[8px] right-[8px] pointer-events-none">
+                      <span className="text-[9px] text-pure font-black bg-text-primary/90 backdrop-blur-sm px-[6px] py-[2px] rounded shadow-md uppercase tracking-wider">
+                        {timeString}
                       </span>
                     </div>
-                  </Link>
-                );
-              },
-            )
+                  </div>
+
+                  {/* Details Below Card Image */}
+                  <div className="flex items-start justify-between gap-[4px] min-w-0 px-[2px]">
+                    <span className="text-xs md:text-sm font-bold text-text-primary line-clamp-1 leading-tight flex-1">
+                      {typeof item.title === "string"
+                        ? item.title
+                        : (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.english ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.romaji ||
+                          (
+                            item.title as unknown as {
+                              english?: string;
+                              romaji?: string;
+                              userPreferred?: string;
+                            }
+                          )?.userPreferred ||
+                          ""}
+                    </span>
+                    <span className="text-[10px] text-text-secondary font-bold tracking-wider uppercase shrink-0 mt-[1px]">
+                      {item.episodes ? `EP ${item.episodes}` : "EP 1"}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
           )}
         </div>
       </div>

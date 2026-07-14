@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface WatchlistItem {
   animeId: string;
@@ -15,35 +16,42 @@ interface WatchlistState {
   setItems: (items: WatchlistItem[]) => void;
 }
 
-export const useWatchlistStore = create<WatchlistState>((set) => ({
-  items: {},
-  addItem: (item) =>
-    set((state) => ({
-      items: { ...state.items, [item.animeId]: item },
-    })),
-  removeItem: (animeId) =>
-    set((state) => {
-      const newItems = { ...state.items };
-      delete newItems[animeId];
-      return { items: newItems };
+export const useWatchlistStore = create<WatchlistState>()(
+  persist(
+    (set) => ({
+      items: {},
+      addItem: (item) =>
+        set((state) => ({
+          items: { ...state.items, [item.animeId]: item },
+        })),
+      removeItem: (animeId) =>
+        set((state) => {
+          const newItems = { ...state.items };
+          delete newItems[animeId];
+          return { items: newItems };
+        }),
+      updateStatus: (animeId, status) =>
+        set((state) => {
+          const item = state.items[animeId];
+          if (!item) return {};
+          return {
+            items: {
+              ...state.items,
+              [animeId]: { ...item, status },
+            },
+          };
+        }),
+      setItems: (itemsList) =>
+        set(() => {
+          const itemsMap: Record<string, WatchlistItem> = {};
+          for (const item of itemsList) {
+            itemsMap[item.animeId] = item;
+          }
+          return { items: itemsMap };
+        }),
     }),
-  updateStatus: (animeId, status) =>
-    set((state) => {
-      const item = state.items[animeId];
-      if (!item) return {};
-      return {
-        items: {
-          ...state.items,
-          [animeId]: { ...item, status },
-        },
-      };
-    }),
-  setItems: (itemsList) =>
-    set(() => {
-      const itemsMap: Record<string, WatchlistItem> = {};
-      for (const item of itemsList) {
-        itemsMap[item.animeId] = item;
-      }
-      return { items: itemsMap };
-    }),
-}));
+    {
+      name: "hiroku-watchlist",
+    },
+  ),
+);

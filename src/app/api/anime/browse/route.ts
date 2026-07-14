@@ -107,63 +107,8 @@ export async function GET(request: Request) {
     const media = json.data.Page.media || [];
 
     const results = media.map(
-      (item: {
-        id: number;
-        title?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        media?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        averageScore?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        genres?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        recommendations?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-        description?:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown;
-      }) => {
+      // biome-ignore lint/suspicious/noExplicitAny: API response is highly dynamic
+      (item: any) => {
         let availableEpisodes = item.episodes;
         if (item.status === "RELEASING" && item.nextAiringEpisode) {
           availableEpisodes = item.nextAiringEpisode.episode - 1;

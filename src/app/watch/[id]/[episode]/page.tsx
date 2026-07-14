@@ -116,73 +116,26 @@ export default function WatchPage({
   const serversArray = Array.isArray(serversData) ? serversData : [];
   const subServers = serversData?.sub
     ? serversData.sub.map(
-        (
-          s:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => s.serverName || s.name || s,
+        (s: { serverName?: string; name?: string } | string) =>
+          typeof s === "string" ? s : s.serverName || s.name,
       )
-    : serversArray.map(
-        (
-          s:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => s.serverName || s.name || s,
+    : serversArray.map((s: { serverName?: string; name?: string } | string) =>
+        typeof s === "string" ? s : s.serverName || s.name,
       );
 
   const dubServers = serversData?.dub
     ? serversData.dub.map(
-        (
-          s:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => s.serverName || s.name || s,
+        (s: { serverName?: string; name?: string } | string) =>
+          typeof s === "string" ? s : s.serverName || s.name,
       )
-    : serversArray.map(
-        (
-          s:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => s.serverName || s.name || s,
+    : serversArray.map((s: { serverName?: string; name?: string } | string) =>
+        typeof s === "string" ? s : s.serverName || s.name,
       );
 
   const softsubServers = serversData?.softsub
     ? serversData.softsub.map(
-        (
-          s:
-            | Record<string, unknown>
-            | string
-            | number
-            | boolean
-            | null
-            | undefined
-            | unknown[]
-            | unknown,
-        ) => s.serverName || s.name || s,
+        (s: { serverName?: string; name?: string } | string) =>
+          typeof s === "string" ? s : s.serverName || s.name,
       )
     : [];
 
@@ -360,17 +313,7 @@ export default function WatchPage({
         attemptPlay();
         // Expose available quality levels to the store
         const levelLabels = data.levels.map(
-          (
-            l:
-              | Record<string, unknown>
-              | string
-              | number
-              | boolean
-              | null
-              | undefined
-              | unknown[]
-              | unknown,
-          ) => `${l.height}p`,
+          (l: { height: number }) => `${l.height}p`,
         );
         if (levelLabels.length > 0) {
           player.setResolutions([...levelLabels, "Auto"]);
@@ -413,20 +356,7 @@ export default function WatchPage({
         }));
 
   const currentEpInfo = episodesList.find(
-    (ep: {
-      number: number;
-      id: string;
-      title: string;
-      providers:
-        | Record<string, unknown>
-        | string
-        | number
-        | boolean
-        | null
-        | undefined
-        | unknown[]
-        | unknown[];
-    }) => ep.episode_number === currentEpNum,
+    (ep: { episode_number: number }) => ep.episode_number === currentEpNum,
   );
 
   // Synchronize with Player Store (mock globally active episode)
@@ -443,6 +373,28 @@ export default function WatchPage({
   useEffect(() => {
     player.setPlaying(isPlaying);
   }, [isPlaying, player.setPlaying]);
+
+  // Add to Continue Watching
+  useEffect(() => {
+    if (anime?.id) {
+      const currentTitle =
+        anime.title?.english ||
+        anime.title?.romaji ||
+        anime.title?.native ||
+        anime.title?.userPreferred ||
+        anime.title;
+
+      const currentImage = anime.image || anime.coverImage || anime.posterImage;
+
+      useWatchlistStore.getState().addItem({
+        animeId: String(anime.id),
+        animeTitle:
+          typeof currentTitle === "string" ? currentTitle : "Unknown Title",
+        animeImage: currentImage,
+        status: "watching",
+      });
+    }
+  }, [anime]);
 
   // Keyboard controls
   // Video Event Handlers
@@ -997,17 +949,8 @@ export default function WatchPage({
                           const targetHeight = parseInt(res, 10);
                           const levels = hlsRef.current.levels;
                           const idx = levels.findIndex(
-                            (
-                              l:
-                                | Record<string, unknown>
-                                | string
-                                | number
-                                | boolean
-                                | null
-                                | undefined
-                                | unknown[]
-                                | unknown,
-                            ) => l.height === targetHeight,
+                            (l: { height?: number }) =>
+                              l.height === targetHeight,
                           );
                           if (idx !== -1) {
                             hlsRef.current.currentLevel = idx;
@@ -1234,15 +1177,14 @@ export default function WatchPage({
               <div className="flex flex-col gap-[8px] overflow-y-auto pr-[4px] flex-1 min-h-0 max-h-[480px] lg:max-h-none">
                 {episodesList.map(
                   (
-                    ep:
-                      | Record<string, unknown>
-                      | string
-                      | number
-                      | boolean
-                      | null
-                      | undefined
-                      | unknown[]
-                      | unknown,
+                    ep: {
+                      episode_number?: number;
+                      id?: string | number;
+                      still_path?: string | null;
+                      name?: string;
+                      runtime?: number;
+                      air_date?: string;
+                    },
                     index: number,
                   ) => {
                     const epNum = ep.episode_number || index + 1;
@@ -1271,7 +1213,7 @@ export default function WatchPage({
                               unoptimized
                               fill
                               src={thumbnail}
-                              alt={ep.name}
+                              alt={ep.name || "Episode thumbnail"}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -1306,15 +1248,14 @@ export default function WatchPage({
               <div className="grid grid-cols-5 gap-[8px] overflow-y-auto pr-[4px] flex-1 min-h-0 max-h-[480px] lg:max-h-none auto-rows-max">
                 {episodesList.map(
                   (
-                    ep:
-                      | Record<string, unknown>
-                      | string
-                      | number
-                      | boolean
-                      | null
-                      | undefined
-                      | unknown[]
-                      | unknown,
+                    ep: {
+                      episode_number?: number;
+                      id?: string | number;
+                      still_path?: string | null;
+                      name?: string;
+                      runtime?: number;
+                      air_date?: string;
+                    },
                     index: number,
                   ) => {
                     const epNum = ep.episode_number || index + 1;
@@ -1473,17 +1414,16 @@ export default function WatchPage({
                     {anime.recommendations
                       .slice(0, 2)
                       .map(
-                        (
-                          rec:
-                            | Record<string, unknown>
-                            | string
-                            | number
-                            | boolean
-                            | null
-                            | undefined
-                            | unknown[]
-                            | unknown,
-                        ) => (
+                        (rec: {
+                          id: string | number;
+                          poster?: string;
+                          title?: string;
+                          type?: string;
+                          averageScore?: number;
+                          score?: number | string;
+                          format?: string;
+                          episodes?: number;
+                        }) => (
                           <Link
                             key={rec.id}
                             href={`/watch/${rec.id}/1`}
@@ -1513,7 +1453,7 @@ export default function WatchPage({
                                   unoptimized
                                   fill
                                   src={rec.poster}
-                                  alt={rec.title}
+                                  alt={rec.title || "Recommendation poster"}
                                   className="w-full h-full object-cover transform-gpu will-change-transform"
                                 />
                               ) : (

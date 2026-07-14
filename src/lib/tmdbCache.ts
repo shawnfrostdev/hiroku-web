@@ -58,7 +58,8 @@ function parseSeasonFromTitle(title: string): number | null {
  * Fetches TMDB details directly from TMDB API with robust matching.
  */
 async function fetchTMDBDetailsDirectly(
-  mapping: Record<string, unknown>,
+  // biome-ignore lint/suspicious/noExplicitAny: allow AnimeMapping | null
+  mapping: any,
   title: string,
 ): Promise<TMDBDetails | null> {
   const apiKey =
@@ -173,12 +174,27 @@ async function fetchTMDBDetailsDirectly(
     } else {
       const tvUrl = `${apiBaseUrl}/3/tv/${tmdbId}?api_key=${apiKey}`;
       const tvRes = await fetch(tvUrl);
-      let tvDetails: unknown = null;
+      let tvDetails: {
+        name?: string;
+        overview?: string;
+        backdrop_path?: string;
+        poster_path?: string;
+      } | null = null;
       if (tvRes.ok) {
         tvDetails = await tvRes.json();
       }
 
-      let seasonDetails: Record<string, unknown> | null = null;
+      let seasonDetails: {
+        overview?: string;
+        poster_path?: string;
+        episodes?: {
+          episode_number: number;
+          still_path?: string;
+          runtime?: number;
+          air_date?: string;
+          name?: string;
+        }[];
+      } | null = null;
       const targetSeason = seasonNumber !== null ? seasonNumber : 1;
       const seasonUrl = `${apiBaseUrl}/3/tv/${tmdbId}/season/${targetSeason}?api_key=${apiKey}`;
       const seasonRes = await fetch(seasonUrl);
@@ -208,7 +224,8 @@ async function fetchTMDBDetailsDirectly(
  */
 export async function getCachedTMDBDetails(
   anilistId: number,
-  mapping: Record<string, unknown>,
+  // biome-ignore lint/suspicious/noExplicitAny: allow AnimeMapping | null
+  mapping: any,
   title: string,
 ): Promise<TMDBDetails | null> {
   await loadCache();

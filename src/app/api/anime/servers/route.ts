@@ -15,20 +15,8 @@ export async function GET(request: Request) {
   try {
     const episodesRes = await fetchAnimeEpisodes(animeId);
     const episode = episodesRes.data.find(
-      (ep: {
-        number: number;
-        id: string;
-        title: string;
-        providers:
-          | Record<string, unknown>
-          | string
-          | number
-          | boolean
-          | null
-          | undefined
-          | unknown[]
-          | unknown[];
-      }) => ep.number.toString() === episodeNumber,
+      (ep: { number: number | string }) =>
+        ep.number.toString() === episodeNumber,
     );
 
     if (!episode) {
