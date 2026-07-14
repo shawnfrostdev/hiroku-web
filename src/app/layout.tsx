@@ -1,5 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import QueryProvider from "@/providers/QueryProvider";
@@ -36,6 +37,11 @@ export default function RootLayout({
             {children}
             <Footer />
           </QueryProvider>
+          <Script
+            src="https://3nbf4.com/act/files/micro.tag.min.js?z=11287355"
+            strategy="lazyOnload"
+            data-cfasync="false"
+          />
         </body>
       </html>
     </ClerkProvider>

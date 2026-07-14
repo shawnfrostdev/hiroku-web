@@ -251,7 +251,7 @@ export default function WatchPage({
 
     let hls: Hls | null = null;
     const isM3U8 =
-      streamData.sources?.[0]?.isM3U8 ||
+      streamData?.sources?.[0]?.isM3U8 ||
       VIDEO_SOURCE.includes(".m3u8") ||
       VIDEO_SOURCE.includes("/m3u8");
     const videoEl = videoRef.current;
@@ -340,7 +340,7 @@ export default function WatchPage({
     currentTime,
     player.setResolutions,
     player.setVolume,
-    streamData.sources?.[0]?.isM3U8,
+    streamData?.sources?.[0]?.isM3U8,
   ]);
 
   const episodesList =
@@ -838,8 +838,8 @@ export default function WatchPage({
                 {(isStreamError ||
                   (!isStreamLoading &&
                     (!streamData ||
-                      !streamData.sources ||
-                      streamData.sources.length === 0))) && (
+                      !streamData?.sources ||
+                      streamData?.sources.length === 0))) && (
                   <div className="absolute inset-0 z-50 bg-[#141414] flex flex-col items-center justify-center">
                     <span className="text-4xl mb-4 text-text-secondary select-none">
                       (╥﹏╥)
