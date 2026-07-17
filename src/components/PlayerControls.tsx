@@ -111,21 +111,17 @@ export default function PlayerControls({
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-[28px] pointer-events-auto">
+        <div className="flex items-center gap-[24px] pointer-events-auto">
           {/* Previous Episode */}
           <button
             type="button"
             onClick={onPrevEpisode}
             disabled={currentEpNum === 1}
             aria-label="Previous Episode"
-            className="flex flex-col items-center gap-[5px] disabled:opacity-30"
+            title="Previous Episode"
+            className="w-[42px] h-[42px] rounded-full bg-control border border-border-line backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform disabled:opacity-30 cursor-pointer"
           >
-            <div className="w-[42px] h-[42px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <SkipBack className="w-[18px] h-[18px] text-white" />
-            </div>
-            <span className="text-[9px] font-semibold text-white/50 select-none tracking-wide">
-              Prev
-            </span>
+            <SkipBack className="w-[17px] h-[17px] text-white" />
           </button>
 
           {/* Play / Pause */}
@@ -133,12 +129,12 @@ export default function PlayerControls({
             type="button"
             onClick={onPlayToggle}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="w-[52px] h-[52px] rounded-full bg-black/60 border border-white/30 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform shadow-lg"
+            className="w-[52px] h-[52px] rounded-full bg-control border border-border-line backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform cursor-pointer shadow-lg"
           >
             {isPlaying ? (
-              <Pause className="w-[22px] h-[22px] text-white" />
+              <Pause className="w-[20px] h-[20px] text-white" />
             ) : (
-              <Play className="w-[22px] h-[22px] text-white fill-current translate-x-[2px]" />
+              <Play className="w-[20px] h-[20px] text-white fill-current translate-x-[1px]" />
             )}
           </button>
 
@@ -148,14 +144,10 @@ export default function PlayerControls({
             onClick={onNextEpisode}
             disabled={currentEpNum === episodesCount}
             aria-label="Next Episode"
-            className="flex flex-col items-center gap-[5px] disabled:opacity-30"
+            title="Next Episode"
+            className="w-[42px] h-[42px] rounded-full bg-control border border-border-line backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform disabled:opacity-30 cursor-pointer"
           >
-            <div className="w-[42px] h-[42px] rounded-full bg-black/50 border border-white/20 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
-              <SkipForward className="w-[18px] h-[18px] text-white" />
-            </div>
-            <span className="text-[9px] font-semibold text-white/50 select-none tracking-wide">
-              Next
-            </span>
+            <SkipForward className="w-[17px] h-[17px] text-white" />
           </button>
         </div>
       </div>
