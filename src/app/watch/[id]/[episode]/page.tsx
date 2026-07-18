@@ -371,12 +371,15 @@ export default function WatchPage({
       });
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        // Expose available quality levels to the store
+        // Expose available quality levels to the store (sorted high to low)
         const levelLabels = data.levels.map(
           (l: { height: number }) => `${l.height}p`,
         );
-        if (levelLabels.length > 0) {
-          player.setResolutions([...levelLabels, "Auto"]);
+        const uniqueSortedLabels = [...new Set(levelLabels)].sort(
+          (a, b) => Number.parseInt(b, 10) - Number.parseInt(a, 10),
+        );
+        if (uniqueSortedLabels.length > 0) {
+          player.setResolutions([...uniqueSortedLabels, "Auto"]);
         }
       });
     } else {

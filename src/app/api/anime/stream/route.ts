@@ -53,18 +53,13 @@ export async function GET(request: Request) {
   if (serverParam) {
     if (serverParam.includes("megu")) {
       server = "megu";
-      if (serverParam.includes("source 1") || serverParam.includes("kiwi")) {
-        subServerName = "kiwi";
+      if (serverParam.includes("source 1") || serverParam.includes("source1")) {
+        subServerName = "source-1";
       } else if (
         serverParam.includes("source 2") ||
-        serverParam.includes("miruro")
+        serverParam.includes("source2")
       ) {
-        subServerName = "miruro";
-      } else if (
-        serverParam.includes("source 3") ||
-        serverParam.includes("primary")
-      ) {
-        subServerName = "primary";
+        subServerName = "source-2";
       }
     } else if (serverParam.includes("-")) {
       const parts = serverParam.split("-");

@@ -65,7 +65,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   durationSeconds: 0,
 
   isBuffering: true,
-  currentResolution: "auto",
+  currentResolution: "Auto",
   availableResolutions: [],
 
   chapterMarkers: [],
