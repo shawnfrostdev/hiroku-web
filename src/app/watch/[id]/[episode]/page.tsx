@@ -282,6 +282,35 @@ export default function WatchPage({
     }
   }, [streamData, rawSubtitles]);
 
+  // Synchronize text tracks mode with currentSubtitle selection on load/change
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const syncTracks = () => {
+      const tracks = Array.from(video.textTracks);
+      for (const track of tracks) {
+        if (currentSubtitle === "Off") {
+          track.mode = "disabled";
+        } else {
+          track.mode = track.label === currentSubtitle ? "showing" : "hidden";
+        }
+      }
+    };
+
+    // Sync immediately
+    syncTracks();
+
+    // Also sync on text track list changes (when browser finishes loading track tags)
+    video.textTracks.addEventListener("change", syncTracks);
+    video.textTracks.addEventListener("addtrack", syncTracks);
+
+    return () => {
+      video.textTracks.removeEventListener("change", syncTracks);
+      video.textTracks.removeEventListener("addtrack", syncTracks);
+    };
+  }, [currentSubtitle]);
+
   // IMPORTANT: Do NOT set episodePositionRef or wasPlayingRef here during render.
   // They are written only in event handlers to prevent HLS teardown side-effects
   // from poisoning their values between the cleanup and the new setup.

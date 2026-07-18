@@ -24,12 +24,6 @@ export async function GET(request: Request) {
     }
 
     const expandProvider = (p: { provider: string; category: string }) => {
-      if (p.provider === "megu") {
-        return [
-          { serverName: "Megu (Source 1)", serverId: "megu-source1" },
-          { serverName: "Megu (Source 2)", serverId: "megu-source2" },
-        ];
-      }
       return [
         {
           serverName: formatProviderName(p.provider),
