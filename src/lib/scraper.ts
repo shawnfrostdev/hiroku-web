@@ -3,12 +3,11 @@ const SCRAPER_URL = (
 ).replace(/\/v1$/, "");
 
 export const formatProviderName = (prov: string) => {
+  if (prov === "megu") return "MeguAnime";
   if (prov === "solaris") return "Solaris";
   if (prov === "lunar") return "Lunar";
-  if (prov === "prism") return "Prism";
   if (prov === "lynx") return "Lynx";
   if (prov === "frost") return "Frost";
-  if (prov === "nexus") return "Nexus";
   return prov.charAt(0).toUpperCase() + prov.slice(1);
 };
 
