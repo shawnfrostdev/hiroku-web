@@ -130,7 +130,11 @@ export async function GET() {
       }),
     );
 
-    return NextResponse.json(mappedEntries);
+    return NextResponse.json(mappedEntries, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+      },
+    });
   } catch (error: unknown) {
     return NextResponse.json(
       { error: (error as Error).message || "Failed to fetch trending anime" },

@@ -15,30 +15,54 @@ const CACHE_FILE = path.join(CACHE_DIR, "tmdb-details-cache.json");
 
 let inMemoryCache: Record<number, TMDBDetails | null> | null = null;
 let isCacheLoaded = false;
+let loadPromise: Promise<void> | null = null;
 
 async function loadCache() {
   if (isCacheLoaded) return;
-  try {
-    const data = await fs.readFile(CACHE_FILE, "utf-8");
-    inMemoryCache = JSON.parse(data);
-  } catch {
-    inMemoryCache = {};
+  if (!loadPromise) {
+    loadPromise = (async () => {
+      try {
+        const data = await fs.readFile(CACHE_FILE, "utf-8");
+        inMemoryCache = JSON.parse(data);
+      } catch {
+        inMemoryCache = {};
+      }
+      isCacheLoaded = true;
+    })();
   }
-  isCacheLoaded = true;
+  return loadPromise;
 }
 
-async function saveCache() {
-  if (!inMemoryCache) return;
-  try {
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-    await fs.writeFile(
-      CACHE_FILE,
-      JSON.stringify(inMemoryCache, null, 2),
-      "utf-8",
-    );
-  } catch (err) {
-    console.error("Failed to save TMDB cache to disk:", err);
+let savePromise: Promise<void> | null = null;
+let pendingSave = false;
+
+async function saveCacheDebounced() {
+  if (savePromise) {
+    pendingSave = true;
+    return;
   }
+
+  savePromise = (async () => {
+    if (!inMemoryCache) return;
+    try {
+      await fs.mkdir(CACHE_DIR, { recursive: true });
+      await fs.writeFile(
+        CACHE_FILE,
+        JSON.stringify(inMemoryCache, null, 2),
+        "utf-8",
+      );
+    } catch (err) {
+      console.error("Failed to save TMDB cache to disk:", err);
+    }
+  })().finally(() => {
+    savePromise = null;
+    if (pendingSave) {
+      pendingSave = false;
+      saveCacheDebounced();
+    }
+  });
+
+  return savePromise;
 }
 
 function parseSeasonFromTitle(title: string): number | null {
@@ -238,7 +262,7 @@ export async function getCachedTMDBDetails(
 
   if (inMemoryCache) {
     inMemoryCache[anilistId] = details;
-    await saveCache();
+    saveCacheDebounced();
   }
 
   return details;

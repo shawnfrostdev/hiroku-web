@@ -30,7 +30,7 @@ export type MappingSource =
 
 const DATA_URL =
   "https://cdn.jsdelivr.net/gh/Fribb/anime-lists@master/anime-list-mini.json";
-// Store in tmp directory for serverless compatibility
+const BUNDLED_FILE = path.join(process.cwd(), "src/lib/anime-list-mini.json");
 const CACHE_DIR = path.join(os.tmpdir(), "hiroku-cache");
 const CACHE_FILE = path.join(CACHE_DIR, "anime-list-mini.json");
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -63,7 +63,21 @@ export async function fetchAndCacheMappings(
     return cachedMappingsInMemory;
   }
 
-  // Check if local cache file is fresh
+  // 1. Try reading from the bundled file first (generated at build time)
+  if (!force) {
+    try {
+      const bundledData = await fs.readFile(BUNDLED_FILE, "utf-8");
+      const parsed = JSON.parse(bundledData);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        cachedMappingsInMemory = parsed;
+        return parsed;
+      }
+    } catch (_error) {
+      // Bundled file not found or invalid, proceed to temp cache/CDN
+    }
+  }
+
+  // 2. Check if local temp cache file is fresh
   try {
     const stats = await fs.stat(CACHE_FILE);
     const now = Date.now();

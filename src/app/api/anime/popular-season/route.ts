@@ -151,7 +151,11 @@ export async function GET() {
       }),
     );
 
-    return NextResponse.json(mappedEntries.slice(0, 20));
+    return NextResponse.json(mappedEntries.slice(0, 20), {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+      },
+    });
   } catch (error: unknown) {
     return NextResponse.json(
       {

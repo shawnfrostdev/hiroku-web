@@ -182,10 +182,18 @@ export async function GET() {
       mapMedia(movies),
     ]);
 
-    return NextResponse.json({
-      finished: mappedFinished.slice(0, 5),
-      movies: mappedMovies.slice(0, 5),
-    });
+    return NextResponse.json(
+      {
+        finished: mappedFinished.slice(0, 5),
+        movies: mappedMovies.slice(0, 5),
+      },
+      {
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=43200, stale-while-revalidate=1800",
+        },
+      },
+    );
   } catch (error: unknown) {
     return NextResponse.json(
       { error: (error as Error).message || "Failed to fetch lists" },
