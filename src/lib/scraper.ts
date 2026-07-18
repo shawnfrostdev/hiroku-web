@@ -3,7 +3,7 @@ const SCRAPER_URL = (
 ).replace(/\/v1$/, "");
 
 export const formatProviderName = (prov: string) => {
-  if (prov === "megu") return "MeguAnime";
+  if (prov === "megu") return "Megu";
   if (prov === "solaris") return "Solaris";
   if (prov === "lunar") return "Lunar";
   if (prov === "lynx") return "Lynx";

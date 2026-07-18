@@ -50,7 +50,7 @@ export default function WatchPage({
   // Tracks whether the user deliberately had the video playing before a server switch.
   // Written by user interactions (togglePlay) and the video's onPlay/onPause events, but
   // guarded so that browser-initiated pauses from HLS teardown don't clear it.
-  const wasPlayingRef = useRef<boolean>(false);
+  const wasPlayingRef = useRef<boolean>(true);
   // Set to true briefly while we're swapping HLS instances so we can ignore
   // browser-initiated pause events that happen as a side effect of src teardown.
   const isSwappingSourceRef = useRef<boolean>(false);
@@ -409,7 +409,7 @@ export default function WatchPage({
   // within the NEW episode start from 0, not the previous episode's position.
   useEffect(() => {
     episodePositionRef.current = 0;
-    wasPlayingRef.current = false;
+    wasPlayingRef.current = true;
     setCurrentTime(0);
     player.playEpisode(animeId, currentEpNum);
   }, [animeId, currentEpNum, player.playEpisode]);
