@@ -284,9 +284,6 @@ export default function WatchPage({
     const timeToResume = episodePositionRef.current;
     const shouldResumePlaying = wasPlayingRef.current;
 
-    // Done setting up — allow normal event handling again.
-    isSwappingSourceRef.current = false;
-
     const attemptPlay = async () => {
       try {
         await videoEl.play();
@@ -320,7 +317,10 @@ export default function WatchPage({
         videoEl.pause();
         setIsPlaying(false);
       }
+      isSwappingSourceRef.current = false;
     };
+
+    videoEl.addEventListener("loadedmetadata", handleMetadata);
 
     if (isM3U8 && Hls.isSupported()) {
       hls = new Hls({ startLevel: -1 }); // -1 = auto
@@ -330,6 +330,7 @@ export default function WatchPage({
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
+          isSwappingSourceRef.current = false;
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.warn("HLS Network Error, recovering...");
@@ -355,17 +356,10 @@ export default function WatchPage({
         if (levelLabels.length > 0) {
           player.setResolutions([...levelLabels, "Auto"]);
         }
-        // For HLS streams, seeking is reliable after MANIFEST_PARSED. Use
-        // handleMetadata to do the clamped seek + conditional play/pause.
-        handleMetadata();
       });
-    } else if (isM3U8 && videoEl.canPlayType("application/vnd.apple.mpegurl")) {
-      videoEl.src = VIDEO_SOURCE;
-      videoEl.addEventListener("loadedmetadata", handleMetadata);
     } else {
-      // Direct MP4 playback
+      // Native HLS (Safari) or direct MP4 playback
       videoEl.src = VIDEO_SOURCE;
-      videoEl.addEventListener("loadedmetadata", handleMetadata);
     }
 
     return () => {
@@ -376,10 +370,6 @@ export default function WatchPage({
         hlsRef.current = null;
       }
       videoEl.removeEventListener("loadedmetadata", handleMetadata);
-      // Clear the flag after a microtask so async browser events still get filtered
-      Promise.resolve().then(() => {
-        isSwappingSourceRef.current = false;
-      });
     };
   }, [
     VIDEO_SOURCE,
