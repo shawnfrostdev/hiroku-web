@@ -50,10 +50,27 @@ export async function GET(request: Request) {
   const serverParam = searchParams.get("server")?.toLowerCase() || undefined;
   let server = serverParam;
   let subServerName: string | undefined;
-  if (serverParam?.includes("-")) {
-    const parts = serverParam.split("-");
-    server = parts[0];
-    subServerName = parts[1]; // e.g. "primary", "kiwi", "miruro"
+  if (serverParam) {
+    if (serverParam.includes("megu")) {
+      server = "megu";
+      if (serverParam.includes("source 1") || serverParam.includes("kiwi")) {
+        subServerName = "kiwi";
+      } else if (
+        serverParam.includes("source 2") ||
+        serverParam.includes("miruro")
+      ) {
+        subServerName = "miruro";
+      } else if (
+        serverParam.includes("source 3") ||
+        serverParam.includes("primary")
+      ) {
+        subServerName = "primary";
+      }
+    } else if (serverParam.includes("-")) {
+      const parts = serverParam.split("-");
+      server = parts[0];
+      subServerName = parts[1]; // e.g. "primary", "kiwi", "miruro"
+    }
   }
   const category = (searchParams.get("category") || "sub").toLowerCase(); // 'sub' or 'dub'
 
