@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, ChevronLeft, ChevronRight, Info, Play } from "lucide-react";
-import Image from "next/image";
 
 interface AnimeItem {
   id: string | number;
@@ -1002,9 +1001,7 @@ export default function Page() {
               {/* Card Image Container */}
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {item.posterImage ? (
-                  <Image
-                    unoptimized
-                    fill
+                  <img
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1032,7 +1029,7 @@ export default function Page() {
                           )?.userPreferred ||
                           ""
                     }
-                    className="w-full h-full object-cover transform-gpu will-change-transform"
+                    className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
@@ -1129,9 +1126,7 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <Image
-                    unoptimized
-                    fill
+                  <img
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1159,7 +1154,7 @@ export default function Page() {
                           )?.userPreferred ||
                           ""
                     }
-                    className="w-full h-full object-cover transform-gpu will-change-transform"
+                    className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
@@ -1257,9 +1252,7 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <Image
-                    unoptimized
-                    fill
+                  <img
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1287,7 +1280,7 @@ export default function Page() {
                           )?.userPreferred ||
                           ""
                     }
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
@@ -1385,9 +1378,7 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <Image
-                    unoptimized
-                    fill
+                  <img
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1415,7 +1406,7 @@ export default function Page() {
                           )?.userPreferred ||
                           ""
                     }
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-[16px] text-center text-xs text-[#A3A3A3]">
@@ -1532,9 +1523,7 @@ export default function Page() {
                 {/* Thumbnail Poster */}
                 <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
                   {item.posterImage ? (
-                    <Image
-                      unoptimized
-                      fill
+                    <img
                       src={item.posterImage}
                       alt={
                         typeof item.title === "string"
@@ -1562,7 +1551,7 @@ export default function Page() {
                             )?.userPreferred ||
                             ""
                       }
-                      className="w-full h-full object-cover transform-gpu will-change-transform"
+                      className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
@@ -1676,9 +1665,7 @@ export default function Page() {
                 {/* Thumbnail Poster */}
                 <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
                   {item.posterImage ? (
-                    <Image
-                      unoptimized
-                      fill
+                    <img
                       src={item.posterImage}
                       alt={
                         typeof item.title === "string"
@@ -1706,7 +1693,7 @@ export default function Page() {
                             )?.userPreferred ||
                             ""
                       }
-                      className="w-full h-full object-cover transform-gpu will-change-transform"
+                      className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[8px] text-[#A3A3A3] p-[2px]">
@@ -1977,9 +1964,7 @@ function ScheduleSection() {
                   <div className="relative aspect-[2/3] rounded-md border border-border-line bg-surface overflow-hidden shadow-md">
                     {/* Poster Image */}
                     {item.posterImage ? (
-                      <Image
-                        unoptimized
-                        fill
+                      <img
                         src={item.posterImage}
                         alt={
                           typeof item.title === "string"
@@ -1989,6 +1974,7 @@ function ScheduleSection() {
                                   english?: string;
                                   romaji?: string;
                                   userPreferred?: string;
+                                  [key: string]: string | undefined;
                                 }
                               )?.english ||
                               (
@@ -1996,6 +1982,7 @@ function ScheduleSection() {
                                   english?: string;
                                   romaji?: string;
                                   userPreferred?: string;
+                                  [key: string]: string | undefined;
                                 }
                               )?.romaji ||
                               (
@@ -2003,11 +1990,12 @@ function ScheduleSection() {
                                   english?: string;
                                   romaji?: string;
                                   userPreferred?: string;
+                                  [key: string]: string | undefined;
                                 }
                               )?.userPreferred ||
                               ""
                         }
-                        className="w-full h-full object-cover transform-gpu will-change-transform"
+                        className="absolute inset-0 w-full h-full object-cover transform-gpu will-change-transform"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center p-16px text-center text-xs text-text-secondary">
