@@ -23,32 +23,39 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Episode not found" }, { status: 404 });
     }
 
+    const expandProvider = (p: { provider: string; category: string }) => {
+      if (p.provider === "megu") {
+        return [
+          { serverName: "Megu (Source 1)", serverId: "megu-kiwi" },
+          { serverName: "Megu (Source 2)", serverId: "megu-miruro" },
+          { serverName: "Megu (Source 3)", serverId: "megu-primary" },
+        ];
+      }
+      return [
+        {
+          serverName: formatProviderName(p.provider),
+          serverId: p.provider,
+        },
+      ];
+    };
+
     const softsubList = (episode.providers || [])
       .filter(
         (p: { provider: string; category: string }) => p.category === "softsub",
       )
-      .map((p: { provider: string; category: string }) => ({
-        serverName: formatProviderName(p.provider),
-        serverId: p.provider,
-      }));
+      .flatMap(expandProvider);
 
     const subList = (episode.providers || [])
       .filter(
         (p: { provider: string; category: string }) => p.category === "sub",
       )
-      .map((p: { provider: string; category: string }) => ({
-        serverName: formatProviderName(p.provider),
-        serverId: p.provider,
-      }));
+      .flatMap(expandProvider);
 
     const dubList = (episode.providers || [])
       .filter(
         (p: { provider: string; category: string }) => p.category === "dub",
       )
-      .map((p: { provider: string; category: string }) => ({
-        serverName: formatProviderName(p.provider),
-        serverId: p.provider,
-      }));
+      .flatMap(expandProvider);
 
     return NextResponse.json({
       softsub: softsubList,

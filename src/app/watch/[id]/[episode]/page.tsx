@@ -10,6 +10,8 @@ import {
   Headphones,
   LayoutList,
   Loader2,
+  Pause,
+  Play,
   Server,
   Share2,
   Zap,
@@ -55,7 +57,27 @@ export default function WatchPage({
   // browser-initiated pause events that happen as a side effect of src teardown.
   const isSwappingSourceRef = useRef<boolean>(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [_isBuffering, setIsBuffering] = useState(true);
+  const [indicator, setIndicator] = useState<{
+    type: "play" | "pause";
+    key: number;
+  } | null>(null);
+  const isFirstRender = useRef(true);
+
+  // Trigger indicator when isPlaying changes (except on first mount or HLS swapping)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!isSwappingSourceRef.current) {
+      setIndicator({
+        type: isPlaying ? "play" : "pause",
+        key: Date.now(),
+      });
+    }
+  }, [isPlaying]);
+
+  const [isBuffering, setIsBuffering] = useState(true);
   const [currentTime, setCurrentTime] = useState(() => {
     const saved = useWatchlistStore.getState().items[animeId]?.progressSeconds;
     return saved || 0;
@@ -915,6 +937,8 @@ export default function WatchPage({
                   onCanPlay={() => setIsBuffering(false)}
                   onLoadStart={() => setIsBuffering(true)}
                   onLoadedData={() => setIsBuffering(false)}
+                  onSeeking={() => setIsBuffering(true)}
+                  onSeeked={() => setIsBuffering(false)}
                   autoPlay
                   playsInline
                   crossOrigin="anonymous"
@@ -932,15 +956,49 @@ export default function WatchPage({
                   <track kind="captions" />
                 </video>
 
-                {/* Loading Overlay */}
-                {isStreamLoading && (
-                  <div className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto cursor-wait">
-                    <div className="flex items-center gap-[12px] bg-black/80 px-[24px] py-[16px] rounded-[12px] border border-[#282828] shadow-2xl backdrop-blur-md">
-                      <Loader2 className="w-[24px] h-[24px] text-white animate-spin" />
-                      <span className="text-white text-sm font-bold">
-                        Loading Streams
-                      </span>
-                    </div>
+                {/* Play/Pause Center Indicator */}
+                {indicator && (
+                  <div
+                    key={indicator.key}
+                    className="absolute pointer-events-none z-30 flex items-center justify-center bg-black/60 text-white rounded-full w-[72px] h-[72px] animate-play-pause-indicator"
+                    onAnimationEnd={() => setIndicator(null)}
+                  >
+                    {indicator.type === "play" ? (
+                      <Play className="w-[32px] h-[32px] fill-current ml-[4px]" />
+                    ) : (
+                      <Pause className="w-[32px] h-[32px] fill-current" />
+                    )}
+                  </div>
+                )}
+
+                <style>{`
+                  @keyframes playPauseBeep {
+                    0% {
+                      transform: scale(0.6);
+                      opacity: 0;
+                    }
+                    15% {
+                      transform: scale(1);
+                      opacity: 0.95;
+                    }
+                    75% {
+                      transform: scale(1.05);
+                      opacity: 0.95;
+                    }
+                    100% {
+                      transform: scale(1.2);
+                      opacity: 0;
+                    }
+                  }
+                  .animate-play-pause-indicator {
+                    animation: playPauseBeep 600ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+                  }
+                `}</style>
+
+                {/* Loading/Buffering Overlay */}
+                {(isStreamLoading || isBuffering) && (
+                  <div className="absolute inset-0 z-40 bg-black/20 flex items-center justify-center pointer-events-none">
+                    <Loader2 className="w-[48px] h-[48px] text-white animate-spin" />
                   </div>
                 )}
 

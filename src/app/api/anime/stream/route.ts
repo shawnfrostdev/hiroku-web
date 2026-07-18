@@ -47,7 +47,14 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const animeId = searchParams.get("id");
   const episodeNumber = searchParams.get("episode");
-  const server = searchParams.get("server")?.toLowerCase() || undefined; // Provider ID (e.g. 'solaris', 'lunar')
+  const serverParam = searchParams.get("server")?.toLowerCase() || undefined;
+  let server = serverParam;
+  let subServerName: string | undefined;
+  if (serverParam?.includes("-")) {
+    const parts = serverParam.split("-");
+    server = parts[0];
+    subServerName = parts[1]; // e.g. "primary", "kiwi", "miruro"
+  }
   const category = (searchParams.get("category") || "sub").toLowerCase(); // 'sub' or 'dub'
 
   if (!animeId || !episodeNumber) {
@@ -176,17 +183,36 @@ export async function GET(request: Request) {
         file?: string;
         type?: string;
         isM3U8?: boolean;
+        server?: string;
       }>) || []
     ).map(
-      (s: { url?: string; file?: string; type?: string; isM3U8?: boolean }) => {
+      (s: {
+        url?: string;
+        file?: string;
+        type?: string;
+        isM3U8?: boolean;
+        server?: string;
+      }) => {
         const url = s.url || s.file;
         return {
           url,
           type: s.type || "hls",
           isM3U8: s.type === "hls" || (url || "").includes(".m3u8"),
+          server: s.server,
         };
       },
     );
+
+    let filteredSources = sources;
+    if (subServerName) {
+      filteredSources = sources.filter((s) =>
+        s.server?.toLowerCase().includes(subServerName?.toLowerCase()),
+      );
+      // Fallback to all sources if the filtered list is empty
+      if (filteredSources.length === 0) {
+        filteredSources = sources;
+      }
+    }
 
     // ----------------------------------------------------
     // AniSkip Integration
@@ -225,7 +251,7 @@ export async function GET(request: Request) {
     // ----------------------------------------------------
 
     return NextResponse.json({
-      sources,
+      sources: filteredSources,
       subtitles: data.subtitles || [],
       skipTimes,
     });
