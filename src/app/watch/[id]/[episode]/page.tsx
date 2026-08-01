@@ -1193,15 +1193,15 @@ export default function WatchPage({
               </div>
 
               {/* Server Settings block */}
-              <div className="flex flex-wrap items-end gap-[16px] shrink-0">
+              <div className="flex items-end gap-[6px] md:gap-[16px] w-full md:w-auto flex-nowrap md:flex-wrap shrink-0 min-w-0">
                 {/* Audio Column */}
                 <div
                   ref={audioTriggerRef}
-                  className="flex flex-col gap-[6px] relative"
+                  className="flex flex-col gap-[6px] relative min-w-0 flex-1 md:flex-initial"
                 >
-                  <div className="flex items-center gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none">
-                    <Headphones className="w-[12px] h-[12px]" />
-                    <span>Audio</span>
+                  <div className="flex items-center gap-[4px] md:gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
+                    <Headphones className="w-[12px] h-[12px] shrink-0" />
+                    <span className="truncate">Audio</span>
                   </div>
                   <button
                     onClick={() => {
@@ -1219,13 +1219,13 @@ export default function WatchPage({
                       setShowServerDropdown(false);
                     }}
                     type="button"
-                    className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a]"
+                    className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[8px] md:px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a] min-w-0 w-full"
                   >
-                    <span className="text-[10px] px-[4px] py-[1px] bg-[#242424] border border-[#282828] rounded font-extrabold tracking-tighter">
+                    <span className="text-[10px] px-[4px] py-[1px] bg-[#242424] border border-[#282828] rounded font-extrabold tracking-tighter shrink-0">
                       CC
                     </span>
-                    <span className="ml-[6px]">{selectedAudio}</span>
-                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[10px]" />
+                    <span className="ml-[6px] truncate">{selectedAudio}</span>
+                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[6px] md:ml-[10px] shrink-0" />
                   </button>
 
                   {/* Audio Dropdown Menu */}
@@ -1264,11 +1264,13 @@ export default function WatchPage({
                 {/* Server Column */}
                 <div
                   ref={serverTriggerRef}
-                  className="flex flex-col gap-[6px] relative"
+                  className="flex flex-col gap-[6px] relative min-w-0 flex-1 md:flex-initial"
                 >
-                  <div className="flex items-center gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none">
-                    <Server className="w-[12px] h-[12px]" />
-                    <span>Server ({currentServers.length})</span>
+                  <div className="flex items-center gap-[4px] md:gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
+                    <Server className="w-[12px] h-[12px] shrink-0" />
+                    <span className="truncate">
+                      Server ({currentServers.length})
+                    </span>
                   </div>
                   <button
                     onClick={() => {
@@ -1286,11 +1288,11 @@ export default function WatchPage({
                       setShowAudioDropdown(false);
                     }}
                     type="button"
-                    className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a]"
+                    className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[8px] md:px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a] min-w-0 w-full"
                   >
-                    <Zap className="w-[12px] h-[12px] fill-current" />
-                    <span className="ml-[6px]">{selectedServer}</span>
-                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[10px]" />
+                    <Zap className="w-[12px] h-[12px] fill-current shrink-0" />
+                    <span className="ml-[6px] truncate">{selectedServer}</span>
+                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[6px] md:ml-[10px] shrink-0" />
                   </button>
 
                   {/* Server Dropdown Menu */}
@@ -1326,24 +1328,30 @@ export default function WatchPage({
                 {/* Action Buttons */}
                 <button
                   type="button"
-                  className="h-[40px] px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center gap-[6px] text-xs font-bold cursor-pointer"
+                  title="Download"
+                  aria-label="Download"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
                 >
-                  <Download className="w-[12px] h-[12px]" />
-                  <span>Download</span>
+                  <Download className="w-[12px] h-[12px] shrink-0" />
+                  <span className="hidden md:inline">Download</span>
                 </button>
                 <button
                   type="button"
-                  className="h-[40px] px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center gap-[6px] text-xs font-bold cursor-pointer"
+                  title="Report"
+                  aria-label="Report"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
                 >
-                  <Bug className="w-[12px] h-[12px]" />
-                  <span>Report</span>
+                  <Bug className="w-[12px] h-[12px] shrink-0" />
+                  <span className="hidden md:inline">Report</span>
                 </button>
                 <button
                   type="button"
-                  className="h-[40px] px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center gap-[6px] text-xs font-bold cursor-pointer"
+                  title="Share"
+                  aria-label="Share"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
                 >
-                  <Share2 className="w-[12px] h-[12px]" />
-                  <span>Share</span>
+                  <Share2 className="w-[12px] h-[12px] shrink-0" />
+                  <span className="hidden md:inline">Share</span>
                 </button>
               </div>
             </div>
