@@ -500,23 +500,22 @@ export default function PlayerControls({
           {/* biome-ignore lint/a11y/noStaticElementInteractions: sidebar container wrapper */}
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: sidebar container wrapper */}
           <div
-            onClick={(e) => e.stopPropagation()} // Prevent touches from bubbling and triggering timer resets
-            className="md:hidden absolute right-0 top-0 bottom-0 z-40 w-[260px] bg-[#121212]/95 backdrop-blur-md border-l border-white/10 flex flex-col shadow-[2xl] animate-slide-in-right text-white pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+            className="md:hidden absolute right-0 top-0 bottom-0 z-40 w-[50%] bg-[#121212]/95 backdrop-blur-md border-l border-white/10 flex flex-col shadow-[2xl] animate-slide-in-right text-white pointer-events-auto"
           >
-            {/* Header: Back button (if nested) or title, and Close button */}
-            <div className="flex items-center justify-between px-[16px] py-[14px] border-b border-white/5">
+            <div className="flex items-center justify-between px-[10px] py-[8px] border-b border-white/5">
               <div className="flex items-center gap-[8px]">
                 {mobileActivePage !== "root" && (
                   <button
                     type="button"
                     onClick={() => setMobileActivePage("root")}
-                    className="p-[4px] -ml-[4px] rounded-full hover:bg-white/10 cursor-pointer"
+                    className="p-[2px] -ml-[2px] rounded-full hover:bg-white/10 cursor-pointer"
                     aria-label="Go Back"
                   >
-                    <ChevronLeft className="w-[18px] h-[18px]" />
+                    <ChevronLeft className="w-[14px] h-[14px]" />
                   </button>
                 )}
-                <span className="text-sm font-bold tracking-wide">
+                <span className="text-xs font-bold tracking-wide">
                   {mobileActivePage === "root" && "Settings"}
                   {mobileActivePage === "speed" && "Playback Speed"}
                   {mobileActivePage === "subtitles" && "Subtitles"}
@@ -526,62 +525,56 @@ export default function PlayerControls({
               <button
                 type="button"
                 onClick={() => setIsMobileSidebarOpen(false)}
-                className="p-[4px] rounded-full hover:bg-white/10 cursor-pointer"
+                className="p-[2px] rounded-full hover:bg-white/10 cursor-pointer"
                 aria-label="Close Settings"
               >
-                <X className="w-[18px] h-[18px]" />
+                <X className="w-[14px] h-[14px]" />
               </button>
             </div>
 
-            {/* Content body */}
-            <div className="flex-1 overflow-y-auto p-[12px] flex flex-col gap-[6px]">
-              {/* PAGE: ROOT */}
+            <div className="flex-1 overflow-y-auto p-[6px] flex flex-col gap-[3px]">
               {mobileActivePage === "root" && (
-                <div className="flex flex-col gap-[4px]">
-                  {/* Playback Speed */}
+                <div className="flex flex-col gap-[3px]">
                   <button
                     type="button"
                     onClick={() => setMobileActivePage("speed")}
-                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                    className="flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold text-left cursor-pointer transition-colors"
                   >
                     <span>Playback Speed</span>
-                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                    <div className="flex items-center gap-[2px] text-white/50 font-normal">
                       <span>{playbackRate}x</span>
-                      <ChevronRight className="w-[14px] h-[14px]" />
+                      <ChevronRight className="w-[12px] h-[12px]" />
                     </div>
                   </button>
 
-                  {/* Subtitles */}
                   <button
                     type="button"
                     onClick={() => setMobileActivePage("subtitles")}
-                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                    className="flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold text-left cursor-pointer transition-colors"
                   >
                     <span>Subtitles</span>
-                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                    <div className="flex items-center gap-[2px] text-white/50 font-normal">
                       <span className="capitalize">
                         {currentSubtitle === "Off" ? "Off" : currentSubtitle}
                       </span>
-                      <ChevronRight className="w-[14px] h-[14px]" />
+                      <ChevronRight className="w-[12px] h-[12px]" />
                     </div>
                   </button>
 
-                  {/* Quality */}
                   <button
                     type="button"
                     onClick={() => setMobileActivePage("quality")}
-                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                    className="flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold text-left cursor-pointer transition-colors"
                   >
                     <span>Quality</span>
-                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                    <div className="flex items-center gap-[2px] text-white/50 font-normal">
                       <span>{currentResolution}</span>
-                      <ChevronRight className="w-[14px] h-[14px]" />
+                      <ChevronRight className="w-[12px] h-[12px]" />
                     </div>
                   </button>
                 </div>
               )}
 
-              {/* PAGE: PLAYBACK SPEED */}
               {mobileActivePage === "speed" &&
                 [0.5, 1, 1.25, 1.5, 2].map((rate) => (
                   <button
@@ -590,18 +583,17 @@ export default function PlayerControls({
                     onClick={() => {
                       onPlaybackRateChange(rate);
                     }}
-                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold cursor-pointer transition-colors ${
                       playbackRate === rate ? "text-[#10B981]" : "text-white/95"
                     }`}
                   >
                     <span>{rate === 1 ? "Normal" : `${rate}x`}</span>
                     {playbackRate === rate && (
-                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                      <Check className="w-[12px] h-[12px] text-[#10B981]" />
                     )}
                   </button>
                 ))}
 
-              {/* PAGE: SUBTITLES */}
               {mobileActivePage === "subtitles" &&
                 availableSubtitles.map((sub: string) => (
                   <button
@@ -610,7 +602,7 @@ export default function PlayerControls({
                     onClick={() => {
                       onSubtitleChange(sub);
                     }}
-                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors capitalize ${
+                    className={`flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold cursor-pointer transition-colors capitalize ${
                       currentSubtitle === sub
                         ? "text-[#10B981]"
                         : "text-white/95"
@@ -618,12 +610,11 @@ export default function PlayerControls({
                   >
                     <span>{sub}</span>
                     {currentSubtitle === sub && (
-                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                      <Check className="w-[12px] h-[12px] text-[#10B981]" />
                     )}
                   </button>
                 ))}
 
-              {/* PAGE: QUALITY */}
               {mobileActivePage === "quality" &&
                 resolutions.map((res) => (
                   <button
@@ -632,7 +623,7 @@ export default function PlayerControls({
                     onClick={() => {
                       onResolutionChange(res);
                     }}
-                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors capitalize ${
+                    className={`flex items-center justify-between w-full p-[8px] py-[6px] rounded-[4px] hover:bg-white/5 text-xs font-bold cursor-pointer transition-colors capitalize ${
                       currentResolution === res ||
                       (res === "Auto" && !currentResolution)
                         ? "text-[#10B981]"
@@ -642,7 +633,7 @@ export default function PlayerControls({
                     <span>{res}</span>
                     {(currentResolution === res ||
                       (res === "Auto" && !currentResolution)) && (
-                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                      <Check className="w-[12px] h-[12px] text-[#10B981]" />
                     )}
                   </button>
                 ))}
