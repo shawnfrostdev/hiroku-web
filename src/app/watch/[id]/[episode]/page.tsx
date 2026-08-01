@@ -1180,9 +1180,9 @@ export default function WatchPage({
           </div>
 
           {/* Episode Info details below player */}
-          <div className="px-[16px] md:px-0 py-[20px] flex flex-col gap-[16px] relative z-50">
+          <div className="px-[16px] md:px-0 py-[16px] flex flex-col gap-[16px] relative z-50">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-[24px]">
-              <div className="flex flex-col gap-[6px]">
+              <div className="flex flex-col gap-[8px]">
                 <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
                   Episode {currentEpNum}:{" "}
                   {!currentEpInfo?.name ||
@@ -1197,9 +1197,9 @@ export default function WatchPage({
                 {/* Audio Column */}
                 <div
                   ref={audioTriggerRef}
-                  className="flex flex-col gap-[6px] relative min-w-0 flex-1 md:flex-initial"
+                  className="flex flex-col gap-[8px] relative min-w-0 flex-1 md:flex-initial"
                 >
-                  <div className="flex items-center gap-[4px] md:gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
+                  <div className="flex items-center gap-[4px] md:gap-[8px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
                     <Headphones className="w-[12px] h-[12px] shrink-0" />
                     <span className="truncate">Audio</span>
                   </div>
@@ -1221,11 +1221,11 @@ export default function WatchPage({
                     type="button"
                     className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[8px] md:px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a] min-w-0 w-full"
                   >
-                    <span className="text-[10px] px-[4px] py-[1px] bg-[#242424] border border-[#282828] rounded font-extrabold tracking-tighter shrink-0">
+                    <span className="text-[10px] px-[4px] py-[2px] bg-[#242424] border border-border-line rounded-[4px] font-extrabold tracking-tighter shrink-0">
                       CC
                     </span>
-                    <span className="ml-[6px] truncate">{selectedAudio}</span>
-                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[6px] md:ml-[10px] shrink-0" />
+                    <span className="ml-[8px] truncate">{selectedAudio}</span>
+                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[8px] shrink-0" />
                   </button>
 
                   {/* Audio Dropdown Menu */}
@@ -1264,9 +1264,9 @@ export default function WatchPage({
                 {/* Server Column */}
                 <div
                   ref={serverTriggerRef}
-                  className="flex flex-col gap-[6px] relative min-w-0 flex-1 md:flex-initial"
+                  className="flex flex-col gap-[8px] relative min-w-0 flex-1 md:flex-initial"
                 >
-                  <div className="flex items-center gap-[4px] md:gap-[6px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
+                  <div className="flex items-center gap-[4px] md:gap-[8px] text-[10px] font-bold tracking-wider text-text-secondary uppercase select-none min-w-0">
                     <Server className="w-[12px] h-[12px] shrink-0" />
                     <span className="truncate">
                       Server ({currentServers.length})
@@ -1291,8 +1291,8 @@ export default function WatchPage({
                     className="flex items-center bg-[#141414] border border-border-line rounded-[8px] h-[40px] px-[8px] md:px-[12px] select-none text-sm font-bold text-white cursor-pointer hover:bg-[#1a1a1a] min-w-0 w-full"
                   >
                     <Zap className="w-[12px] h-[12px] fill-current shrink-0" />
-                    <span className="ml-[6px] truncate">{selectedServer}</span>
-                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[6px] md:ml-[10px] shrink-0" />
+                    <span className="ml-[8px] truncate">{selectedServer}</span>
+                    <ChevronsUpDown className="w-[12px] h-[12px] text-text-secondary ml-[8px] shrink-0" />
                   </button>
 
                   {/* Server Dropdown Menu */}
@@ -1330,7 +1330,7 @@ export default function WatchPage({
                   type="button"
                   title="Download"
                   aria-label="Download"
-                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[8px] text-xs font-bold cursor-pointer shrink-0"
                 >
                   <Download className="w-[12px] h-[12px] shrink-0" />
                   <span className="hidden md:inline">Download</span>
@@ -1339,7 +1339,7 @@ export default function WatchPage({
                   type="button"
                   title="Report"
                   aria-label="Report"
-                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[8px] text-xs font-bold cursor-pointer shrink-0"
                 >
                   <Bug className="w-[12px] h-[12px] shrink-0" />
                   <span className="hidden md:inline">Report</span>
@@ -1348,7 +1348,7 @@ export default function WatchPage({
                   type="button"
                   title="Share"
                   aria-label="Share"
-                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[6px] text-xs font-bold cursor-pointer shrink-0"
+                  className="h-[40px] w-[40px] md:w-auto md:px-[16px] bg-[#242424] text-white hover:bg-[#323232] rounded-[8px] border border-border-line flex items-center justify-center md:gap-[8px] text-xs font-bold cursor-pointer shrink-0"
                 >
                   <Share2 className="w-[12px] h-[12px] shrink-0" />
                   <span className="hidden md:inline">Share</span>
@@ -1365,15 +1365,15 @@ export default function WatchPage({
           <div
             className={
               isTheaterMode
-                ? "flex flex-col gap-[16px] bg-surface border border-border-line rounded-[12px] p-[20px]"
-                : "flex flex-col gap-[16px] bg-surface border border-border-line rounded-0 md:rounded-[12px] p-[20px] lg:absolute lg:top-0 lg:left-0 lg:right-0 lg:bottom-[24px]"
+                ? "flex flex-col gap-[16px] bg-surface border border-border-line rounded-[12px] p-[24px]"
+                : "flex flex-col gap-[16px] bg-surface border border-border-line rounded-0 md:rounded-[12px] p-[24px] lg:absolute lg:top-0 lg:left-0 lg:right-0 lg:bottom-[24px]"
             }
           >
             <div className="flex items-center justify-between border-b border-border-line pb-[12px]">
               <h2 className="text-sm font-bold uppercase tracking-widest text-text-primary">
                 Episodes
               </h2>
-              <div className="flex items-center gap-[4px] bg-[#242424] p-[2px] rounded-[6px] border border-border-line">
+              <div className="flex items-center gap-[4px] bg-[#242424] p-[2px] rounded-[8px] border border-border-line">
                 <button
                   type="button"
                   onClick={() => setViewMode("list")}
@@ -1450,7 +1450,7 @@ export default function WatchPage({
                           </div>
                         )}
 
-                        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[2px]">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[4px]">
                           <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
                             Episode {epNum}
                           </span>
@@ -1488,7 +1488,7 @@ export default function WatchPage({
                         onClick={() =>
                           router.push(`/watch/${animeId}/${epNum}`)
                         }
-                        className={`aspect-square flex items-center justify-center rounded-[6px] border text-xs font-bold hover:bg-control cursor-pointer ${
+                        className={`aspect-square flex items-center justify-center rounded-[8px] border text-xs font-bold hover:bg-control cursor-pointer ${
                           isCurrent
                             ? "bg-control border-white text-white"
                             : "bg-background border-border-line text-text-secondary hover:text-white"
@@ -1530,17 +1530,17 @@ export default function WatchPage({
                     </h2>
                     {anime?.romajiTitle &&
                       anime.romajiTitle !== anime.title && (
-                        <p className="text-xs text-text-muted font-bold mt-[2px]">
+                        <p className="text-xs text-text-muted font-bold mt-[4px]">
                           {anime.romajiTitle}
                         </p>
                       )}
                   </div>
                   {anime?.genres && anime.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-[6px]">
+                    <div className="flex flex-wrap gap-[8px]">
                       {anime.genres.map((genre: string) => (
                         <span
                           key={genre}
-                          className="text-[10px] font-bold uppercase tracking-wider px-[8px] py-[3px] rounded bg-control border border-border-line text-text-secondary"
+                          className="text-[10px] font-bold uppercase tracking-wider px-[8px] py-[4px] rounded-[4px] bg-control border border-border-line text-text-secondary"
                         >
                           {genre}
                         </span>
@@ -1625,9 +1625,9 @@ export default function WatchPage({
           {!isTheaterMode && (
             <div className="shrink-0 lg:w-[380px] xl:w-[440px] h-full">
               {anime?.recommendations && anime.recommendations.length > 0 && (
-                <div className="bg-surface border border-border-line rounded-[12px] p-[20px] flex flex-col gap-[16px] h-full">
+                <div className="bg-surface border border-border-line rounded-[12px] p-[24px] flex flex-col gap-[16px] h-full">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[#525252]">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted">
                       Recommended
                     </h2>
                   </div>
@@ -1668,7 +1668,7 @@ export default function WatchPage({
                               </div>
                             )}
                             {/* Poster */}
-                            <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
+                            <div className="relative aspect-[2/3] w-[48px] rounded-[8px] border border-border-line bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
                               {rec.poster ? (
                                 <Image
                                   unoptimized
@@ -1690,17 +1690,17 @@ export default function WatchPage({
                               </span>
                               <div className="flex items-center gap-[6px] text-xs text-[#A3A3A3] mt-[4px]">
                                 {rec.score && (
-                                  <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded text-[9px] shrink-0">
+                                  <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-[6px] py-[2px] rounded-[4px] text-[9px] shrink-0">
                                     {rec.score} ★
                                   </span>
                                 )}
                                 {rec.format && (
-                                  <span className="text-[9px] font-bold px-[6px] py-[2px] rounded border uppercase tracking-wider shrink-0 bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                  <span className="text-[9px] font-bold px-[6px] py-[2px] rounded-[4px] border uppercase tracking-wider shrink-0 bg-blue-500/10 text-blue-400 border-blue-500/20">
                                     {rec.format}
                                   </span>
                                 )}
                                 {rec.episodes && (
-                                  <span className="text-[9px] font-bold px-[6px] py-[2px] rounded border uppercase tracking-wider shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                                  <span className="text-[9px] font-bold px-[6px] py-[2px] rounded-[4px] border uppercase tracking-wider shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                                     {rec.episodes} EP
                                   </span>
                                 )}
@@ -1724,7 +1724,7 @@ export default function WatchPage({
             <h2 className="text-sm font-bold uppercase tracking-widest text-text-primary">
               Comments
             </h2>
-            <span className="text-xs font-bold text-text-muted bg-control border border-border-line px-[8px] py-[2px] rounded">
+            <span className="text-xs font-bold text-text-muted bg-control border border-border-line px-[8px] py-[2px] rounded-[4px]">
               0
             </span>
           </div>
@@ -1739,12 +1739,12 @@ export default function WatchPage({
                 <textarea
                   placeholder="Share your thoughts about this episode..."
                   rows={3}
-                  className="w-full bg-background border border-border-line rounded-[8px] px-[14px] py-[10px] text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full bg-background border border-border-line rounded-[8px] px-[16px] py-[12px] text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none focus:border-white/30 transition-colors"
                 />
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    className="px-[16px] py-[8px] bg-white text-black text-xs font-bold rounded-[6px] hover:bg-white/90 transition-colors cursor-pointer"
+                    className="px-[16px] py-[8px] bg-white text-black text-xs font-bold rounded-[8px] hover:bg-white/90 transition-colors cursor-pointer"
                   >
                     Post Comment
                   </button>
