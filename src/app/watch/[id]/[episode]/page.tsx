@@ -83,8 +83,10 @@ export default function WatchPage({
     return saved || 0;
   });
   const [_duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(() => usePlayerStore.getState().volume);
+  const [isMuted, setIsMuted] = useState(
+    () => usePlayerStore.getState().isMuted,
+  );
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [_playbackRate, setPlaybackRate] = useState(1);
@@ -331,6 +333,10 @@ export default function WatchPage({
       VIDEO_SOURCE.includes("/m3u8");
     const videoEl = videoRef.current;
 
+    // Sync physical video element to our current state
+    videoEl.volume = volume;
+    videoEl.muted = isMuted;
+
     // Read from the episode-level position ref. This is NEVER reset by HLS
     // teardown — only by handleTimeUpdate and the episode-change effect.
     const timeToResume = episodePositionRef.current;
@@ -340,17 +346,9 @@ export default function WatchPage({
       try {
         await videoEl.play();
       } catch (err) {
-        console.warn("Autoplay blocked, attempting muted autoplay", err);
-        videoEl.muted = true;
-        setIsMuted(true);
-        if (typeof player.setIsMuted === "function") player.setIsMuted(true);
-        try {
-          await videoEl.play();
-        } catch (e) {
-          console.warn("Muted autoplay also failed", e);
-          setIsPlaying(false);
-          setIsBuffering(false);
-        }
+        console.warn("Playback failed or blocked by browser:", err);
+        setIsPlaying(false);
+        setIsBuffering(false);
       }
     };
 
@@ -363,6 +361,10 @@ export default function WatchPage({
       if (clampedTime > 0) {
         videoEl.currentTime = clampedTime;
       }
+      // Ensure volume and muted state are strictly synced to the video element on load
+      videoEl.volume = volume;
+      videoEl.muted = isMuted;
+
       if (shouldResumePlaying) {
         attemptPlay();
       } else {
