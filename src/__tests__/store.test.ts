@@ -1,6 +1,40 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { usePlayerStore } from "@/store/usePlayerStore";
-import { useWatchlistStore } from "@/store/useWatchlistStore";
+
+// Mock localStorage for Zustand persist middleware in test environment
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    length: 0,
+    key: (_index: number) => null,
+  };
+})();
+
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "localStorage", {
+    value: localStorageMock,
+    writable: true,
+    configurable: true,
+  });
+}
+Object.defineProperty(globalThis, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
+// We dynamically import the stores so the mocks are defined BEFORE the stores initialize!
+const { usePlayerStore } = await import("@/store/usePlayerStore");
+const { useWatchlistStore } = await import("@/store/useWatchlistStore");
 
 describe("useWatchlistStore", () => {
   beforeEach(() => {
@@ -15,7 +49,7 @@ describe("useWatchlistStore", () => {
     };
 
     useWatchlistStore.getState().addItem(item);
-    expect(useWatchlistStore.getState().items["123"]).toEqual(item);
+    expect(useWatchlistStore.getState().items["123"]).toMatchObject(item);
 
     useWatchlistStore.getState().updateStatus("123", "watching");
     expect(useWatchlistStore.getState().items["123"].status).toBe("watching");

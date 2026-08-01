@@ -7,11 +7,13 @@ import { usePlayerStore } from "@/store/usePlayerStore";
 interface TimelineBarProps {
   onSeek: (time: number) => void;
   skipTimes?: Array<{ type: string; startTime: number; endTime: number }>;
+  onDragStateChange?: (dragging: boolean) => void;
 }
 
 export default function TimelineBar({
   onSeek,
   skipTimes = [],
+  onDragStateChange,
 }: TimelineBarProps) {
   // Sync strictly to state selectors to prevent re-renders in higher parent panels
   const currentTime = usePlayerStore((state) => state.currentTime);
@@ -20,6 +22,17 @@ export default function TimelineBar({
 
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [hoverPercent, setHoverPercent] = useState<number>(0);
+
+  const handlePointerDown = () => {
+    onDragStateChange?.(true);
+    const handlePointerUp = () => {
+      onDragStateChange?.(false);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("touchend", handlePointerUp);
+    };
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("touchend", handlePointerUp);
+  };
 
   const handleValueChange = (values: number[]) => {
     if (values.length > 0) {
@@ -75,6 +88,8 @@ export default function TimelineBar({
       onMouseLeave={handleMouseLeave}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onTouchStart={handlePointerDown}
     >
       {/* OP/ED Highlights */}
       {duration > 0 &&

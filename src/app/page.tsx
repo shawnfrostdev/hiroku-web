@@ -28,6 +28,7 @@ interface AnimeItem {
   };
 }
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -1001,7 +1002,9 @@ export default function Page() {
               {/* Card Image Container */}
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {item.posterImage ? (
-                  <img
+                  <Image
+                    unoptimized
+                    fill
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1126,7 +1129,9 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <img
+                  <Image
+                    unoptimized
+                    fill
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1252,7 +1257,9 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <img
+                  <Image
+                    unoptimized
+                    fill
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1378,7 +1385,9 @@ export default function Page() {
               <div className="relative aspect-[2/3] rounded-[10px] border border-[#282828] bg-[#141414] overflow-hidden shadow-md">
                 {/* Poster Image */}
                 {item.posterImage ? (
-                  <img
+                  <Image
+                    unoptimized
+                    fill
                     src={item.posterImage}
                     alt={
                       typeof item.title === "string"
@@ -1523,7 +1532,9 @@ export default function Page() {
                 {/* Thumbnail Poster */}
                 <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
                   {item.posterImage ? (
-                    <img
+                    <Image
+                      unoptimized
+                      fill
                       src={item.posterImage}
                       alt={
                         typeof item.title === "string"
@@ -1665,7 +1676,9 @@ export default function Page() {
                 {/* Thumbnail Poster */}
                 <div className="relative aspect-[2/3] w-[48px] rounded-[6px] border border-[#282828] bg-[#141414] overflow-hidden shrink-0 shadow-md z-10">
                   {item.posterImage ? (
-                    <img
+                    <Image
+                      unoptimized
+                      fill
                       src={item.posterImage}
                       alt={
                         typeof item.title === "string"
@@ -1964,7 +1977,9 @@ function ScheduleSection() {
                   <div className="relative aspect-[2/3] rounded-md border border-border-line bg-surface overflow-hidden shadow-md">
                     {/* Poster Image */}
                     {item.posterImage ? (
-                      <img
+                      <Image
+                        unoptimized
+                        fill
                         src={item.posterImage}
                         alt={
                           typeof item.title === "string"

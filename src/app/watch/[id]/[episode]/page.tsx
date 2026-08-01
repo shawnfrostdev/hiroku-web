@@ -90,6 +90,7 @@ export default function WatchPage({
   const [_playbackRate, setPlaybackRate] = useState(1);
   const [_showSpeedControls, setShowSpeedControls] = useState(false);
   const [isHoveringControls, setIsHoveringControls] = useState(false);
+  const [isControlsLocked, setIsControlsLocked] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -547,7 +548,17 @@ export default function WatchPage({
         if (!isTouch) {
           togglePlay();
         } else {
-          setIsHoveringControls((prev) => !prev);
+          setIsHoveringControls((prev) => {
+            const next = !prev;
+            if (next) {
+              resetInactivityTimer();
+            } else {
+              if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current);
+              }
+            }
+            return next;
+          });
         }
       }, 220);
     }
@@ -764,19 +775,36 @@ export default function WatchPage({
     };
   }, [adjustVolume, seekRelative, toggleFullscreen, togglePlay]);
 
-  // Mouse inactivity hide controls
-  const handleMouseMove = () => {
+  // Inactivity timer: reset on user interaction
+  const resetInactivityTimer = useCallback(() => {
     setIsHoveringControls(true);
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
+    if (isControlsLocked) return;
+
     controlsTimeoutRef.current = setTimeout(() => {
       if (isPlaying) {
         setIsHoveringControls(false);
         setShowSpeedControls(false);
       }
-    }, 2500);
+    }, 4000);
+  }, [isPlaying, isControlsLocked]);
+
+  const handleMouseMove = () => {
+    resetInactivityTimer();
   };
+
+  useEffect(() => {
+    if (isControlsLocked) {
+      setIsHoveringControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    } else {
+      resetInactivityTimer();
+    }
+  }, [isControlsLocked, resetInactivityTimer]);
 
   useEffect(() => {
     return () => {
@@ -1146,6 +1174,8 @@ export default function WatchPage({
                     }}
                     onTheaterToggle={() => setIsTheaterMode((prev) => !prev)}
                     onFullscreenToggle={toggleFullscreen}
+                    onControlsLockChange={setIsControlsLocked}
+                    onUserInteraction={resetInactivityTimer}
                   />
                 )}
               </>

@@ -1,14 +1,19 @@
 "use client";
 
 import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
   Maximize2,
   Minimize2,
   Pause,
   Play,
+  Settings,
   SkipBack,
   SkipForward,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import TimelineBar from "./TimelineBar";
 import VolumeControl from "./VolumeControl";
@@ -36,6 +41,8 @@ interface PlayerControlsProps {
   onResolutionChange: (res: string) => void;
   onTheaterToggle: () => void;
   onFullscreenToggle: () => void;
+  onControlsLockChange?: (locked: boolean) => void;
+  onUserInteraction?: () => void;
 }
 
 export default function PlayerControls({
@@ -61,6 +68,8 @@ export default function PlayerControls({
   onResolutionChange,
   onTheaterToggle,
   onFullscreenToggle,
+  onControlsLockChange,
+  onUserInteraction,
 }: PlayerControlsProps) {
   const playbackRate = usePlayerStore((state) => state.playbackRate);
   const currentResolution = usePlayerStore((state) => state.currentResolution);
@@ -71,6 +80,19 @@ export default function PlayerControls({
   const [showSpeed, setShowSpeed] = useState(false);
   const [showAudio, setShowAudio] = useState(false);
   const [showQuality, setShowQuality] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [mobileActivePage, setMobileActivePage] = useState<
+    "root" | "speed" | "subtitles" | "quality"
+  >("root");
+
+  const isSettingsOpen =
+    showSpeed || showAudio || showQuality || isMobileSidebarOpen;
+  const isLocked = isDragging || isSettingsOpen;
+
+  useEffect(() => {
+    onControlsLockChange?.(isLocked);
+  }, [isLocked, onControlsLockChange]);
 
   const formatTime = (secs: number) => {
     if (Number.isNaN(secs) || secs === null || secs < 0) return "00:00";
@@ -111,7 +133,13 @@ export default function PlayerControls({
           controlsVisible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-[24px] pointer-events-auto">
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: capture bubbled interactions */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: capture bubbled interactions */}
+        <div
+          className={`flex items-center gap-[24px] ${controlsVisible ? "pointer-events-auto" : "pointer-events-none"}`}
+          onClick={onUserInteraction}
+          onTouchStart={onUserInteraction}
+        >
           {/* Previous Episode */}
           <button
             type="button"
@@ -155,11 +183,15 @@ export default function PlayerControls({
       {/* ============================================================
           BOTTOM CONTROL BAR
           ============================================================ */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: capture bubbled interactions */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: capture bubbled interactions */}
       <div
+        onClick={onUserInteraction}
+        onTouchStart={onUserInteraction}
         className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex flex-col z-10 transition-opacity duration-300 ${
           controlsVisible
-            ? "opacity-100"
-            : "opacity-0 md:group-hover:opacity-100"
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto"
         }`}
       >
         {/* Skip OP/ED Button */}
@@ -187,121 +219,20 @@ export default function PlayerControls({
               {formatTime(duration)}
             </span>
 
-            {/* Settings: Speed | CC | Quality | Fullscreen */}
-            <div className="flex items-center">
-              {/* Speed */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSpeed((prev) => !prev);
-                    setShowAudio(false);
-                    setShowQuality(false);
-                  }}
-                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
-                  aria-label="Playback Speed"
-                >
-                  {playbackRate}x
-                </button>
-                {showSpeed && (
-                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[72px]">
-                    {[0.5, 1, 1.25, 1.5, 2].map((rate) => (
-                      <button
-                        type="button"
-                        key={rate}
-                        onClick={() => {
-                          onPlaybackRateChange(rate);
-                          setShowSpeed(false);
-                        }}
-                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black whitespace-nowrap ${
-                          playbackRate === rate
-                            ? "bg-white text-black"
-                            : "text-text-secondary"
-                        }`}
-                      >
-                        {rate}x
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Subtitle / CC */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAudio((prev) => !prev);
-                    setShowSpeed(false);
-                    setShowQuality(false);
-                  }}
-                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
-                  aria-label="Subtitle Language"
-                >
-                  <span className="capitalize truncate whitespace-nowrap">
-                    {currentSubtitle === "Off" ? "CC" : currentSubtitle}
-                  </span>
-                </button>
-                {showAudio && (
-                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[100px]">
-                    {availableSubtitles.map((sub: string) => (
-                      <button
-                        type="button"
-                        key={sub}
-                        onClick={() => {
-                          onSubtitleChange(sub);
-                          setShowAudio(false);
-                        }}
-                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
-                          currentSubtitle === sub
-                            ? "bg-white text-black"
-                            : "text-text-secondary"
-                        }`}
-                      >
-                        {sub}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Quality */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowQuality((prev) => !prev);
-                    setShowSpeed(false);
-                    setShowAudio(false);
-                  }}
-                  className="h-[28px] px-[7px] flex items-center justify-center text-white/80 text-[10px] font-bold cursor-pointer"
-                  aria-label="Video Quality"
-                >
-                  <span className="whitespace-nowrap">{currentResolution}</span>
-                </button>
-                {showQuality && (
-                  <div className="absolute bottom-[32px] right-0 bg-[#121212] border border-[#282828] rounded-[6px] p-[6px] flex flex-col gap-[4px] shadow-2xl z-30 min-w-[80px]">
-                    {resolutions.map((res) => (
-                      <button
-                        type="button"
-                        key={res}
-                        onClick={() => {
-                          onResolutionChange(res);
-                          setShowQuality(false);
-                        }}
-                        className={`px-[10px] py-[7px] text-xs text-left rounded-[4px] font-bold cursor-pointer hover:bg-white hover:text-black capitalize whitespace-nowrap ${
-                          currentResolution === res ||
-                          (res === "Auto" && !currentResolution)
-                            ? "bg-white text-black"
-                            : "text-text-secondary"
-                        }`}
-                      >
-                        {res}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {/* Settings: Gear icon | Fullscreen */}
+            <div className="flex items-center gap-[6px]">
+              {/* Gear Settings Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSidebarOpen(true);
+                  setMobileActivePage("root");
+                }}
+                className="h-[28px] w-[28px] flex items-center justify-center text-white/80 cursor-pointer"
+                aria-label="Open Settings"
+              >
+                <Settings className="w-[15px] h-[15px]" />
+              </button>
 
               {/* Fullscreen */}
               <button
@@ -321,14 +252,22 @@ export default function PlayerControls({
 
           {/* Timeline — no horizontal padding, stretches to player edges */}
           <div className="-mt-[4px]">
-            <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
+            <TimelineBar
+              onSeek={onSeek}
+              skipTimes={skipTimes}
+              onDragStateChange={setIsDragging}
+            />
           </div>
         </div>
 
         {/* ── DESKTOP LAYOUT ── (hidden on mobile, shown on md+) */}
         <div className="hidden md:flex flex-col gap-[12px] p-[20px]">
           {/* Timeline */}
-          <TimelineBar onSeek={onSeek} skipTimes={skipTimes} />
+          <TimelineBar
+            onSeek={onSeek}
+            skipTimes={skipTimes}
+            onDragStateChange={setIsDragging}
+          />
 
           {/* Controls Row */}
           <div className="flex items-center justify-between w-full text-white">
@@ -546,6 +485,171 @@ export default function PlayerControls({
           </div>
         </div>
       </div>
+      {/* ============================================================
+          MOBILE SETTINGS SIDEBAR & BACKDROP
+          ============================================================ */}
+      {isMobileSidebarOpen && (
+        <>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop close action */}
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop close action */}
+          <div
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="md:hidden absolute inset-0 bg-black/45 backdrop-blur-[1px] z-30 transition-opacity duration-300 pointer-events-auto"
+          />
+
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: sidebar container wrapper */}
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: sidebar container wrapper */}
+          <div
+            onClick={(e) => e.stopPropagation()} // Prevent touches from bubbling and triggering timer resets
+            className="md:hidden absolute right-0 top-0 bottom-0 z-40 w-[260px] bg-[#121212]/95 backdrop-blur-md border-l border-white/10 flex flex-col shadow-[2xl] animate-slide-in-right text-white pointer-events-auto"
+          >
+            {/* Header: Back button (if nested) or title, and Close button */}
+            <div className="flex items-center justify-between px-[16px] py-[14px] border-b border-white/5">
+              <div className="flex items-center gap-[8px]">
+                {mobileActivePage !== "root" && (
+                  <button
+                    type="button"
+                    onClick={() => setMobileActivePage("root")}
+                    className="p-[4px] -ml-[4px] rounded-full hover:bg-white/10 cursor-pointer"
+                    aria-label="Go Back"
+                  >
+                    <ChevronLeft className="w-[18px] h-[18px]" />
+                  </button>
+                )}
+                <span className="text-sm font-bold tracking-wide">
+                  {mobileActivePage === "root" && "Settings"}
+                  {mobileActivePage === "speed" && "Playback Speed"}
+                  {mobileActivePage === "subtitles" && "Subtitles"}
+                  {mobileActivePage === "quality" && "Quality"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="p-[4px] rounded-full hover:bg-white/10 cursor-pointer"
+                aria-label="Close Settings"
+              >
+                <X className="w-[18px] h-[18px]" />
+              </button>
+            </div>
+
+            {/* Content body */}
+            <div className="flex-1 overflow-y-auto p-[12px] flex flex-col gap-[6px]">
+              {/* PAGE: ROOT */}
+              {mobileActivePage === "root" && (
+                <div className="flex flex-col gap-[4px]">
+                  {/* Playback Speed */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileActivePage("speed")}
+                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                  >
+                    <span>Playback Speed</span>
+                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                      <span>{playbackRate}x</span>
+                      <ChevronRight className="w-[14px] h-[14px]" />
+                    </div>
+                  </button>
+
+                  {/* Subtitles */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileActivePage("subtitles")}
+                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                  >
+                    <span>Subtitles</span>
+                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                      <span className="capitalize">
+                        {currentSubtitle === "Off" ? "Off" : currentSubtitle}
+                      </span>
+                      <ChevronRight className="w-[14px] h-[14px]" />
+                    </div>
+                  </button>
+
+                  {/* Quality */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileActivePage("quality")}
+                    className="flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold text-left cursor-pointer transition-colors"
+                  >
+                    <span>Quality</span>
+                    <div className="flex items-center gap-[4px] text-white/50 font-normal">
+                      <span>{currentResolution}</span>
+                      <ChevronRight className="w-[14px] h-[14px]" />
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* PAGE: PLAYBACK SPEED */}
+              {mobileActivePage === "speed" &&
+                [0.5, 1, 1.25, 1.5, 2].map((rate) => (
+                  <button
+                    type="button"
+                    key={rate}
+                    onClick={() => {
+                      onPlaybackRateChange(rate);
+                    }}
+                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors ${
+                      playbackRate === rate ? "text-[#10B981]" : "text-white/95"
+                    }`}
+                  >
+                    <span>{rate === 1 ? "Normal" : `${rate}x`}</span>
+                    {playbackRate === rate && (
+                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                    )}
+                  </button>
+                ))}
+
+              {/* PAGE: SUBTITLES */}
+              {mobileActivePage === "subtitles" &&
+                availableSubtitles.map((sub: string) => (
+                  <button
+                    type="button"
+                    key={sub}
+                    onClick={() => {
+                      onSubtitleChange(sub);
+                    }}
+                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors capitalize ${
+                      currentSubtitle === sub
+                        ? "text-[#10B981]"
+                        : "text-white/95"
+                    }`}
+                  >
+                    <span>{sub}</span>
+                    {currentSubtitle === sub && (
+                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                    )}
+                  </button>
+                ))}
+
+              {/* PAGE: QUALITY */}
+              {mobileActivePage === "quality" &&
+                resolutions.map((res) => (
+                  <button
+                    type="button"
+                    key={res}
+                    onClick={() => {
+                      onResolutionChange(res);
+                    }}
+                    className={`flex items-center justify-between w-full p-[12px] rounded-[6px] hover:bg-white/5 text-sm font-bold cursor-pointer transition-colors capitalize ${
+                      currentResolution === res ||
+                      (res === "Auto" && !currentResolution)
+                        ? "text-[#10B981]"
+                        : "text-white/95"
+                    }`}
+                  >
+                    <span>{res}</span>
+                    {(currentResolution === res ||
+                      (res === "Auto" && !currentResolution)) && (
+                      <Check className="w-[16px] h-[16px] text-[#10B981]" />
+                    )}
+                  </button>
+                ))}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
