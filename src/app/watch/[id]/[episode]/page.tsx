@@ -1060,7 +1060,7 @@ export default function WatchPage({
 
                 {/* Loading/Buffering Overlay */}
                 {(isStreamLoading || isBuffering) && (
-                  <div className="absolute inset-0 z-40 bg-black/20 flex items-center justify-center pointer-events-none">
+                  <div className="hidden md:flex absolute inset-0 z-40 bg-black/20 items-center justify-center pointer-events-none">
                     <Loader2 className="w-[48px] h-[48px] text-white animate-spin" />
                   </div>
                 )}
@@ -1120,67 +1120,66 @@ export default function WatchPage({
                   )}
                 </button>
 
-                {/* Custom Control Bar (overlay) — hidden while loading */}
-                {!isStreamLoading && (
-                  <PlayerControls
-                    isPlaying={isPlaying}
-                    isFullscreen={isFullscreen}
-                    isTheaterMode={isTheaterMode}
-                    isHoveringControls={isHoveringControls}
-                    currentEpNum={currentEpNum}
-                    episodesCount={episodesList.length}
-                    currentSubtitle={currentSubtitle}
-                    availableSubtitles={availableSubtitles}
-                    skipTimes={streamData?.skipTimes}
-                    onPlayToggle={togglePlay}
-                    onPrevEpisode={navigateToPrevEpisode}
-                    onNextEpisode={navigateToNextEpisode}
-                    onSeek={handleSeekChange}
-                    onSkipBackward={handleSkipBackward}
-                    onSkipForward={handleSkipForward}
-                    onVolumeChange={handleVolumeChange}
-                    onToggleMute={toggleMute}
-                    onPlaybackRateChange={handlePlaybackRateChange}
-                    onSubtitleChange={(label) => {
-                      setCurrentSubtitle(label);
-                      if (videoRef.current) {
-                        const tracks = Array.from(videoRef.current.textTracks);
-                        tracks.forEach((track) => {
-                          if (label === "Off") {
-                            track.mode = "disabled";
-                          } else {
-                            track.mode =
-                              track.label === label ? "showing" : "hidden";
-                          }
-                        });
-                      }
-                    }}
-                    onResolutionChange={(res) => {
-                      player.setResolution(res);
-                      if (hlsRef.current) {
-                        if (res === "Auto") {
-                          // Let HLS pick the best level automatically
-                          hlsRef.current.currentLevel = -1;
+                {/* Custom Control Bar (overlay) */}
+                <PlayerControls
+                  isPlaying={isPlaying}
+                  isFullscreen={isFullscreen}
+                  isTheaterMode={isTheaterMode}
+                  isHoveringControls={isHoveringControls}
+                  currentEpNum={currentEpNum}
+                  episodesCount={episodesList.length}
+                  currentSubtitle={currentSubtitle}
+                  availableSubtitles={availableSubtitles}
+                  skipTimes={streamData?.skipTimes}
+                  isLoading={isStreamLoading || isBuffering}
+                  isStreamLoading={isStreamLoading}
+                  onPlayToggle={togglePlay}
+                  onPrevEpisode={navigateToPrevEpisode}
+                  onNextEpisode={navigateToNextEpisode}
+                  onSeek={handleSeekChange}
+                  onSkipBackward={handleSkipBackward}
+                  onSkipForward={handleSkipForward}
+                  onVolumeChange={handleVolumeChange}
+                  onToggleMute={toggleMute}
+                  onPlaybackRateChange={handlePlaybackRateChange}
+                  onSubtitleChange={(label) => {
+                    setCurrentSubtitle(label);
+                    if (videoRef.current) {
+                      const tracks = Array.from(videoRef.current.textTracks);
+                      tracks.forEach((track) => {
+                        if (label === "Off") {
+                          track.mode = "disabled";
                         } else {
-                          // Match selected label (e.g. "1080p") to an HLS level by height
-                          const targetHeight = parseInt(res, 10);
-                          const levels = hlsRef.current.levels;
-                          const idx = levels.findIndex(
-                            (l: { height?: number }) =>
-                              l.height === targetHeight,
-                          );
-                          if (idx !== -1) {
-                            hlsRef.current.currentLevel = idx;
-                          }
+                          track.mode =
+                            track.label === label ? "showing" : "hidden";
+                        }
+                      });
+                    }
+                  }}
+                  onResolutionChange={(res) => {
+                    player.setResolution(res);
+                    if (hlsRef.current) {
+                      if (res === "Auto") {
+                        // Let HLS pick the best level automatically
+                        hlsRef.current.currentLevel = -1;
+                      } else {
+                        // Match selected label (e.g. "1080p") to an HLS level by height
+                        const targetHeight = parseInt(res, 10);
+                        const levels = hlsRef.current.levels;
+                        const idx = levels.findIndex(
+                          (l: { height?: number }) => l.height === targetHeight,
+                        );
+                        if (idx !== -1) {
+                          hlsRef.current.currentLevel = idx;
                         }
                       }
-                    }}
-                    onTheaterToggle={() => setIsTheaterMode((prev) => !prev)}
-                    onFullscreenToggle={toggleFullscreen}
-                    onControlsLockChange={setIsControlsLocked}
-                    onUserInteraction={resetInactivityTimer}
-                  />
-                )}
+                    }
+                  }}
+                  onTheaterToggle={() => setIsTheaterMode((prev) => !prev)}
+                  onFullscreenToggle={toggleFullscreen}
+                  onControlsLockChange={setIsControlsLocked}
+                  onUserInteraction={resetInactivityTimer}
+                />
               </>
             )}
           </div>
