@@ -193,13 +193,16 @@ export default function PlayerControls({
 
       {/* Mobile Skip OP/ED Button (independent of controls, always visible/interactive in OP/ED window) */}
       {activeSkip && !isMobileSidebarOpen && (
-        <div className="md:hidden absolute bottom-[44px] right-[12px] z-20">
+        <div
+          className={`md:hidden absolute transition-all duration-300 right-[12px] z-20 ${
+            controlsVisible ? "bottom-[80px]" : "bottom-[16px]"
+          }`}
+        >
           <button
             type="button"
             onClick={() => onSeek(activeSkip.endTime)}
-            className="flex items-center gap-[6px] bg-white text-black px-[14px] py-[7px] rounded-[6px] font-bold shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:bg-gray-200 transition-transform active:scale-95 cursor-pointer text-[13px] pointer-events-auto"
+            className="bg-white text-black px-[10px] py-[5px] rounded-[4px] font-bold shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:bg-gray-200 transition-transform active:scale-95 cursor-pointer text-[11px] pointer-events-auto"
           >
-            <SkipForward className="w-[15px] h-[15px]" />
             {activeSkip.type === "op" ? "Skip OP" : "Skip ED"}
           </button>
         </div>
