@@ -275,8 +275,8 @@ export default function PlayerControls({
             </div>
           </div>
 
-          {/* Timeline — no horizontal padding, stretches to player edges */}
-          <div className="-mt-[4px]">
+          {/* Timeline — aligned with controls */}
+          <div className="-mt-[4px] px-[10px]">
             <TimelineBar
               onSeek={onSeek}
               skipTimes={skipTimes}
