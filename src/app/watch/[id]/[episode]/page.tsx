@@ -536,6 +536,10 @@ export default function WatchPage({
       // Second click / double-tap — skip ±10s on both desktop and mobile
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
+      if (isTouch) {
+        setIsHoveringControls(true);
+        resetInactivityTimer();
+      }
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       if (clickX < rect.width / 2) {
@@ -551,17 +555,8 @@ export default function WatchPage({
         if (!isTouch) {
           togglePlay();
         } else {
-          setIsHoveringControls((prev) => {
-            const next = !prev;
-            if (next) {
-              resetInactivityTimer();
-            } else {
-              if (controlsTimeoutRef.current) {
-                clearTimeout(controlsTimeoutRef.current);
-              }
-            }
-            return next;
-          });
+          setIsHoveringControls(true);
+          resetInactivityTimer();
         }
       }, 220);
     }
