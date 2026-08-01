@@ -69,7 +69,8 @@ export default function WatchPage({
       isFirstRender.current = false;
       return;
     }
-    if (!isSwappingSourceRef.current) {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (!isSwappingSourceRef.current && !isMobile) {
       setIndicator({
         type: isPlaying ? "play" : "pause",
         key: Date.now(),
@@ -1022,7 +1023,7 @@ export default function WatchPage({
                 {indicator && (
                   <div
                     key={indicator.key}
-                    className="absolute pointer-events-none z-30 flex items-center justify-center bg-black/60 text-white rounded-full w-[72px] h-[72px] animate-play-pause-indicator"
+                    className="hidden md:flex absolute pointer-events-none z-30 flex items-center justify-center bg-black/60 text-white rounded-full w-[72px] h-[72px] animate-play-pause-indicator"
                     onAnimationEnd={() => setIndicator(null)}
                   >
                     {indicator.type === "play" ? (
